@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "355328288359",
+    "project_id": "cashxchange-a07f7",
+    "storage_bucket": "cashxchange-a07f7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:355328288359:android:56c55a458ef9fd644c56c2",
+        "android_client_info": {
+          "package_name": "com.example.cashxchange"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "355328288359-f1t4bcr2l65b5lb0f7b217vni0skdqhb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1LUJFCbES2C3MRDvq4L0eXSf-hJGlY70"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "355328288359-f1t4bcr2l65b5lb0f7b217vni0skdqhb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
