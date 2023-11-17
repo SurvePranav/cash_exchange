@@ -1,4 +1,7 @@
 import 'package:cashxchange/provider/auth_provider.dart';
+import 'package:cashxchange/provider/location_provider.dart';
+import 'package:cashxchange/provider/request_provider.dart';
+import 'package:cashxchange/screens/to_implement/request_status.dart';
 import 'package:cashxchange/screens/welcome_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +30,12 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(
           create: (_) => AuthProvider(),
         ),
+        ChangeNotifierProvider(
+          create: (_) => LocationProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => RequestProvider(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -35,6 +44,7 @@ class _MyAppState extends State<MyApp> {
           useMaterial3: true,
         ),
         home: const WelcomeScreen(),
+        // home: const RequestStatusScreen(),
       ),
     );
   }

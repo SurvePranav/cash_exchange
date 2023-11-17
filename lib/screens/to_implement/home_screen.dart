@@ -1,6 +1,7 @@
 import 'package:cashxchange/constants/color_constants.dart';
 import 'package:cashxchange/widgets/request_card.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -59,8 +60,19 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           Container(
-            color: blue_10,
-            child: Image.asset("assets/images/google-maps.png"),
+            margin: EdgeInsets.symmetric(horizontal: 20),
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(
+                Radius.circular(10),
+              ),
+            ),
+            height: 300,
+            child: const GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: LatLng(19.0760, 72.8777),
+                zoom: 15,
+              ),
+            ),
           ),
           RequestCard(
             amount: 'Rs.500',

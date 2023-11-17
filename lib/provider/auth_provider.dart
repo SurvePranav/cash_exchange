@@ -28,7 +28,7 @@ class AuthProvider extends ChangeNotifier {
     checkSignIn();
   }
 
-  void checkSignIn() async {
+  Future<void> checkSignIn() async {
     final SharedPreferences s = await SharedPreferences.getInstance();
     _isSignedIn = s.getBool("is_signedin") ?? false;
     notifyListeners();
@@ -180,6 +180,9 @@ class AuthProvider extends ChangeNotifier {
         createdAt: snapshot['createdAt'],
         phoneNumber: snapshot['phoneNumber'],
         uid: snapshot['uid'],
+        address: snapshot['address'],
+        locationLat: snapshot['locationLat'],
+        locationLon: snapshot['locationLon'],
       );
       _uid = UserModel.instance.uid;
       notifyListeners();

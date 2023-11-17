@@ -6,6 +6,9 @@ class UserModel {
   late String createdAt;
   late String phoneNumber;
   late String uid;
+  late String address;
+  late String locationLat;
+  late String locationLon;
 
   // Private constructor
   UserModel._privateConstructor() {
@@ -16,6 +19,9 @@ class UserModel {
     createdAt = "";
     phoneNumber = "";
     uid = "";
+    address = "";
+    locationLat = "";
+    locationLon = "";
   }
 
   // Static instance of UserModel
@@ -33,6 +39,9 @@ class UserModel {
     required String createdAt,
     required String phoneNumber,
     required String uid,
+    required String address,
+    required String locationLat,
+    required String locationLon,
   }) {
     this.name = name;
     this.email = email;
@@ -41,6 +50,9 @@ class UserModel {
     this.createdAt = createdAt;
     this.phoneNumber = phoneNumber;
     this.uid = uid;
+    this.address = address;
+    this.locationLat = locationLat;
+    this.locationLon = locationLon;
   }
 
   // from Map
@@ -53,6 +65,9 @@ class UserModel {
       createdAt: map['createdAt'] ?? '',
       phoneNumber: map['phoneNumber'] ?? '',
       uid: map['uid'] ?? '',
+      address: map['address'] ?? '',
+      locationLat: map['locationLat'] ?? '',
+      locationLon: map['locationLon'] ?? '',
     );
     return _instance;
   }
@@ -67,6 +82,9 @@ class UserModel {
       "createdAt": createdAt,
       "phoneNumber": phoneNumber,
       "uid": uid,
+      "address": address,
+      "locationLat": locationLat,
+      "locationLon": locationLon,
     };
   }
 }

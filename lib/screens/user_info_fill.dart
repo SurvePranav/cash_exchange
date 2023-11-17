@@ -2,10 +2,12 @@ import 'dart:io';
 import 'package:cashxchange/constants/color_constants.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
+import 'package:cashxchange/provider/location_provider.dart';
 import 'package:cashxchange/screens/main_body.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:cashxchange/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_geocoder/geocoder.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
@@ -21,12 +23,15 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final bioController = TextEditingController();
+  final locationController = TextEditingController();
+  late String lat, lon;
 
   @override
   void dispose() {
     nameController.dispose();
     emailController.dispose();
     bioController.dispose();
+    locationController.dispose();
     super.dispose();
   }
 
@@ -34,6 +39,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
   Widget build(BuildContext context) {
     final isLoading =
         Provider.of<AuthProvider>(context, listen: true).isLoading;
+
     return Scaffold(
       body: isLoading
           ? Center(
@@ -94,6 +100,37 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                                 controller: emailController,
                               ),
 
+                              //location
+                              Consumer<LocationProvider>(
+                                builder: (context, value, child) {
+                                  return textFeld(
+                                      hintText: "Enter your address",
+                                      icon: Icons.location_pin,
+                                      inputType: TextInputType.name,
+                                      maxLines: 2,
+                                      controller: locationController,
+                                      locationButton: true,
+                                      onLocationPressed: () async {
+                                        await value
+                                            .getCurrentLocation()
+                                            .then((val) async {
+                                          lat = '${val.latitude}';
+                                          lon = '${val.longitude}';
+                                          final coordinates = Coordinates(
+                                              double.parse(lat),
+                                              double.parse(lon));
+                                          var address = await value
+                                              .getAddressFromCoordinates(
+                                                  coordinates);
+                                          locationController.text = address
+                                              .first.addressLine
+                                              .toString();
+                                          setState(() {});
+                                        });
+                                      });
+                                },
+                              ),
+
                               // bio
                               textFeld(
                                 hintText: "Enter your bio here...",
@@ -109,9 +146,27 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                         SizedBox(
                           height: 50,
                           width: MediaQuery.of(context).size.width * 0.85,
-                          child: CustomButton(
-                            text: "Continue",
-                            onPressed: () => storeData(),
+                          child: Consumer<LocationProvider>(
+                            builder: (context, value, child) {
+                              return CustomButton(
+                                text: "Continue",
+                                onPressed: () async {
+                                  // getting latitude and longitude from address
+                                  await value
+                                      .getAddressFromQuery(
+                                          locationController.text.trim())
+                                      .then((value) {
+                                    lat = value.first.coordinates.latitude
+                                        .toString();
+                                    lon = value.first.coordinates.longitude
+                                        .toString();
+
+                                    //calling store data function
+                                    storeData();
+                                  });
+                                },
+                              );
+                            },
                           ),
                         )
                       ],
@@ -129,6 +184,8 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
     required TextInputType inputType,
     required int maxLines,
     required TextEditingController controller,
+    Function? onLocationPressed,
+    locationButton = false,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -138,6 +195,25 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
         keyboardType: inputType,
         maxLines: maxLines,
         decoration: InputDecoration(
+          suffixIcon: locationButton
+              ? Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: blue_10,
+                    ),
+                    child: const Icon(
+                      Icons.location_searching,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      if (onLocationPressed != null) {
+                        onLocationPressed();
+                      }
+                    },
+                  ),
+                )
+              : null,
           prefixIcon: Container(
             margin: const EdgeInsets.all(8.0),
             decoration: BoxDecoration(
@@ -183,7 +259,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
   void storeData() async {
     final ap = Provider.of<AuthProvider>(context, listen: false);
 
-    // initilizing userModel singleton instance
+// initilizing userModel singleton instance
     UserModel.instance.initializeUser(
       name: nameController.text.trim(),
       email: emailController.text.trim(),
@@ -192,7 +268,12 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
       createdAt: "",
       phoneNumber: "",
       uid: "",
+      address: locationController.text.trim(),
+      locationLat: lat,
+      locationLon: lon,
     );
+
+    // saving the data
     if (image != null) {
       ap.saveUserDataToFirebase(
         context: context,
@@ -211,5 +292,6 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
     } else {
       showSlackBar(context, "Please upload a profile photo");
     }
+    ;
   }
 }

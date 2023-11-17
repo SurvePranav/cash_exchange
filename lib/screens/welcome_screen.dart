@@ -47,6 +47,7 @@ class WelcomeScreen extends StatelessWidget {
               child: CustomButton(
                 onPressed: () async {
                   final ap = Provider.of<AuthProvider>(context, listen: false);
+                  await ap.checkSignIn();
                   if (ap.isSignedIn == true) {
                     await ap.getDataFromSP().whenComplete(
                           () => Navigator.pushReplacement(
