@@ -2,14 +2,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class RequestStatusScreen extends StatefulWidget {
-  const RequestStatusScreen({super.key});
+class FullMapScreen extends StatefulWidget {
+  const FullMapScreen({super.key});
 
   @override
-  State<RequestStatusScreen> createState() => _RequestStatusScreenState();
+  State<FullMapScreen> createState() => _FullMapScreenState();
 }
 
-class _RequestStatusScreenState extends State<RequestStatusScreen> {
+class _FullMapScreenState extends State<FullMapScreen> {
   @override
   Widget build(BuildContext context) {
     final Completer<GoogleMapController> mapController = Completer();

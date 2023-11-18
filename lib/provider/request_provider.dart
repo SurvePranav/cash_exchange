@@ -1,10 +1,13 @@
 import 'dart:convert';
 
 import 'package:cashxchange/model/request_model.dart';
+import 'package:cashxchange/model/user_model.dart';
+import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RequestProvider extends ChangeNotifier {
@@ -15,6 +18,17 @@ class RequestProvider extends ChangeNotifier {
   String get reqid => _reqid!;
 
   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
+
+  // set loading value while async processes
+  void setLoading(bool loading) {
+    if (loading) {
+      _isLoading = true;
+      notifyListeners();
+    } else {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
   // database operations
 
@@ -36,14 +50,10 @@ class RequestProvider extends ChangeNotifier {
   Future<bool> uploadRequestToDatabase({
     required BuildContext context,
   }) async {
-    _isLoading = true;
-    notifyListeners();
-
+    setLoading(true);
     try {
       // uploading new request info to database
-      RequestModel.instance.createdAt = DateTime.now().toString();
-      RequestModel.instance.expiration =
-          DateTime.now().add(const Duration(hours: 12)).toString();
+      RequestModel.instance.createdAt = DateTime.now();
 
       await _firebaseFirestore
           .collection("request")
@@ -55,39 +65,62 @@ class RequestProvider extends ChangeNotifier {
         _isLoading = false;
         notifyListeners();
       });
+      setLoading(false);
       return true;
-    } on FirebaseException catch (e) {
+    } catch (e) {
       showSlackBar(context, e.toString());
-      _isLoading = false;
-      notifyListeners();
+      setLoading(false);
       return false;
     }
-    return false;
   }
 
-  // get data from firestore
-  Future getDataFromFireStroe() async {
-    await _firebaseFirestore
-        .collection("request")
-        .doc(_reqid)
-        .get()
-        .then((DocumentSnapshot snapshot) {
-      RequestModel.instance.initializeRequest(
-        reqId: snapshot['reqId'],
-        uid: snapshot['uid'],
-        createdAt: snapshot['createdAt'],
-        amount: snapshot['amount'],
-        type: snapshot['type'],
-        info: snapshot['info'],
-        locationLat: snapshot['locationLat'],
-        locationLon: snapshot['locationLon'],
-        views: snapshot['views'],
-        expiration: snapshot['expiration'],
-        isAccepted: snapshot['isAccepted'],
-      );
-      _reqid = RequestModel.instance.reqId;
-      notifyListeners();
-    });
+  // get active requests from firestore
+  Future<List<Map<String, dynamic>>> getActiveRequests(
+      BuildContext context) async {
+    try {
+      DateTime exp = DateTime.now().subtract(const Duration(hours: 12));
+      QuerySnapshot querySnapshot = await _firebaseFirestore
+          .collection('request')
+          .where('uid',
+              isEqualTo: Provider.of<AuthProvider>(context, listen: false).uid)
+          .where('createdAt', isGreaterThan: exp)
+          .get();
+      List<Map<String, dynamic>> documents = querySnapshot.docs
+          .map((doc) => doc.data() as Map<String, dynamic>)
+          .toList();
+
+      return documents;
+    } catch (e) {
+      showSlackBar(context, e.toString());
+      return [];
+    }
+  }
+
+  // get request using request id
+  Future<void> getRequestById(BuildContext context, String reqId) async {
+    try {
+      await _firebaseFirestore
+          .collection('request')
+          .doc(reqId)
+          .get()
+          .then((DocumentSnapshot doc) {
+        RequestModel.instance.initializeRequest(
+          reqId: doc['reqId'],
+          uid: doc['uid'],
+          createdAt: doc['createdAt'].toDate(),
+          amount: doc['amount'],
+          type: doc['type'],
+          info: doc['info'],
+          locationLat: doc['locationLat'],
+          locationLon: doc['locationLon'],
+          views: doc['views'],
+          isAccepted: doc['isAccepted'],
+        );
+      });
+    } catch (e) {
+      print("Exception Cought by me!!!!!!!!!!!!");
+      showSlackBar(context, e.toString());
+    }
   }
 
   // Storing Data locally(shared preference)

@@ -1,6 +1,7 @@
+import 'package:cashxchange/constants/color_constants.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/screens/profile_screen.dart';
-import 'package:cashxchange/screens/to_implement/request_screen.dart';
+import 'package:cashxchange/screens/request_module_screens/request_screen.dart';
 import 'package:cashxchange/screens/to_implement/chat_screen.dart';
 import 'package:cashxchange/screens/to_implement/home_screen.dart';
 import 'package:cashxchange/screens/to_implement/notification_screen.dart';
@@ -9,34 +10,42 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class MainBody extends StatefulWidget {
-  const MainBody({super.key});
+  final int currentIndex;
+  const MainBody({super.key, required this.currentIndex});
   @override
   State<MainBody> createState() => _MainBodyState();
 }
 
 class _MainBodyState extends State<MainBody> {
-  final PageController _pageController = PageController(initialPage: 0);
-  int currentIndex = 0;
+  late final PageController _pageController;
+  late int currentIndex;
+  @override
+  void initState() {
+    _pageController = PageController(initialPage: widget.currentIndex);
+    currentIndex = widget.currentIndex;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final ap = Provider.of<AuthProvider>(context, listen: false);
     return Scaffold(
-      body: SafeArea(
-        child: PageView(
-          controller: _pageController,
-          onPageChanged: (value) {
-            setState(() {
-              currentIndex = value;
-            });
-          },
-          children: [
-            const HomeScreen(),
-            const ChatScreen(),
-            const RaiseRequestScreen(),
-            NofificationScreen(),
-            const ProfileScreen(),
-          ],
-        ),
+      backgroundColor: blue_10,
+      body: PageView(
+        physics: const NeverScrollableScrollPhysics(),
+        controller: _pageController,
+        onPageChanged: (value) {
+          setState(() {
+            currentIndex = value;
+          });
+        },
+        children: [
+          const HomeScreen(),
+          const ChatScreen(),
+          const RaiseRequestScreen(),
+          NofificationScreen(),
+          const ProfileScreen(),
+        ],
       ),
       bottomNavigationBar: CustomBottomNavbar(
         currentIndex: currentIndex,
@@ -45,10 +54,8 @@ class _MainBodyState extends State<MainBody> {
           setState(
             () {
               currentIndex = index;
-              _pageController.animateToPage(
+              _pageController.jumpToPage(
                 index,
-                duration: const Duration(milliseconds: 100),
-                curve: Curves.easeInOut,
               );
             },
           );

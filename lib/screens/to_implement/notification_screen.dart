@@ -31,15 +31,27 @@ class NofificationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: blue_10,
       appBar: AppBar(
-        title: const Text("Notifications", style: TextStyle(color: Colors.white)),
+        title:
+            const Text("Notifications", style: TextStyle(color: Colors.white)),
         backgroundColor: blue_10,
       ),
-      body: ListView.builder(
-        itemCount: notifications.length,
-        itemBuilder: (context, index) {
-          return notifications[index];
-        },
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(25),
+            bottomRight: Radius.circular(25),
+          ), // Adjust the value for roundness
+        ),
+        child: ListView.builder(
+          itemCount: notifications.length,
+          itemBuilder: (context, index) {
+            return notifications[index];
+          },
+        ),
       ),
     );
   }
@@ -51,7 +63,10 @@ class NotificationTile extends StatelessWidget {
   final String time;
 
   const NotificationTile(
-      {super.key, required this.title, required this.message, required this.time});
+      {super.key,
+      required this.title,
+      required this.message,
+      required this.time});
 
   @override
   Widget build(BuildContext context) {

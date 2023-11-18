@@ -8,7 +8,8 @@ class RequestCard extends StatelessWidget {
   final String amount;
   final VoidCallback onAcceptPressed;
 
-  const RequestCard({super.key, 
+  const RequestCard({
+    super.key,
     required this.userImage,
     required this.userName,
     required this.requestType,
@@ -20,7 +21,7 @@ class RequestCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 4.0,
-      margin: const EdgeInsets.all(18.0),
+      margin: const EdgeInsets.all(25.0),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0), // Rounded corners
       ),

@@ -5,16 +5,20 @@ import 'package:geolocator/geolocator.dart';
 class LocationProvider extends ChangeNotifier {
   Widget _myWidget = const Icon(
     Icons.location_searching,
-    // color: blue_10,
   );
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+
   void setWidgetToLoading(bool loading) {
     if (loading) {
+      _isLoading = true;
       _myWidget = const CircularProgressIndicator(
         color: Colors.white,
         strokeWidth: 1,
       );
       notifyListeners();
     } else {
+      _isLoading = false;
       _myWidget = const Icon(
         Icons.location_searching,
         color: Colors.white,

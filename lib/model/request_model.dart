@@ -1,14 +1,13 @@
 class RequestModel {
   late String reqId;
   late String uid;
-  late String createdAt;
+  late DateTime createdAt;
   late String amount;
   late String type;
   late String info;
   late String locationLat;
   late String locationLon;
-  late String views;
-  late String expiration;
+  late int views;
   late bool isAccepted;
   // late String
 
@@ -16,14 +15,13 @@ class RequestModel {
   RequestModel._privateConstructor() {
     reqId = "";
     uid = "";
-    createdAt = "";
+    createdAt = DateTime.now();
     amount = "";
     type = "";
     info = "";
     locationLat = "";
     locationLon = "";
-    views = "";
-    expiration = "";
+    views = 0;
     isAccepted = false;
   }
 
@@ -37,14 +35,13 @@ class RequestModel {
   void initializeRequest({
     required String reqId,
     required String uid,
-    required String createdAt,
+    required DateTime createdAt,
     required String amount,
     required String type,
     required String info,
     required String locationLat,
     required String locationLon,
-    required String views,
-    required String expiration,
+    required int views,
     required bool isAccepted,
   }) {
     this.reqId = reqId;
@@ -56,7 +53,6 @@ class RequestModel {
     this.locationLat = locationLat;
     this.locationLon = locationLon;
     this.views = views;
-    this.expiration = expiration;
     this.isAccepted = isAccepted;
   }
 
@@ -72,7 +68,6 @@ class RequestModel {
       locationLat: map['locationLat'] ?? '',
       locationLon: map['locationLon'] ?? '',
       views: map['views'] ?? '',
-      expiration: map['expiration'] ?? '',
       isAccepted: map['isAccepted'] ?? '',
     );
     return _instance;
@@ -90,7 +85,6 @@ class RequestModel {
       "locationLat": locationLat,
       "locationLon": locationLon,
       "views": views,
-      "expiration": expiration,
       "isAccepted": isAccepted,
     };
   }

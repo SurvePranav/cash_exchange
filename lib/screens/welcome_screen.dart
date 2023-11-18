@@ -1,12 +1,8 @@
 import 'package:cashxchange/constants/color_constants.dart';
-import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/screens/register_screen.dart';
 import 'package:cashxchange/widgets/custom_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import 'main_body.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -46,28 +42,13 @@ class WelcomeScreen extends StatelessWidget {
               width: double.infinity,
               child: CustomButton(
                 onPressed: () async {
-                  final ap = Provider.of<AuthProvider>(context, listen: false);
-                  await ap.checkSignIn();
-                  if (ap.isSignedIn == true) {
-                    await ap.getDataFromSP().whenComplete(
-                          () => Navigator.pushReplacement(
-                            context,
-                            CupertinoPageRoute(
-                              builder: (context) =>
-                                  const MainBody(), // SecondPage is the destination page
-                            ),
-                          ),
-                        );
-                  } else {
-                    Navigator.push(
-                      context,
-                      CupertinoPageRoute(
-                        builder: (context) =>
-                            const RegisterScreen(), // SecondPage is the destination page
-                      ),
-                    );
-                  }
-                  ;
+                  Navigator.push(
+                    context,
+                    CupertinoPageRoute(
+                      builder: (context) =>
+                          const RegisterScreen(), // SecondPage is the destination page
+                    ),
+                  );
                 },
                 text: 'Get Started',
               ),

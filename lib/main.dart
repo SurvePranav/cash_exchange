@@ -1,8 +1,7 @@
 import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/provider/location_provider.dart';
 import 'package:cashxchange/provider/request_provider.dart';
-import 'package:cashxchange/screens/to_implement/request_status.dart';
-import 'package:cashxchange/screens/welcome_screen.dart';
+import 'package:cashxchange/screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -43,8 +42,10 @@ class _MyAppState extends State<MyApp> {
         theme: ThemeData(
           useMaterial3: true,
         ),
-        home: const WelcomeScreen(),
-        // home: const RequestStatusScreen(),
+        home: const SplashScreen(),
+        // home: const WelcomeScreen(),
+        // home: const FullMapScreen(),
+        // home: RequestSuccessScreen(),
       ),
     );
   }

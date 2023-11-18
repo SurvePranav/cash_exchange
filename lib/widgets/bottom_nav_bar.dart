@@ -23,7 +23,7 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
     return Container(
       color: blue_10,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
         child: GNav(
           backgroundColor: blue_10,
           color: Colors.white,

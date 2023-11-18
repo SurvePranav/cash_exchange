@@ -283,7 +283,9 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
           ap.saveDataToSP().then((value) => ap.setSignedIn()).then(
                 (value) => Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(
-                      builder: (context) => const MainBody(),
+                      builder: (context) => const MainBody(
+                        currentIndex: 0,
+                      ),
                     ),
                     (route) => false),
               );

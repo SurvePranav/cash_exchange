@@ -164,7 +164,9 @@ class _OTPScreenState extends State<OTPScreen> {
                 .then((value) => ap.setSignedIn())
                 .then((value) => Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(
-                      builder: (context) => const MainBody(),
+                      builder: (context) => const MainBody(
+                        currentIndex: 0,
+                      ),
                     ),
                     (route) => false));
           } else {
