@@ -20,12 +20,12 @@ class RequestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 4.0,
+      // elevation: 2,
       margin: const EdgeInsets.all(25.0),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0), // Rounded corners
       ),
-      color: blue_4,
+      color: Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -34,7 +34,7 @@ class RequestCard extends StatelessWidget {
           ),
           Center(
             child: CircleAvatar(
-              backgroundColor: blue_6,
+              backgroundColor: AppColors.blue_6,
               backgroundImage:
                   const AssetImage("assets/images/profile_icon.png"),
               radius: 50,
@@ -72,12 +72,12 @@ class RequestCard extends StatelessWidget {
                   children: <Widget>[
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: blue_2,
+                        backgroundColor: AppColors.deepGreen,
                       ),
                       onPressed: onAcceptPressed,
-                      child: Text(
+                      child: const Text(
                         'Accept Request',
-                        style: TextStyle(color: blue_10),
+                        style: TextStyle(color: Colors.white),
                       ),
                     ),
                   ],

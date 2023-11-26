@@ -29,12 +29,12 @@ class _RequestStatusScreenState extends State<RequestStatusScreen> {
           icon: const Icon(Icons.arrow_back),
           color: Colors.white,
         ),
-        backgroundColor: blue_10,
+        backgroundColor: AppColors.deepGreen,
       ),
       body: Consumer<RequestProvider>(
         builder: (context, value, child) {
           return FutureBuilder<List<Map<String, dynamic>>>(
-            future: value.getActiveRequests(context),
+            future: value.getActiveRequests(context, onlyMyRequests: true),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());

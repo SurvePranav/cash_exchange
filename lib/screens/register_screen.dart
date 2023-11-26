@@ -45,7 +45,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   height: 200,
                   padding: const EdgeInsets.all(25),
                   decoration: BoxDecoration(
-                    color: blue_4,
+                    color: AppColors.blue_4,
                     shape: BoxShape.circle,
                   ),
                   child: Image.asset(
@@ -58,7 +58,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Text(
                   "Register",
                   style: TextStyle(
-                      color: darkBlack,
+                      color: AppColors.darkBlack,
                       fontSize: 25,
                       fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
@@ -68,7 +68,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 Text(
                   "Add your phone number, we will send you a verification code!",
-                  style: TextStyle(color: dimBlack),
+                  style: TextStyle(color: AppColors.dimBlack),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(
@@ -76,7 +76,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 TextFormField(
                   controller: _controller,
-                  cursorColor: blue_10,
+                  cursorColor: AppColors.deepGreen,
                   onChanged: (value) {
                     if (_controller.text.length == 9 ||
                         _controller.text.length == 10) {
@@ -88,11 +88,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(7),
-                      borderSide: BorderSide(color: dimBlack, width: 1),
+                      borderSide:
+                          BorderSide(color: AppColors.dimBlack, width: 1),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(7),
-                      borderSide: BorderSide(color: blue_10, width: 1.5),
+                      borderSide:
+                          BorderSide(color: AppColors.deepGreen, width: 1.5),
                     ),
                     hintText: "Enter phone number",
                     hintStyle: const TextStyle(

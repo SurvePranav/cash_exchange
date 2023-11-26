@@ -18,19 +18,12 @@ class _SplashScreenState extends State<SplashScreen> {
     await ap.checkSignIn().then((value) async {
       if (ap.isSignedIn == true) {
         await ap.getDataFromSP().whenComplete(
-              () => Navigator.pushReplacement(
-                context,
-                CupertinoPageRoute(
-                  builder: (context) => const MainBody(
-                    currentIndex: 0,
-                  ), // SecondPage is the destination page
-                ),
-              ),
+              () => Navigator.pushReplacementNamed(context, 'home_screen'),
             );
       } else {
         Navigator.push(
           context,
-          CupertinoPageRoute(
+          MaterialPageRoute(
             builder: (context) =>
                 const WelcomeScreen(), // SecondPage is the destination page
           ),

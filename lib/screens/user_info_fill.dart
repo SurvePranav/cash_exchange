@@ -4,27 +4,42 @@ import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/provider/location_provider.dart';
 import 'package:cashxchange/screens/main_body.dart';
+import 'package:cashxchange/utils/local_images.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:cashxchange/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_geocoder/geocoder.dart';
+// import 'package:flutter_geocoder/geocoder.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 class UserInfoScreen extends StatefulWidget {
-  const UserInfoScreen({super.key});
+  final bool editProfile;
+  const UserInfoScreen({super.key, this.editProfile = false});
 
   @override
   State<UserInfoScreen> createState() => _UserInfoScreenState();
 }
 
 class _UserInfoScreenState extends State<UserInfoScreen> {
-  File? image;
+  File? image = ImageSingleton.getLocalImage();
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final bioController = TextEditingController();
   final locationController = TextEditingController();
   late String lat, lon;
+
+  @override
+  void initState() {
+    if (widget.editProfile) {
+      nameController.text = UserModel.instance.name;
+      emailController.text = UserModel.instance.email;
+      bioController.text = UserModel.instance.bio;
+      locationController.text = UserModel.instance.address;
+      lat = UserModel.instance.locationLat;
+      lon = UserModel.instance.locationLon;
+    }
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -41,9 +56,18 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
         Provider.of<AuthProvider>(context, listen: true).isLoading;
 
     return Scaffold(
+      appBar: widget.editProfile
+          ? AppBar(
+              title: Container(
+                  color: Colors.red,
+                  width: MediaQuery.of(context).size.width,
+                  alignment: Alignment.center,
+                  child: Text("Edit Profile")),
+            )
+          : null,
       body: isLoading
           ? Center(
-              child: CircularProgressIndicator(color: blue_10),
+              child: CircularProgressIndicator(color: AppColors.deepGreen),
             )
           : SafeArea(
               child: Padding(
@@ -55,24 +79,65 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                       children: [
                         InkWell(
                           onTap: () async {
-                            if (await checkPermission(
-                                Permission.photos, context)) {
-                              selectImage();
-                            }
+                            selectImage();
                           },
                           child: image == null
                               ? CircleAvatar(
-                                  backgroundColor: blue_10,
-                                  radius: 50,
-                                  child: const Icon(
-                                    Icons.account_circle,
-                                    color: Colors.white,
-                                    size: 60,
+                                  backgroundColor: AppColors.deepGreen,
+                                  radius: 70,
+                                  child: Stack(
+                                    children: [
+                                      const Align(
+                                        alignment: Alignment.center,
+                                        child: Icon(
+                                          Icons.account_circle,
+                                          color: Colors.white,
+                                          size: 90,
+                                        ),
+                                      ),
+                                      Align(
+                                        alignment: Alignment.bottomRight,
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          child: Container(
+                                            height: 35,
+                                            width: 35,
+                                            color: AppColors.deepGreen,
+                                            child: const Icon(
+                                              Icons.camera_alt,
+                                              color: Colors.white,
+                                              size: 28,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 )
-                              : CircleAvatar(
-                                  backgroundImage: FileImage(image!),
-                                  radius: 50,
+                              : Hero(
+                                  tag: "profile_pic",
+                                  child: CircleAvatar(
+                                    backgroundColor: Colors.black,
+                                    backgroundImage: FileImage(image!),
+                                    radius: 70,
+                                    child: Align(
+                                      alignment: Alignment.bottomRight,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: Container(
+                                          height: 35,
+                                          width: 35,
+                                          color: AppColors.deepGreen,
+                                          child: const Icon(
+                                            Icons.camera_alt,
+                                            color: Colors.white,
+                                            size: 28,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ),
                         ),
                         Container(
@@ -110,22 +175,21 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                                       maxLines: 2,
                                       controller: locationController,
                                       locationButton: true,
+                                      locationButtonIcon: value.isLoading
+                                          ? Icons.location_searching
+                                          : Icons.location_pin,
+                                      // locationButtonIcon: Icons.location_pin,
                                       onLocationPressed: () async {
+                                        value.setLoading(true);
                                         await value
                                             .getCurrentLocation()
                                             .then((val) async {
-                                          lat = '${val.latitude}';
-                                          lon = '${val.longitude}';
-                                          final coordinates = Coordinates(
-                                              double.parse(lat),
-                                              double.parse(lon));
-                                          var address = await value
+                                          lat = '${val[0]}';
+                                          lon = '${val[1]}';
+                                          locationController.text = await value
                                               .getAddressFromCoordinates(
-                                                  coordinates);
-                                          locationController.text = address
-                                              .first.addressLine
-                                              .toString();
-                                          setState(() {});
+                                                  val[0], val[1]);
+                                          value.setLoading(false);
                                         });
                                       });
                                 },
@@ -149,20 +213,29 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                           child: Consumer<LocationProvider>(
                             builder: (context, value, child) {
                               return CustomButton(
-                                text: "Continue",
+                                text: widget.editProfile
+                                    ? "Update Profile"
+                                    : "Continue",
                                 onPressed: () async {
                                   // getting latitude and longitude from address
                                   await value
-                                      .getAddressFromQuery(
+                                      .getCoordinatesFromAddressString(
                                           locationController.text.trim())
-                                      .then((value) {
-                                    lat = value.first.coordinates.latitude
-                                        .toString();
-                                    lon = value.first.coordinates.longitude
-                                        .toString();
+                                      .then((coordinates) async {
+                                    if (coordinates.isNotEmpty) {
+                                      lat = coordinates[0].toString();
+                                      lon = coordinates[1].toString();
+                                    } else {
+                                      List co =
+                                          await value.getCurrentLocation();
+                                      lat = co[0].toString();
+                                      lon = co[1].toString();
+                                    }
+                                    // clearing cache before moving further
+                                    // await ImageSingleton.deleteCacheDir();
 
                                     //calling store data function
-                                    storeData();
+                                    await storeData();
                                   });
                                 },
                               );
@@ -186,11 +259,12 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
     required TextEditingController controller,
     Function? onLocationPressed,
     locationButton = false,
+    IconData locationButtonIcon = Icons.location_searching,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: TextFormField(
-        cursorColor: blue_10,
+        cursorColor: AppColors.deepGreen,
         controller: controller,
         keyboardType: inputType,
         maxLines: maxLines,
@@ -198,19 +272,27 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
           suffixIcon: locationButton
               ? Container(
                   margin: const EdgeInsets.symmetric(horizontal: 8),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: blue_10,
-                    ),
-                    child: const Icon(
-                      Icons.location_searching,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
-                      if (onLocationPressed != null) {
-                        onLocationPressed();
-                      }
-                    },
+                  child: Column(
+                    children: [
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.deepGreen,
+                        ),
+                        child: Icon(
+                          locationButtonIcon,
+                          color: Colors.white,
+                        ),
+                        onPressed: () {
+                          if (onLocationPressed != null) {
+                            onLocationPressed();
+                          }
+                        },
+                      ),
+                      const Text(
+                        "current location",
+                        style: TextStyle(color: Colors.grey, fontSize: 10),
+                      )
+                    ],
                   ),
                 )
               : null,
@@ -218,7 +300,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
             margin: const EdgeInsets.all(8.0),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              color: blue_10,
+              color: AppColors.deepGreen,
             ),
             child: Icon(
               icon,
@@ -235,13 +317,13 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(
-              color: blue_4,
+              color: AppColors.blue_4,
             ),
           ),
           hintText: hintText,
           alignLabelWithHint: true,
           border: InputBorder.none,
-          fillColor: blue_2,
+          fillColor: AppColors.blue_2,
           filled: true,
         ),
       ),
@@ -251,49 +333,84 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
   // for selecting image
 
   void selectImage() async {
-    image = await pickImage(context);
-    setState(() {});
+    await checkPermission(Permission.photos, context).then((value) async {
+      await pickImage(context).then((pickedImage) async {
+        if (pickedImage != null) {
+          if (ImageSingleton.localImagePath != null) {
+            await ImageSingleton.deleteLocalImage();
+          }
+          await ImageSingleton.setLocalImagePath(imagePath: pickedImage.path)
+              .then((value) {
+            image = ImageSingleton.getLocalImage();
+            setState(() {});
+          });
+        }
+      });
+    });
   }
 
   // store user data to database
-  void storeData() async {
+  Future<void> storeData() async {
     final ap = Provider.of<AuthProvider>(context, listen: false);
 
-// initilizing userModel singleton instance
-    UserModel.instance.initializeUser(
-      name: nameController.text.trim(),
-      email: emailController.text.trim(),
-      bio: bioController.text.trim(),
-      profilePic: "",
-      createdAt: "",
-      phoneNumber: "",
-      uid: "",
-      address: locationController.text.trim(),
-      locationLat: lat,
-      locationLon: lon,
-    );
-
     // saving the data
-    if (image != null) {
-      ap.saveUserDataToFirebase(
-        context: context,
-        profilePic: image!,
-        onSuccess: () {
-          // once data is saved we need to store it locally also using shared preference library
-          ap.saveDataToSP().then((value) => ap.setSignedIn()).then(
-                (value) => Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                      builder: (context) => const MainBody(
-                        currentIndex: 0,
+    if (image != null &&
+        nameController.text != "" &&
+        emailController.text != "" &&
+        locationController.text != "" &&
+        bioController.text != "") {
+      if (widget.editProfile) {
+        UserModel.instance.name = nameController.text.trim();
+        UserModel.instance.email = emailController.text.trim();
+        UserModel.instance.bio = bioController.text.trim();
+        UserModel.instance.address = locationController.text.trim();
+        UserModel.instance.locationLat = lat;
+        UserModel.instance.locationLon = lon;
+        ap.saveUserDataToFirebase(
+          context: context,
+          profilePic: image!,
+          updateData: true,
+          onSuccess: () async {
+            // once data is saved we need to store it locally also using shared preference library
+            await ap.saveDataToSP().then((value) {
+              Navigator.of(context)
+                  .pushNamedAndRemoveUntil('profile_screen', (route) => false);
+            });
+          },
+        );
+      } else {
+        // initilizing userModel singleton instance
+        UserModel.instance.initializeUser(
+          name: nameController.text.trim(),
+          email: emailController.text.trim(),
+          bio: bioController.text.trim(),
+          profilePic: "",
+          createdAt: "",
+          phoneNumber: "",
+          uid: "",
+          address: locationController.text.trim(),
+          locationLat: lat,
+          locationLon: lon,
+        );
+        await ap.saveUserDataToFirebase(
+          context: context,
+          profilePic: image!,
+          onSuccess: () {
+            // once data is saved we need to store it locally also using shared preference library
+            ap.saveDataToSP().then((value) => ap.setSignedIn()).then(
+                  (value) => Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (context) => const MainBody(
+                          currentIndex: 0,
+                        ),
                       ),
-                    ),
-                    (route) => false),
-              );
-        },
-      );
+                      (route) => false),
+                );
+          },
+        );
+      }
     } else {
-      showSlackBar(context, "Please upload a profile photo");
+      showSlackBar(context, "please fill all the fields");
     }
-    ;
   }
 }

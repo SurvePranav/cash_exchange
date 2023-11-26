@@ -31,19 +31,17 @@ class NofificationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: blue_10,
       appBar: AppBar(
         title:
             const Text("Notifications", style: TextStyle(color: Colors.white)),
-        backgroundColor: blue_10,
+        backgroundColor: AppColors.deepGreen,
       ),
       body: Container(
-        height: MediaQuery.of(context).size.height,
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(25),
-            bottomRight: Radius.circular(25),
+            bottomLeft: Radius.circular(23),
+            bottomRight: Radius.circular(23),
           ), // Adjust the value for roundness
         ),
         child: ListView.builder(
@@ -73,7 +71,7 @@ class NotificationTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: blue_6, // Blue background color
+        color: AppColors.blue_6, // Blue background color
         borderRadius: BorderRadius.circular(12.0),
         boxShadow: [
           BoxShadow(

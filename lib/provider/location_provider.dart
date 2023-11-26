@@ -1,46 +1,63 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter_geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 class LocationProvider extends ChangeNotifier {
-  Widget _myWidget = const Icon(
-    Icons.location_searching,
-  );
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  void setWidgetToLoading(bool loading) {
+  void setLoading(bool loading) {
     if (loading) {
       _isLoading = true;
-      _myWidget = const CircularProgressIndicator(
-        color: Colors.white,
-        strokeWidth: 1,
-      );
       notifyListeners();
     } else {
       _isLoading = false;
-      _myWidget = const Icon(
-        Icons.location_searching,
-        color: Colors.white,
-      );
       notifyListeners();
     }
   }
 
-  Widget get myWidget => _myWidget;
-  // find address from query
-  Future<List> getAddressFromQuery(String address) async {
-    return await Geocoder.local.findAddressesFromQuery(address);
+  // find address string from latitude,longitiude
+
+  Future<String> getAddressFromCoordinates(
+    double latitude,
+    double longitude,
+  ) async {
+    try {
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(latitude, longitude);
+      if (placemarks.isNotEmpty) {
+        Placemark first = placemarks.first;
+        return "${first.street}, ${first.subLocality}, ${first.locality}, ${first.administrativeArea} ${first.postalCode}, ${first.country}";
+      } else {
+        return "";
+      }
+    } catch (e) {
+      return "";
+    }
   }
 
-  // find address from coordinates
-  Future<List> getAddressFromCoordinates(Coordinates coordinates) async {
-    return await Geocoder.local.findAddressesFromCoordinates(coordinates);
+  // find latutude, longitude from string
+
+  Future<List<double?>> getCoordinatesFromAddressString(String address) async {
+    try {
+      List<Location> locations = await locationFromAddress(address);
+      if (locations.isNotEmpty) {
+        return [
+          locations.first.latitude,
+          locations.first.longitude,
+        ];
+      } else {
+        return [];
+      }
+    } catch (e) {
+      print("Error Getting Coordinates: $e");
+      return [];
+    }
   }
 
-  // for getting current location
-  Future<Position> getCurrentLocation() async {
-    setWidgetToLoading(true);
+  // for getting current location's latutude, longitude
+  Future<List<double>> getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       return Future.error("Location Permission Dissabled");
@@ -54,8 +71,51 @@ class LocationProvider extends ChangeNotifier {
     } else if (permission == LocationPermission.deniedForever) {
       return Future.error("Locatoion Permission denied forever");
     }
-    var pos = await Geolocator.getCurrentPosition();
-    setWidgetToLoading(false);
-    return pos;
+    Position pos = await Geolocator.getCurrentPosition();
+    return [pos.latitude, pos.longitude];
+  }
+
+  // filter markers within the 5km radius
+  List<Map<String, dynamic>> requestsWithinGivenRadious({
+    required double radious,
+    required List<Map<String, dynamic>> locations,
+    required currentLat,
+    required currentLon,
+  }) {
+    List<Map<String, dynamic>> filtered = [];
+    locations.map((e) {
+      if (calculateDistance(
+            currentLat,
+            currentLon,
+            double.parse(e['locationLat']),
+            double.parse(e['locationLon']),
+          ) <=
+          radious) {
+        filtered.add(e);
+      }
+    });
+    return filtered;
+  }
+
+  double calculateDistance(
+      double currentLat, double currentLon, double lat2, double lon2) {
+    const R = 6371.0; // Earth radius in kilometers
+
+    final double dLat = _toRadians(lat2 - currentLat);
+    final double dLon = _toRadians(lon2 - currentLon);
+
+    final double a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(_toRadians(currentLat)) *
+            cos(_toRadians(currentLon)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
+
+    final double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+    return R * c; // Distance in kilometers
+  }
+
+  double _toRadians(double degrees) {
+    return degrees * (pi / 180);
   }
 }

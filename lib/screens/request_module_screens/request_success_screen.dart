@@ -64,7 +64,7 @@ class _RequestSuccessScreenState extends State<RequestSuccessScreen> {
                 alignment: Alignment.center,
                 child: Text(
                   "Done",
-                  style: TextStyle(color: blue_10, fontSize: 20),
+                  style: TextStyle(color: AppColors.deepGreen, fontSize: 20),
                 ),
               ),
             ),

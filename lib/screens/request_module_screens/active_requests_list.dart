@@ -33,7 +33,8 @@ class _ActiveRequestsListState extends State<ActiveRequestsList> {
                 height: 100,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                      shape: const CircleBorder(), backgroundColor: blue_10),
+                      shape: const CircleBorder(),
+                      backgroundColor: AppColors.deepGreen),
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => const MainBody(
@@ -65,7 +66,7 @@ class _ActiveRequestsListState extends State<ActiveRequestsList> {
         itemBuilder: (context, index) {
           final request = widget.requests.elementAt(index);
           return Card(
-            color: blue_8,
+            color: AppColors.blue_8,
             elevation: 5,
             margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
             shape: RoundedRectangleBorder(
@@ -81,36 +82,34 @@ class _ActiveRequestsListState extends State<ActiveRequestsList> {
                   fontSize: 20,
                 ),
               ),
-              subtitle: Container(
-                child: Row(
-                  children: [
-                    Text(
-                      'Rs.${request['amount']}',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                      ),
+              subtitle: Row(
+                children: [
+                  Text(
+                    'Rs.${request['amount']}',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16,
                     ),
-                    const Expanded(child: SizedBox()),
-                    SizedBox(
-                      width: 50,
-                      child: Row(
-                        children: [
-                          const Icon(Icons.remove_red_eye,
-                              size: 18, color: Colors.white70),
-                          const SizedBox(
-                            width: 5,
-                          ),
-                          Text(
-                            "${request['views']}",
-                            style: const TextStyle(
-                                color: Colors.white70, fontSize: 13),
-                          ),
-                        ],
-                      ),
+                  ),
+                  const Expanded(child: SizedBox()),
+                  SizedBox(
+                    width: 50,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.remove_red_eye,
+                            size: 18, color: Colors.white70),
+                        const SizedBox(
+                          width: 5,
+                        ),
+                        Text(
+                          "${request['views']}",
+                          style: const TextStyle(
+                              color: Colors.white70, fontSize: 13),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
               trailing: const Icon(
                 Icons.arrow_forward,

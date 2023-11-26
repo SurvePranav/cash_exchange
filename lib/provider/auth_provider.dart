@@ -7,6 +7,7 @@ import 'package:cashxchange/utils/util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,6 +27,16 @@ class AuthProvider extends ChangeNotifier {
 
   AuthProvider() {
     checkSignIn();
+  }
+
+  void setLoading(bool loading) {
+    if (loading) {
+      _isLoading = true;
+      notifyListeners();
+    } else {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> checkSignIn() async {
@@ -50,12 +61,11 @@ class AuthProvider extends ChangeNotifier {
           await _firebaseAuth.signInWithCredential(phoneAuthCredential);
         },
         verificationFailed: (error) {
-          print("Verification Failed: ${error.message.toString()}");
           throw Exception(error.message.toString());
         },
         codeSent: (verificationId, forceResendingToken) {
           Navigator.of(context).push(
-            MaterialPageRoute(
+            CupertinoPageRoute(
               builder: (context) => OTPScreen(verificationId: verificationId),
             ),
           );
@@ -85,8 +95,7 @@ class AuthProvider extends ChangeNotifier {
     required String userOtp,
     required Function onSuccess,
   }) async {
-    _isLoading = true;
-    notifyListeners();
+    setLoading(true);
 
     try {
       PhoneAuthCredential creds = PhoneAuthProvider.credential(
@@ -102,12 +111,10 @@ class AuthProvider extends ChangeNotifier {
         onSuccess();
       }
 
-      _isLoading = false;
-      notifyListeners();
+      setLoading(false);
     } on FirebaseAuthException catch (e) {
       showSlackBar(context, e.message.toString());
-      _isLoading = false;
-      notifyListeners();
+      setLoading(false);
     }
   }
 
@@ -118,10 +125,10 @@ class AuthProvider extends ChangeNotifier {
         await _firebaseFirestore.collection("users").doc(_uid).get();
 
     if (snapshot.exists) {
-      print("User Exisit!");
+      // User Exisit!
       return true;
     } else {
-      print("New User");
+      //"New User"
       return false;
     }
   }
@@ -132,21 +139,28 @@ class AuthProvider extends ChangeNotifier {
     required BuildContext context,
     required File profilePic,
     required Function onSuccess,
+    bool updateData = false,
   }) async {
-    _isLoading = true;
-    notifyListeners();
+    setLoading(true);
 
     try {
-      // Uploading Image To Fierebase Storage
-      await storeFileToStroage("profilePic/$_uid", profilePic).then((value) {
-        UserModel.instance.profilePic = value;
-        UserModel.instance.createdAt =
-            DateTime.now().millisecondsSinceEpoch.toString();
-        UserModel.instance.phoneNumber =
-            _firebaseAuth.currentUser!.phoneNumber!;
-        UserModel.instance.uid = _firebaseAuth.currentUser!.uid;
-        notifyListeners();
-      });
+      if (updateData) {
+        await storeFileToStroage("profilePic/$_uid", profilePic).then((value) {
+          UserModel.instance.profilePic = value;
+          notifyListeners();
+        });
+      } else {
+        // Uploading Image To Fierebase Storage
+        await storeFileToStroage("profilePic/$_uid", profilePic).then((value) {
+          UserModel.instance.profilePic = value;
+          UserModel.instance.createdAt =
+              DateTime.now().millisecondsSinceEpoch.toString();
+          UserModel.instance.phoneNumber =
+              _firebaseAuth.currentUser!.phoneNumber!;
+          UserModel.instance.uid = _firebaseAuth.currentUser!.uid;
+          notifyListeners();
+        });
+      }
 
       // uploading all user info to database
       await _firebaseFirestore
@@ -155,13 +169,11 @@ class AuthProvider extends ChangeNotifier {
           .set(UserModel.instance.toMap())
           .then((value) {
         onSuccess();
-        _isLoading = false;
-        notifyListeners();
+        setLoading(false);
       });
     } on FirebaseAuthException catch (e) {
       showSlackBar(context, e.toString());
-      _isLoading = false;
-      notifyListeners();
+      setLoading(false);
     }
   }
 
@@ -196,6 +208,16 @@ class AuthProvider extends ChangeNotifier {
     String downloadUrl = await snapshot.ref.getDownloadURL();
     return downloadUrl;
   }
+
+  // replace/update image file func
+  // Future<String> replaceFileFromStorage(
+  //     String ref, File file, String url) async {
+  //   UploadTask uploadTask =
+  //       _firebaseStorage.ref().child(ref).putFile(file);
+  //   TaskSnapshot snapshot = await uploadTask;
+  //   String downloadUrl = await snapshot.ref.getDownloadURL();
+  //   return downloadUrl;
+  // }
 
   // Storing Data locally(shared preference)
 

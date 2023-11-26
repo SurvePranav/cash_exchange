@@ -21,44 +21,43 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: blue_10,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-        child: GNav(
-          backgroundColor: blue_10,
-          color: Colors.white,
-          activeColor: Colors.white,
-          tabBackgroundColor: blue_8,
-          padding: const EdgeInsets.all(10),
-          gap: 10,
-          onTabChange: widget.onTabChange,
-          selectedIndex: widget.currentIndex,
-          tabs: [
-            GButton(
-              icon: Icons.home_outlined,
-              text: "Home",
-              onPressed: () {},
-            ),
-            GButton(
-              icon: Icons.chat,
-              text: 'Chat',
-              onPressed: () {},
-            ),
-            GButton(
-              icon: Icons.add,
-              onPressed: () {},
-            ),
-            GButton(
-              icon: Icons.notification_add,
-              onPressed: () {},
-            ),
-            GButton(
-              icon: Icons.person_outlined,
-              text: 'Profile',
-              onPressed: () {},
-            ),
-          ],
-        ),
+      height: 50,
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 17.0, vertical: 2),
+      child: GNav(
+        backgroundColor: Colors.white,
+        color: AppColors.deepGreen,
+        activeColor: Colors.white,
+        tabBackgroundColor: AppColors.deepGreen,
+        padding: const EdgeInsets.all(7),
+        gap: 6,
+        onTabChange: widget.onTabChange,
+        selectedIndex: widget.currentIndex,
+        tabs: [
+          GButton(
+            icon: Icons.home_outlined,
+            // text: "Home",
+            onPressed: () {},
+          ),
+          GButton(
+            icon: Icons.chat,
+            // text: 'Chat',
+            onPressed: () {},
+          ),
+          GButton(
+            icon: Icons.add,
+            onPressed: () {},
+          ),
+          GButton(
+            icon: Icons.notification_add,
+            onPressed: () {},
+          ),
+          GButton(
+            icon: Icons.person_outlined,
+            // text: 'Profile',
+            onPressed: () {},
+          ),
+        ],
       ),
     );
   }

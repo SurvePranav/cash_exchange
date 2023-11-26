@@ -1,6 +1,6 @@
 import 'package:cashxchange/constants/color_constants.dart';
 import 'package:cashxchange/screens/to_implement/message_screen.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -14,18 +14,11 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(25),
-          bottomRight: Radius.circular(25),
-        ), // Adjust the value for roundness
-      ),
+      color: Colors.white,
       child: CustomScrollView(
         slivers: [
           SliverAppBar(
-            backgroundColor: blue_10,
+            backgroundColor: AppColors.deepGreen,
             expandedHeight: 80, // Adjust as needed
             floating: false, // The app bar does not float as the user scrolls
             pinned: false, // The app bar remains pinned at the top

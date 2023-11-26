@@ -37,10 +37,10 @@ class RequestProvider extends ChangeNotifier {
         await _firebaseFirestore.collection("requests").doc(_reqid).get();
 
     if (snapshot.exists) {
-      print("Request Exisit!");
+      // request exists
       return true;
     } else {
-      print("New Request");
+      // request is new
       return false;
     }
   }
@@ -75,16 +75,23 @@ class RequestProvider extends ChangeNotifier {
   }
 
   // get active requests from firestore
-  Future<List<Map<String, dynamic>>> getActiveRequests(
-      BuildContext context) async {
+  Future<List<Map<String, dynamic>>> getActiveRequests(BuildContext context,
+      {onlyMyRequests = false}) async {
     try {
       DateTime exp = DateTime.now().subtract(const Duration(hours: 12));
-      QuerySnapshot querySnapshot = await _firebaseFirestore
-          .collection('request')
-          .where('uid',
-              isEqualTo: Provider.of<AuthProvider>(context, listen: false).uid)
-          .where('createdAt', isGreaterThan: exp)
-          .get();
+      QuerySnapshot querySnapshot;
+      if (onlyMyRequests) {
+        querySnapshot = await _firebaseFirestore
+            .collection('request')
+            .where('uid', isEqualTo: UserModel.instance.uid)
+            .where('createdAt', isGreaterThan: exp)
+            .get();
+      } else {
+        querySnapshot = await _firebaseFirestore
+            .collection('request')
+            .where('createdAt', isGreaterThan: exp)
+            .get();
+      }
       List<Map<String, dynamic>> documents = querySnapshot.docs
           .map((doc) => doc.data() as Map<String, dynamic>)
           .toList();
@@ -118,7 +125,6 @@ class RequestProvider extends ChangeNotifier {
         );
       });
     } catch (e) {
-      print("Exception Cought by me!!!!!!!!!!!!");
       showSlackBar(context, e.toString());
     }
   }

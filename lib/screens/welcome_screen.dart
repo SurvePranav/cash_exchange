@@ -24,7 +24,9 @@ class WelcomeScreen extends StatelessWidget {
             Text(
               "Exchange Your Cash With Digital Money & Vise-A-Versa!",
               style: TextStyle(
-                  color: darkBlack, fontSize: 20, fontWeight: FontWeight.bold),
+                  color: AppColors.darkBlack,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(
@@ -32,7 +34,7 @@ class WelcomeScreen extends StatelessWidget {
             ),
             Text(
               "Start Your Journey Now!",
-              style: TextStyle(color: dimBlack),
+              style: TextStyle(color: AppColors.dimBlack),
             ),
             const SizedBox(
               height: 30,
