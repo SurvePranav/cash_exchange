@@ -1,16 +1,13 @@
 import 'package:cashxchange/constants/color_constants.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
-import 'package:cashxchange/screens/main_body.dart';
-import 'package:cashxchange/screens/user_info_fill.dart';
+import 'package:cashxchange/screens/profile_module_screens/user_info_fill.dart';
 import 'package:cashxchange/utils/local_images.dart';
 import 'package:cashxchange/utils/util.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cashxchange/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
-
-import '../widgets/custom_button.dart';
 
 class OTPScreen extends StatefulWidget {
   final String verificationId;

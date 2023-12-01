@@ -1,5 +1,5 @@
 import 'package:cashxchange/constants/color_constants.dart';
-import 'package:cashxchange/screens/to_implement/message_screen.dart';
+import 'package:cashxchange/screens/chat_module_screens/message_screen.dart';
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/material.dart';
 
@@ -18,12 +18,15 @@ class _ChatScreenState extends State<ChatScreen> {
       child: CustomScrollView(
         slivers: [
           SliverAppBar(
-            backgroundColor: AppColors.deepGreen,
+            backgroundColor: AppColors.blue_4,
             expandedHeight: 80, // Adjust as needed
             floating: false, // The app bar does not float as the user scrolls
             pinned: false, // The app bar remains pinned at the top
             flexibleSpace: const FlexibleSpaceBar(
-              title: Text('Chats'),
+              title: Text(
+                'Chats',
+                style: TextStyle(color: Colors.black),
+              ),
             ),
           ),
           // Add other SliverList or SliverGrid widgets for your scrollable content

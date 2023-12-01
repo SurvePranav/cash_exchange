@@ -1,68 +1,117 @@
 import 'package:cashxchange/model/request_model.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/request_provider.dart';
+import 'package:cashxchange/screens/request_module_screens/active_requests_screen.dart';
+import 'package:cashxchange/screens/request_module_screens/edit_request_screen.dart';
+import 'package:cashxchange/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class RequestDetailsScreen extends StatefulWidget {
-  final String reqId;
-  const RequestDetailsScreen({super.key, required this.reqId});
+class RequestDetailsScreen extends StatelessWidget {
+  final Map<String, dynamic> request;
+  const RequestDetailsScreen({super.key, required this.request});
 
-  @override
-  State createState() => _RequestDetailsScreenState();
-}
-
-class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Request Details'),
-      ),
-      body: Consumer<RequestProvider>(
-        builder: (context, value, child) {
-          return FutureBuilder<void>(
-            future: value.getRequestById(context, widget.reqId),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else {
-                String location = "Current Location";
-                if (UserModel.instance.locationLat ==
-                        RequestModel.instance.locationLat &&
-                    UserModel.instance.locationLon ==
-                        RequestModel.instance.locationLon) {
-                  location = "Your Preffered Location";
-                }
-                return Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      buildInfoRow('Creation Date',
-                          RequestModel.instance.createdAt.toLocal().toString()),
-                      buildInfoRow(
-                          'Expiration Date',
-                          RequestModel.instance.createdAt
-                              .add(const Duration(hours: 12))
-                              .toLocal()
-                              .toString()),
-                      buildInfoRow('Amount', RequestModel.instance.amount),
-                      buildInfoRow('Request Type', RequestModel.instance.type),
-                      buildInfoRow('Location', location),
-                      buildInfoRow(
-                          'Views', RequestModel.instance.views.toString()),
-                      buildInfoRow('Accepted By', '--'),
-                      buildInfoRow('More Info', RequestModel.instance.info),
-                    ],
-                  ),
-                );
-              }
-            },
+        appBar: AppBar(
+          title: const Text('Request Details'),
+        ),
+        body: Builder(builder: (context) {
+          String location = "Current Location";
+          if (UserModel.instance.locationLat ==
+                  RequestModel.instance.locationLat.toString() &&
+              UserModel.instance.locationLon ==
+                  RequestModel.instance.locationLon.toString()) {
+            location = "Home Location";
+          }
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                buildInfoRow('Creation Date',
+                    request['createdAt'].toDate().toLocal().toString()),
+                buildInfoRow(
+                    'Expiration Date',
+                    request['createdAt']
+                        .toDate()
+                        .add(const Duration(hours: 12))
+                        .toLocal()
+                        .toString()),
+                buildInfoRow('Amount', request['amount']),
+                buildInfoRow('Request Type', request['type']),
+                buildInfoRow('Location', location),
+                buildInfoRow('Views', request['views'].toString()),
+                buildInfoRow('Accepted By', '--'),
+                buildInfoRow('More Info', request['info']),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    SizedBox(
+                      width: 120,
+                      height: 50,
+                      child: CustomButton(
+                        onPressed: () async {
+                          await Provider.of<RequestProvider>(context,
+                                  listen: false)
+                              .deleteRequestById(reqId: request['reqId'])
+                              .then((value) {
+                            Navigator.of(context).pop();
+                            Navigator.of(context).pop();
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const RequestStatusScreen(),
+                              ),
+                            );
+                          });
+                        },
+                        text: "",
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("Delete"),
+                            Icon(Icons.delete),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 40,
+                    ),
+                    SizedBox(
+                      width: 120,
+                      height: 50,
+                      child: CustomButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => EditRequest(
+                                request: request,
+                              ),
+                            ),
+                          );
+                        },
+                        text: "",
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("Edit"),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Icon(Icons.edit),
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                )
+              ],
+            ),
           );
-        },
-      ),
-    );
+        }));
   }
 
   Widget buildInfoRow(String label, String value) {

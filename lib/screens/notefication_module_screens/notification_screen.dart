@@ -1,7 +1,7 @@
 import 'package:cashxchange/constants/color_constants.dart';
 import 'package:flutter/material.dart';
 
-class NofificationScreen extends StatelessWidget {
+class NotificationScreen extends StatelessWidget {
   final List<NotificationTile> notifications = [
     const NotificationTile(
       title: 'New Message',
@@ -26,12 +26,20 @@ class NofificationScreen extends StatelessWidget {
     // Add more notification tiles here
   ];
 
-  NofificationScreen({super.key});
+  NotificationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            icon: const Icon(
+              Icons.arrow_back_ios,
+              color: Colors.white,
+            )),
         title:
             const Text("Notifications", style: TextStyle(color: Colors.white)),
         backgroundColor: AppColors.deepGreen,

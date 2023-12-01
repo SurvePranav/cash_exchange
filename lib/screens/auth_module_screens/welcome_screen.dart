@@ -1,5 +1,5 @@
 import 'package:cashxchange/constants/color_constants.dart';
-import 'package:cashxchange/screens/register_screen.dart';
+import 'package:cashxchange/screens/auth_module_screens/register_screen.dart';
 import 'package:cashxchange/widgets/custom_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

@@ -10,7 +10,7 @@ class ImageSingleton {
 
   // Getter for the local image path
   static String? get localImagePath => _localImagePath;
-  static int _i = 2;
+  static int _i = 1;
 
   // Function to set image from a given URL
   static Future<void> setImageFromUrl(String imageUrl) async {

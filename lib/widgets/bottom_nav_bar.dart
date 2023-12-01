@@ -2,60 +2,44 @@ import 'package:cashxchange/constants/color_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 
-class CustomBottomNavbar extends StatefulWidget {
-  final PageController pageController;
+class CustomBottomNavbar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTabChange;
+  final bool isHomeScreen;
   const CustomBottomNavbar({
     super.key,
-    required this.pageController,
     required this.currentIndex,
     required this.onTabChange,
+    this.isHomeScreen = false,
   });
 
   @override
-  State<CustomBottomNavbar> createState() => _CustomBottomNavbarState();
-}
-
-class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
-  @override
   Widget build(BuildContext context) {
     return Container(
-      height: 50,
+      height: 52,
       color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 17.0, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 2),
       child: GNav(
         backgroundColor: Colors.white,
         color: AppColors.deepGreen,
         activeColor: Colors.white,
         tabBackgroundColor: AppColors.deepGreen,
-        padding: const EdgeInsets.all(7),
-        gap: 6,
-        onTabChange: widget.onTabChange,
-        selectedIndex: widget.currentIndex,
-        tabs: [
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+        gap: 7,
+        onTabChange: onTabChange,
+        selectedIndex: currentIndex,
+        tabs: const [
           GButton(
             icon: Icons.home_outlined,
-            // text: "Home",
-            onPressed: () {},
+            iconSize: 28,
           ),
           GButton(
-            icon: Icons.chat,
-            // text: 'Chat',
-            onPressed: () {},
+            icon: Icons.add_circle_outline,
+            iconSize: 28,
           ),
           GButton(
-            icon: Icons.add,
-            onPressed: () {},
-          ),
-          GButton(
-            icon: Icons.notification_add,
-            onPressed: () {},
-          ),
-          GButton(
-            icon: Icons.person_outlined,
-            // text: 'Profile',
-            onPressed: () {},
+            icon: Icons.chat_outlined,
+            iconSize: 28,
           ),
         ],
       ),

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class PanelWidget extends StatelessWidget {
@@ -11,18 +10,18 @@ class PanelWidget extends StatelessWidget {
       controller: controller,
       padding: EdgeInsets.zero,
       children: [
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
-        BuildInfoCard(),
+        buildInfoCard(),
       ],
     );
   }
 
-  Widget BuildInfoCard() {
+  Widget buildInfoCard() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 23),
-      child: Column(children: [
+      padding: const EdgeInsets.symmetric(horizontal: 23),
+      child: const Column(children: [
         Text(
           "About",
           style: TextStyle(fontWeight: FontWeight.w600, color: Colors.black),
@@ -31,7 +30,7 @@ class PanelWidget extends StatelessWidget {
           height: 23,
         ),
         Text(
-            '''PS P:\Final_Year_Project\cashxchange> flutter pub add sliding_up_panel
+            '''PS P:Final_Year_Projectcashxchange> flutter pub add sliding_up_panel
 Resolving dependencies...
   _flutterfire_internals 1.3.4 (1.3.13 available)
   cloud_firestore 4.8.4 (4.13.2 available)
@@ -106,7 +105,7 @@ The plugin `flutter_geocoder` uses a deprecated version of the Android embild fa
 Otherwise, consider removing it since a future release of Flutter will remove these deprecated APIs.
 If you are plugin author, take a look at the docs for migrating the plugin to the V2 embedding:
 https://flutter.dev/go/android-plugin-migration.
-PS P:\Final_Year_Project\cashxchange>'''),
+PS P:Final_Year_Projectcashxchange>'''),
       ]),
     );
   }

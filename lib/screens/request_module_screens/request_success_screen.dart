@@ -1,7 +1,5 @@
 import 'package:cashxchange/constants/color_constants.dart';
 import 'package:cashxchange/model/request_model.dart';
-import 'package:cashxchange/screens/main_body.dart';
-import 'package:cashxchange/screens/to_implement/home_screen.dart';
 import 'package:flutter/material.dart';
 
 class RequestSuccessScreen extends StatefulWidget {
@@ -52,12 +50,6 @@ class _RequestSuccessScreenState extends State<RequestSuccessScreen> {
             child: GestureDetector(
               onTap: () {
                 Navigator.pop(context);
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (context) => const MainBody(
-                            currentIndex: 0,
-                          )),
-                );
               },
               child: Container(
                 color: Colors.white,

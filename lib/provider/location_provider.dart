@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -51,7 +50,6 @@ class LocationProvider extends ChangeNotifier {
         return [];
       }
     } catch (e) {
-      print("Error Getting Coordinates: $e");
       return [];
     }
   }
@@ -75,47 +73,13 @@ class LocationProvider extends ChangeNotifier {
     return [pos.latitude, pos.longitude];
   }
 
-  // filter markers within the 5km radius
-  List<Map<String, dynamic>> requestsWithinGivenRadious({
-    required double radious,
-    required List<Map<String, dynamic>> locations,
-    required currentLat,
-    required currentLon,
-  }) {
-    List<Map<String, dynamic>> filtered = [];
-    locations.map((e) {
-      if (calculateDistance(
-            currentLat,
-            currentLon,
-            double.parse(e['locationLat']),
-            double.parse(e['locationLon']),
-          ) <=
-          radious) {
-        filtered.add(e);
-      }
-    });
-    return filtered;
-  }
-
-  double calculateDistance(
-      double currentLat, double currentLon, double lat2, double lon2) {
-    const R = 6371.0; // Earth radius in kilometers
-
-    final double dLat = _toRadians(lat2 - currentLat);
-    final double dLon = _toRadians(lon2 - currentLon);
-
-    final double a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(_toRadians(currentLat)) *
-            cos(_toRadians(currentLon)) *
-            sin(dLon / 2) *
-            sin(dLon / 2);
-
-    final double c = 2 * atan2(sqrt(a), sqrt(1 - a));
-
-    return R * c; // Distance in kilometers
-  }
-
-  double _toRadians(double degrees) {
-    return degrees * (pi / 180);
+  // find distance between 2 coordinates
+  double findDistanceBetweenCoordinates(
+    double lat1,
+    double lon1,
+    double lat2,
+    double lon2,
+  ) {
+    return Geolocator.distanceBetween(lat1, lon1, lat2, lon2);
   }
 }

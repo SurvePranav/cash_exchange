@@ -5,8 +5,8 @@ class RequestModel {
   late String amount;
   late String type;
   late String info;
-  late String locationLat;
-  late String locationLon;
+  late double locationLat;
+  late double locationLon;
   late int views;
   late bool isAccepted;
   // late String
@@ -19,8 +19,8 @@ class RequestModel {
     amount = "";
     type = "";
     info = "";
-    locationLat = "";
-    locationLon = "";
+    locationLat = 0.0;
+    locationLon = 0.0;
     views = 0;
     isAccepted = false;
   }
@@ -39,8 +39,8 @@ class RequestModel {
     required String amount,
     required String type,
     required String info,
-    required String locationLat,
-    required String locationLon,
+    required double locationLat,
+    required double locationLon,
     required int views,
     required bool isAccepted,
   }) {

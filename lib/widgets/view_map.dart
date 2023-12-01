@@ -1,6 +1,6 @@
 import 'package:cashxchange/constants/color_constants.dart';
 import 'package:cashxchange/provider/location_provider.dart';
-import 'package:cashxchange/screens/to_implement/full_map.dart';
+import 'package:cashxchange/screens/request_module_screens/full_map.dart';
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -11,41 +11,48 @@ class ViewMapWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: Colors.white,
+      ),
       child: Column(
         children: [
           Container(
             // color: Colors.red,
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(15),
             height: 200,
             child: FutureBuilder(
               future: Provider.of<LocationProvider>(context, listen: false)
                   .getCurrentLocation(),
-              builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.deepGreen,
-                    ),
-                  );
-                } else {
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
                   return GoogleMap(
                     zoomControlsEnabled: false,
                     mapToolbarEnabled: false,
                     markers: {
                       Marker(
                         markerId: const MarkerId("1"),
-                        position: LatLng(snapshot.data[0], snapshot.data[1]),
+                        position: LatLng(
+                          snapshot.data![0],
+                          snapshot.data![1],
+                        ),
                         infoWindow: const InfoWindow(
-                          title: 'Your location',
+                          title: 'Current location',
                         ),
                       ),
                     },
                     initialCameraPosition: CameraPosition(
-                      target: LatLng(snapshot.data[0], snapshot.data[1]),
+                      target: LatLng(
+                        snapshot.data![0],
+                        snapshot.data![1],
+                      ),
                       zoom: 14,
                     ),
                   );
+                } else {
+                  return Image.asset("assets/images/google-maps.png");
                 }
               },
             ),
@@ -57,11 +64,12 @@ class ViewMapWidget extends StatelessWidget {
               ));
             },
             style: ElevatedButton.styleFrom(
+              elevation: 0,
               backgroundColor: Colors.white, // Change the text color
               padding: const EdgeInsets.all(16.0), // Change padding
               shape: RoundedRectangleBorder(
                 borderRadius:
-                    BorderRadius.circular(10.0), // Change button shape
+                    BorderRadius.circular(20.0), // Change button shape
               ),
             ),
             child: Row(

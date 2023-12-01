@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 
 typedef MyCallBack = Function(Map<String, dynamic> request);
 
-class ActiveRequestsList extends StatelessWidget {
+class TransactionsList extends StatelessWidget {
   final List<Map<String, dynamic>> requests;
   final MyCallBack onTap;
-  const ActiveRequestsList(
+  const TransactionsList(
       {super.key, required this.requests, required this.onTap});
 
   @override
@@ -31,7 +31,7 @@ class ActiveRequestsList extends StatelessWidget {
                       shape: const CircleBorder(),
                       backgroundColor: AppColors.deepGreen),
                   onPressed: () {
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(
+                    Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => const MainBody(
                         currentIndex: 2,
                       ),

@@ -3,19 +3,24 @@ import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/provider/location_provider.dart';
 import 'package:cashxchange/provider/request_provider.dart';
 import 'package:cashxchange/screens/main_body.dart';
-import 'package:cashxchange/screens/request_module_screens/active_requests_screen.dart';
+import 'package:cashxchange/screens/notefication_module_screens/notification_screen.dart';
+import 'package:cashxchange/screens/profile_module_screens/profile_screen.dart';
 import 'package:cashxchange/screens/splash_screen.dart';
-import 'package:cashxchange/screens/to_implement/full_map.dart';
-import 'package:cashxchange/screens/user_info_fill.dart';
-import 'package:cashxchange/utils/local_images.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // await Firebase.initializeApp();
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      systemNavigationBarColor: Colors.white,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
   await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
   runApp(const MyApp());
 }
@@ -55,8 +60,8 @@ class _MyAppState extends State<MyApp> {
           'home_screen': (context) => const MainBody(currentIndex: 0),
           'chats_screen': (context) => const MainBody(currentIndex: 1),
           'new_request_screen': (context) => const MainBody(currentIndex: 2),
-          'notification_screen': (context) => const MainBody(currentIndex: 3),
-          'profile_screen': (context) => const MainBody(currentIndex: 4),
+          'notification_screen': (context) => NotificationScreen(),
+          'profile_screen': (context) => const ProfileScreen(),
         },
         home: const SplashScreen(),
         // home: const WelcomeScreen(),

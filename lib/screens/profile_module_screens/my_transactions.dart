@@ -1,25 +1,24 @@
 import 'package:cashxchange/constants/color_constants.dart';
 import 'package:cashxchange/provider/request_provider.dart';
+import 'package:cashxchange/screens/profile_module_screens/transactions_list.dart';
 import 'package:cashxchange/screens/request_module_screens/request_fullscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'active_requests_list.dart';
-
-class RequestStatusScreen extends StatefulWidget {
-  const RequestStatusScreen({super.key});
+class MyTransactionsScreen extends StatefulWidget {
+  const MyTransactionsScreen({super.key});
 
   @override
-  State<RequestStatusScreen> createState() => _RequestStatusScreenState();
+  State<MyTransactionsScreen> createState() => _MyTransactionsScreenState();
 }
 
-class _RequestStatusScreenState extends State<RequestStatusScreen> {
+class _MyTransactionsScreenState extends State<MyTransactionsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "Your Active Requests",
+          "My Transactions",
           style: TextStyle(color: Colors.white),
         ),
         leading: IconButton(
@@ -34,13 +33,13 @@ class _RequestStatusScreenState extends State<RequestStatusScreen> {
       body: Consumer<RequestProvider>(
         builder: (context, value, child) {
           return FutureBuilder<List<Map<String, dynamic>>>(
-            future: value.getActiveRequests(context, onlyMyRequests: true),
+            future: value.getAllRequests(context),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasData) {
                 List<Map<String, dynamic>> documents = snapshot.data ?? [];
-                return ActiveRequestsList(
+                return TransactionsList(
                   requests: documents,
                   onTap: (Map<String, dynamic> request) {
                     Navigator.of(context).push(

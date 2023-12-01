@@ -70,7 +70,6 @@ class _FullMapScreenState extends State<FullMapScreen> {
                     GoogleMap(
                       initialCameraPosition: snapshot.data,
                       mapType: MapType.normal,
-                      zoomControlsEnabled: false,
                       onMapCreated: (controller) {
                         // _mapController = controller;
                       },
@@ -204,17 +203,6 @@ class _FullMapScreenState extends State<FullMapScreen> {
           ),
         ),
       ),
-      // floatingActionButton: Container(
-      //   height: 60,
-      //   child: ElevatedButton(
-      //     onPressed: () async {},
-      //     child: Icon(
-      //       Icons.location_searching,
-      //       color: AppColors.deepGreen,
-      //       size: 30,
-      //     ),
-      //   ),
-      // ),
     );
   }
 

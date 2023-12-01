@@ -58,11 +58,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
     return Scaffold(
       appBar: widget.editProfile
           ? AppBar(
-              title: Container(
-                  color: Colors.red,
-                  width: MediaQuery.of(context).size.width,
-                  alignment: Alignment.center,
-                  child: Text("Edit Profile")),
+              title: const Text("Edit Profile"),
             )
           : null,
       body: isLoading
@@ -323,7 +319,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
           hintText: hintText,
           alignLabelWithHint: true,
           border: InputBorder.none,
-          fillColor: AppColors.blue_2,
+          fillColor: Colors.white,
           filled: true,
         ),
       ),

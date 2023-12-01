@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cashxchange/model/user_model.dart';
-import 'package:cashxchange/screens/otp_screen.dart';
+import 'package:cashxchange/screens/auth_module_screens/otp_screen.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -201,6 +201,21 @@ class AuthProvider extends ChangeNotifier {
     });
   }
 
+  Future<Map<String, String>> getUserDataById({required String uid}) async {
+    Map<String, String> userData = {};
+    await _firebaseFirestore
+        .collection("users")
+        .doc(uid)
+        .get()
+        .then((DocumentSnapshot snapshot) {
+      userData['name'] = snapshot['name'];
+      userData['profilePic'] = snapshot['profilePic'];
+      userData['bio'] = snapshot['bio'];
+      return userData;
+    });
+    return userData;
+  }
+
   // upload image file fuc
   Future<String> storeFileToStroage(String ref, File file) async {
     UploadTask uploadTask = _firebaseStorage.ref().child(ref).putFile(file);
@@ -208,16 +223,6 @@ class AuthProvider extends ChangeNotifier {
     String downloadUrl = await snapshot.ref.getDownloadURL();
     return downloadUrl;
   }
-
-  // replace/update image file func
-  // Future<String> replaceFileFromStorage(
-  //     String ref, File file, String url) async {
-  //   UploadTask uploadTask =
-  //       _firebaseStorage.ref().child(ref).putFile(file);
-  //   TaskSnapshot snapshot = await uploadTask;
-  //   String downloadUrl = await snapshot.ref.getDownloadURL();
-  //   return downloadUrl;
-  // }
 
   // Storing Data locally(shared preference)
 

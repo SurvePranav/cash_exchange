@@ -1,72 +1,71 @@
 import 'package:cashxchange/constants/color_constants.dart';
-import 'package:cashxchange/provider/auth_provider.dart';
-import 'package:cashxchange/screens/profile_screen.dart';
+import 'package:cashxchange/screens/chat_module_screens/chat_screen.dart';
+import 'package:cashxchange/screens/home_screen.dart';
 import 'package:cashxchange/screens/request_module_screens/request_screen.dart';
-import 'package:cashxchange/screens/to_implement/chat_screen.dart';
-import 'package:cashxchange/screens/to_implement/home_screen.dart';
-import 'package:cashxchange/screens/to_implement/notification_screen.dart';
-import 'package:cashxchange/screens/user_info_fill.dart';
-import 'package:cashxchange/widgets/bottom_nav_bar.dart';
+import 'package:cashxchange/widgets/custom_bottom_navigation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class MainBody extends StatefulWidget {
   final int currentIndex;
-  const MainBody({super.key, required this.currentIndex});
+  const MainBody({super.key, this.currentIndex = 0});
   @override
   State<MainBody> createState() => _MainBodyState();
 }
 
 class _MainBodyState extends State<MainBody> {
-  late final PageController _pageController;
-  late int currentIndex;
+  int _currentPage = 0;
+
   @override
   void initState() {
-    _pageController = PageController(initialPage: widget.currentIndex);
-    currentIndex = widget.currentIndex;
     super.initState();
+    _currentPage = widget.currentIndex;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: PageView(
-        physics: const NeverScrollableScrollPhysics(),
-        controller: _pageController,
-        onPageChanged: (value) {
-          setState(() {
-            currentIndex = value;
-          });
-        },
-        children: [
-          const HomeScreen(),
-          const ChatScreen(),
-          const RaiseRequestScreen(),
-          NofificationScreen(),
-          const ProfileScreen(),
-          // const UserInfoScreen(),
-        ],
-      ),
-      bottomNavigationBar: CustomBottomNavbar(
-        currentIndex: currentIndex,
-        pageController: _pageController,
-        onTabChange: (index) {
-          setState(
-            () {
-              currentIndex = index;
-              _pageController.jumpToPage(
-                index,
-              );
-            },
-          );
-        },
+    return PopScope(
+      canPop: _currentPage == 0 ? true : false,
+      onPopInvoked: (myval) async {
+        _currentPage = 0;
+        setState(() {});
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.blue_4,
+        body: SafeArea(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                stops: const [
+                  0.5,
+                  1.0,
+                ],
+                colors: [
+                  AppColors.mintGreen,
+                  AppColors.blue_4,
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: IndexedStack(
+              index: _currentPage,
+              children: const [
+                HomeScreen(),
+                // SafeArea(child: Container()),
+                RaiseRequestScreen(),
+                ChatScreen(),
+              ],
+            ),
+          ),
+        ),
+        bottomNavigationBar: MyCustomBottomNaviationBar(
+          selectedIndex: _currentPage,
+          onTabChange: (int index) {
+            _currentPage = index;
+            setState(() {});
+          },
+        ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
   }
 }
