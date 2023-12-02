@@ -1,8 +1,7 @@
-import 'package:cashxchange/constants/color_constants.dart';
+import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/screens/profile_module_screens/user_info_fill.dart';
-import 'package:cashxchange/utils/local_images.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:cashxchange/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
@@ -161,9 +160,7 @@ class _OTPScreenState extends State<OTPScreen> {
             ap
                 .getDataFromFireStroe()
                 .then((value) async {
-                  ap.saveDataToSP();
-                  await ImageSingleton.setImageFromUrl(
-                      UserModel.instance.profilePic);
+                  await ap.saveDataToSP();
                 })
                 .then((value) => ap.setSignedIn())
                 .then((value) {

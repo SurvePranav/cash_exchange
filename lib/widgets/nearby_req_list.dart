@@ -1,4 +1,5 @@
-import 'package:cashxchange/constants/color_constants.dart';
+import 'package:cashxchange/constants/constant_values.dart';
+import 'package:cashxchange/widgets/constant_widget.dart';
 import 'package:flutter/material.dart';
 
 typedef MyCallBack = Function(Map<String, dynamic> request);
@@ -15,53 +16,43 @@ class NearbyRequestList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (requests.isEmpty) {
-      return SliverList(
-        delegate: SliverChildListDelegate.fixed(
-          [
-            Container(
-              height: MediaQuery.of(context).size.height * 0.35,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20), color: Colors.white),
-              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("No nearby requests"),
-                  const SizedBox(
-                    height: 100,
+      return MyConstantWidget(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text("No nearby requests"),
+            const SizedBox(
+              height: 100,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      shape: const CircleBorder(),
+                      backgroundColor: AppColors.deepGreen),
+                  onPressed: () {
+                    // Navigator.of(context).push(MaterialPageRoute(
+                    //   builder: (context) => const MainBody(
+                    //     currentIndex: 2,
+                    //   ),
+                    // ));
+                  },
+                  child: const Icon(
+                    Icons.atm,
+                    size: 40,
+                    color: Colors.white,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SizedBox(
-                      width: 100,
-                      height: 100,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            shape: const CircleBorder(),
-                            backgroundColor: AppColors.deepGreen),
-                        onPressed: () {
-                          // Navigator.of(context).push(MaterialPageRoute(
-                          //   builder: (context) => const MainBody(
-                          //     currentIndex: 2,
-                          //   ),
-                          // ));
-                        },
-                        child: const Icon(
-                          Icons.atm,
-                          size: 40,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Text(
-                    "See Nearby ATM's",
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 20.0,
-                    ),
-                  ),
-                ],
+                ),
+              ),
+            ),
+            const Text(
+              "See Nearby ATM's",
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 20.0,
               ),
             ),
           ],

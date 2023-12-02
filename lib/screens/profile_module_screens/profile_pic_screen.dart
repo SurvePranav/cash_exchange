@@ -1,4 +1,4 @@
-import 'package:cashxchange/utils/local_images.dart';
+import 'package:cashxchange/model/user_model.dart';
 import 'package:flutter/material.dart';
 
 class ProfilePicScreen extends StatelessWidget {
@@ -30,7 +30,7 @@ class ProfilePicScreen extends StatelessWidget {
           child: isLocalImage
               ? Hero(
                   tag: "profile_pic",
-                  child: Image.file(ImageSingleton.getLocalImage()!),
+                  child: Image.network(UserModel.instance.profilePic),
                 )
               : Hero(
                   tag: "others_profile",

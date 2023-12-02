@@ -1,9 +1,6 @@
 import 'dart:io';
-import 'dart:typed_data';
-
-import 'package:cashxchange/constants/color_constants.dart';
+import 'package:cashxchange/constants/constant_values.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -31,30 +28,6 @@ Future<File?> pickImage(BuildContext context) async {
   }
 
   return image;
-}
-
-// compress image size
-Future<File?> compressImage(File originalImage, String path) async {
-  try {
-    Uint8List? imageBytes = await FlutterImageCompress.compressWithFile(
-      path,
-      // minWidth: 1024, // Set the minimum width (optional)
-      // minHeight: 1024, // Set the minimum height (optional)
-      quality: 60, // Set the quality (0 - 100)
-    );
-
-    // Create a new File from the compressed bytes
-    if (imageBytes != null) {
-      File compressedImage = File.fromRawPath(imageBytes);
-      return compressedImage;
-    } else {
-      // print("got null image");
-      return null;
-    }
-  } catch (e) {
-    // print("Error compressing image: $e");
-    return null;
-  }
 }
 
 // Check Permission

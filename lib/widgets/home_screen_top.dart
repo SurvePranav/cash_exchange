@@ -1,6 +1,6 @@
-import 'package:cashxchange/constants/color_constants.dart';
+import 'package:cashxchange/constants/constant_values.dart';
+import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/screens/request_module_screens/active_requests_screen.dart';
-import 'package:cashxchange/utils/local_images.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -43,7 +43,8 @@ class HomeScreenTopSection extends StatelessWidget {
                           child: Center(
                             child: CircleAvatar(
                               backgroundImage:
-                                  FileImage(ImageSingleton.getLocalImage()!),
+                                  NetworkImage(UserModel.instance.profilePic),
+                              // FileImage(ImageSingleton.getLocalImage()!),
                               radius: 23,
                             ),
                           ),

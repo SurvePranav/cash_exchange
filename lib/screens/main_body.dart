@@ -1,4 +1,4 @@
-import 'package:cashxchange/constants/color_constants.dart';
+import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/screens/chat_module_screens/chat_screen.dart';
 import 'package:cashxchange/screens/home_screen.dart';
 import 'package:cashxchange/screens/request_module_screens/request_screen.dart';

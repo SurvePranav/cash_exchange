@@ -1,14 +1,12 @@
 import 'dart:io';
-import 'package:cashxchange/constants/color_constants.dart';
+import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/provider/location_provider.dart';
 import 'package:cashxchange/screens/main_body.dart';
-import 'package:cashxchange/utils/local_images.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:cashxchange/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
-// import 'package:flutter_geocoder/geocoder.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
@@ -21,7 +19,7 @@ class UserInfoScreen extends StatefulWidget {
 }
 
 class _UserInfoScreenState extends State<UserInfoScreen> {
-  File? image = ImageSingleton.getLocalImage();
+  File? image;
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final bioController = TextEditingController();
@@ -77,20 +75,24 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                           onTap: () async {
                             selectImage();
                           },
-                          child: image == null
+                          child: !widget.editProfile
                               ? CircleAvatar(
                                   backgroundColor: AppColors.deepGreen,
+                                  backgroundImage:
+                                      image != null ? FileImage(image!) : null,
                                   radius: 70,
                                   child: Stack(
                                     children: [
-                                      const Align(
-                                        alignment: Alignment.center,
-                                        child: Icon(
-                                          Icons.account_circle,
-                                          color: Colors.white,
-                                          size: 90,
-                                        ),
-                                      ),
+                                      image != null
+                                          ? const SizedBox()
+                                          : const Align(
+                                              alignment: Alignment.center,
+                                              child: Icon(
+                                                Icons.account_circle,
+                                                color: Colors.white,
+                                                size: 90,
+                                              ),
+                                            ),
                                       Align(
                                         alignment: Alignment.bottomRight,
                                         child: ClipRRect(
@@ -115,7 +117,11 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                                   tag: "profile_pic",
                                   child: CircleAvatar(
                                     backgroundColor: Colors.black,
-                                    backgroundImage: FileImage(image!),
+                                    backgroundImage: image != null
+                                        ? FileImage(image!)
+                                        : NetworkImage(
+                                                UserModel.instance.profilePic)
+                                            as ImageProvider<Object>?,
                                     radius: 70,
                                     child: Align(
                                       alignment: Alignment.bottomRight,
@@ -332,14 +338,9 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
     await checkPermission(Permission.photos, context).then((value) async {
       await pickImage(context).then((pickedImage) async {
         if (pickedImage != null) {
-          if (ImageSingleton.localImagePath != null) {
-            await ImageSingleton.deleteLocalImage();
-          }
-          await ImageSingleton.setLocalImagePath(imagePath: pickedImage.path)
-              .then((value) {
-            image = ImageSingleton.getLocalImage();
-            setState(() {});
-          });
+          print("I was called");
+          image = pickedImage;
+          setState(() {});
         }
       });
     });

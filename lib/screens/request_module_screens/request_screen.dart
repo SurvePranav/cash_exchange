@@ -1,16 +1,15 @@
-import 'package:cashxchange/constants/color_constants.dart';
+import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/request_model.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/provider/location_provider.dart';
 import 'package:cashxchange/provider/request_provider.dart';
 import 'package:cashxchange/screens/request_module_screens/active_requests_screen.dart';
+import 'package:cashxchange/screens/request_module_screens/pick_location.dart';
 import 'package:cashxchange/screens/request_module_screens/request_success_screen.dart';
 import 'package:cashxchange/widgets/custom_button.dart';
-import 'package:flutter/cupertino.dart' show CupertinoActivityIndicator;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-// import 'package:flutter_geocoder/geocoder.dart';
 
 class RaiseRequestScreen extends StatefulWidget {
   final Map<String, dynamic>? request;
@@ -27,7 +26,7 @@ class RaiseRequestScreen extends StatefulWidget {
 
 class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
   String _requestType = 'Cash';
-  bool isFirst = true;
+  int activeButton = 0;
   String warningText = '';
 
   final amountController = TextEditingController();
@@ -91,7 +90,6 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                     });
                   },
                   decoration: InputDecoration(
-                    // Customize the container surrounding the dropdown
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -144,125 +142,150 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                       const SizedBox(
                         height: 20,
                       ),
-                      Visibility(
-                          visible: !widget.editRequest,
-                          child: Column(
-                            children: [
-                              const Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  'Location',
-                                  style: TextStyle(fontSize: 20.0),
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    flex: 4,
-                                    child: Column(
-                                      children: [
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: isFirst
-                                                ? AppColors.blue_6
-                                                : Colors.white,
-                                          ),
-                                          onPressed: () {
-                                            lat = double.parse(
-                                                UserModel.instance.locationLat);
-                                            lon = double.parse(
-                                                UserModel.instance.locationLon);
-                                            print(
-                                                "my pos: lat: $lat, lon:$lon");
-                                            setState(() {
-                                              isFirst = true;
-                                            });
-                                          },
-                                          child: Icon(
-                                            Icons.location_pin,
-                                            color: isFirst
-                                                ? Colors.white
-                                                : AppColors.deepGreen,
-                                          ),
-                                        ),
-                                        const Text("My Location"),
-                                      ],
-                                    ),
+                      widget.editRequest
+                          ? const SizedBox()
+                          : Column(
+                              children: [
+                                const Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    'Location',
+                                    style: TextStyle(fontSize: 20.0),
                                   ),
-                                  Expanded(
-                                    flex: 1,
-                                    child: Consumer<RequestProvider>(
-                                      builder: (context, value, child) {
-                                        return value.isLoading
-                                            ? SizedBox(
-                                                height: 30,
-                                                width: 30,
-                                                child:
-                                                    CupertinoActivityIndicator(
-                                                  color: AppColors.deepGreen,
+                                ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        children: [
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: activeButton == 0
+                                                  ? AppColors.blue_6
+                                                  : Colors.white,
+                                            ),
+                                            onPressed: () {
+                                              lat = double.parse(UserModel
+                                                  .instance.locationLat);
+                                              lon = double.parse(UserModel
+                                                  .instance.locationLon);
+                                              print(
+                                                  "my pos: lat: $lat, lon:$lon");
+                                              setState(() {
+                                                activeButton = 0;
+                                              });
+                                            },
+                                            child: Icon(
+                                              Icons.location_pin,
+                                              color: activeButton == 0
+                                                  ? Colors.white
+                                                  : AppColors.deepGreen,
+                                            ),
+                                          ),
+                                          const Text("My Location"),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        children: [
+                                          Consumer<LocationProvider>(
+                                            builder: (context, value, child) {
+                                              return ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        activeButton == 1
+                                                            ? AppColors.blue_6
+                                                            : Colors.white),
+                                                onPressed: () async {
+                                                  setState(() {
+                                                    activeButton = 1;
+                                                  });
+                                                  value.setLoading(true);
+                                                  await value
+                                                      .getCurrentLocation()
+                                                      .then((pos) {
+                                                    lat = pos[0];
+                                                    lon = pos[1];
+                                                    print(
+                                                      "current pos: lat: $lat, lon:$lon",
+                                                    );
+                                                  });
+                                                  value.setLoading(false);
+                                                },
+                                                child: value.isLoading
+                                                    ? const SizedBox(
+                                                        height: 20,
+                                                        width: 20,
+                                                        child:
+                                                            CircularProgressIndicator(
+                                                          color: Colors.white,
+                                                        ),
+                                                      )
+                                                    : Icon(
+                                                        Icons
+                                                            .location_searching,
+                                                        color: activeButton == 1
+                                                            ? Colors.white
+                                                            : AppColors
+                                                                .deepGreen),
+                                              );
+                                            },
+                                          ),
+                                          const Text("Current Location"),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        children: [
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: activeButton == 2
+                                                  ? AppColors.blue_6
+                                                  : Colors.white,
+                                            ),
+                                            onPressed: () async {
+                                              await Navigator.of(context)
+                                                  .push(
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      PickLocationScreen(
+                                                    coordinates: [lat, lon],
+                                                  ),
                                                 ),
                                               )
-                                            : const SizedBox();
-                                      },
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 4,
-                                    child: Column(
-                                      children: [
-                                        Consumer<LocationProvider>(
-                                          builder: (context, value, child) {
-                                            return ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: isFirst
-                                                    ? Colors.white
-                                                    : AppColors.blue_6,
-                                              ),
-                                              onPressed: () async {
-                                                setState(() {
-                                                  isFirst = false;
-                                                });
-                                                value.setLoading(true);
-                                                await value
-                                                    .getCurrentLocation()
-                                                    .then((pos) {
-                                                  lat = pos[0];
-                                                  lon = pos[1];
+                                                  .then((results) {
+                                                if (results != null &&
+                                                    results.isNotEmpty) {
+                                                  lat = results[0];
+                                                  lon = results[1];
                                                   print(
-                                                    "current pos: lat: $lat, lon:$lon",
-                                                  );
-                                                });
-                                                value.setLoading(false);
-                                              },
-                                              child: value.isLoading
-                                                  ? const SizedBox(
-                                                      height: 20,
-                                                      width: 20,
-                                                      child:
-                                                          CircularProgressIndicator(
-                                                        color: Colors.white,
-                                                      ),
-                                                    )
-                                                  : Icon(
-                                                      Icons.location_searching,
-                                                      color: isFirst
-                                                          ? AppColors.deepGreen
-                                                          : Colors.white,
-                                                    ),
-                                            );
-                                          },
-                                        ),
-                                        const Text("Current Location"),
-                                      ],
+                                                      "lat: ${results[0]}, lon:${results[1]}");
+                                                  setState(() {
+                                                    activeButton = 2;
+                                                  });
+                                                }
+                                              });
+                                            },
+                                            child: Icon(
+                                              Icons.map,
+                                              color: activeButton == 2
+                                                  ? Colors.white
+                                                  : AppColors.deepGreen,
+                                            ),
+                                          ),
+                                          const Text("From Map"),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(
-                                height: 20,
-                              ),
-                            ],
-                          )),
+                                  ],
+                                ),
+                                const SizedBox(
+                                  height: 20,
+                                ),
+                              ],
+                            ),
                       const Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -281,7 +304,22 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 30),
+                SizedBox(
+                  height: 35,
+                  width: 35,
+                  child: Padding(
+                    padding: const EdgeInsets.all(7),
+                    child: Consumer<RequestProvider>(
+                      builder: (context, rp, widget) {
+                        if (rp.isLoading) {
+                          return const CircularProgressIndicator();
+                        } else {
+                          return const SizedBox();
+                        }
+                      },
+                    ),
+                  ),
+                ),
                 SizedBox(
                   height: 50,
                   width: MediaQuery.of(context).size.width * 0.85,
@@ -378,7 +416,6 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
           );
         });
       } else {
-        print('lat: $lat, lon: $lon');
         RequestModel.instance.initializeRequest(
           reqId: '',
           uid: Provider.of<AuthProvider>(context, listen: false).uid,
@@ -398,7 +435,7 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
             amountController.text = '';
             infoController.text = '';
             _requestType = 'Cash';
-            isFirst = true;
+            activeButton = 0;
             warningText = '';
             Navigator.of(context).push(
               MaterialPageRoute(

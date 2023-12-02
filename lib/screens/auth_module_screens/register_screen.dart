@@ -5,7 +5,7 @@ import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../constants/color_constants.dart';
+import '../../constants/constant_values.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});

@@ -1,13 +1,20 @@
-import 'package:cashxchange/constants/color_constants.dart';
+import 'package:cashxchange/constants/constant_values.dart';
+import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/location_provider.dart';
 import 'package:cashxchange/screens/request_module_screens/full_map.dart';
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
-class ViewMapWidget extends StatelessWidget {
+class ViewMapWidget extends StatefulWidget {
   const ViewMapWidget({super.key});
+
+  @override
+  State<ViewMapWidget> createState() => _ViewMapWidgetState();
+}
+
+class _ViewMapWidgetState extends State<ViewMapWidget> {
+  Widget? cachedImage;
 
   @override
   Widget build(BuildContext context) {
@@ -18,41 +25,67 @@ class ViewMapWidget extends StatelessWidget {
         color: Colors.white,
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            // color: Colors.red,
-            padding: const EdgeInsets.all(15),
-            height: 200,
+            padding: const EdgeInsets.all(9),
+            height: MediaQuery.of(context).size.height * 0.23,
             child: FutureBuilder(
               future: Provider.of<LocationProvider>(context, listen: false)
                   .getCurrentLocation(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
-                  return GoogleMap(
-                    zoomControlsEnabled: false,
-                    mapToolbarEnabled: false,
-                    markers: {
-                      Marker(
-                        markerId: const MarkerId("1"),
-                        position: LatLng(
-                          snapshot.data![0],
-                          snapshot.data![1],
-                        ),
-                        infoWindow: const InfoWindow(
-                          title: 'Current location',
-                        ),
+                  cachedImage = ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.network(
+                      getStaticMapUrl(
+                        apiKey: ApiKey.getMapsApiKey(),
+                        lat: snapshot.data![0],
+                        lon: snapshot.data![1],
+                        zoom: 17,
+                        width: 400,
+                        height:
+                            (MediaQuery.of(context).size.height * 0.26).toInt(),
                       ),
-                    },
-                    initialCameraPosition: CameraPosition(
-                      target: LatLng(
-                        snapshot.data![0],
-                        snapshot.data![1],
-                      ),
-                      zoom: 14,
+                      fit: BoxFit.cover,
                     ),
                   );
+                  return Stack(
+                    children: [
+                      Align(alignment: Alignment.center, child: cachedImage!),
+                      Align(
+                        alignment: const Alignment(0, -0.40),
+                        child: Icon(
+                          Icons.location_pin,
+                          color: AppColors.blue_4,
+                          size: 64,
+                        ),
+                      ),
+                      const Align(
+                        alignment: Alignment.center,
+                        child: Text("."),
+                      ),
+                      Align(
+                        alignment: const Alignment(0, -0.42),
+                        child: CircleAvatar(
+                          radius: 16,
+                          backgroundColor: Colors.black,
+                          backgroundImage:
+                              NetworkImage(UserModel.instance.profilePic),
+                        ),
+                      ),
+                    ],
+                  );
                 } else {
-                  return Image.asset("assets/images/google-maps.png");
+                  if (cachedImage != null) {
+                    return cachedImage!;
+                  } else {
+                    return Center(
+                      child: LinearProgressIndicator(
+                        color: AppColors.deepGreen,
+                      ),
+                    );
+                  }
                 }
               },
             ),
@@ -96,5 +129,16 @@ class ViewMapWidget extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String getStaticMapUrl({
+    required String apiKey,
+    required double lat,
+    required double lon,
+    required int zoom,
+    required int width,
+    required int height,
+  }) {
+    return 'https://maps.googleapis.com/maps/api/staticmap?center=$lat,$lon&zoom=$zoom&size=${width}x$height&key=AIzaSyD1LUJFCbES2C3MRDvq4L0eXSf-hJGlY70';
   }
 }

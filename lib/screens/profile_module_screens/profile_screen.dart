@@ -1,11 +1,10 @@
-import 'package:cashxchange/constants/color_constants.dart';
+import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/screens/profile_module_screens/my_transactions.dart';
 import 'package:cashxchange/screens/profile_module_screens/profile_pic_screen.dart';
 import 'package:cashxchange/screens/profile_module_screens/user_info_fill.dart';
 import 'package:cashxchange/screens/auth_module_screens/welcome_screen.dart';
-import 'package:cashxchange/utils/local_images.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -62,14 +61,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       onPressed: () async {
                         await ap.userSignOut().then(
-                          (value) async {
-                            await ImageSingleton.deleteLocalImage().then(
-                              (value) => Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(
-                                  builder: (context) {
-                                    return const WelcomeScreen();
-                                  },
-                                ),
+                          (value) {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return const WelcomeScreen();
+                                },
                               ),
                             );
                           },
@@ -210,7 +207,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             color: Colors.black,
                             image: DecorationImage(
                               fit: BoxFit.contain,
-                              image: FileImage(ImageSingleton.getLocalImage()!),
+                              // image: FileImage(ImageSingleton.getLocalImage()!),
+                              image:
+                                  NetworkImage(UserModel.instance.profilePic),
                             ),
                           ),
                         )),

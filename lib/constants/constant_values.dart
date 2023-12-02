@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class AppColors {
@@ -15,4 +18,21 @@ class AppColors {
 
   static Color darkBlack = const Color.fromARGB(255, 0, 0, 0);
   static Color dimBlack = const Color.fromARGB(120, 0, 0, 0);
+}
+
+class ApiKey {
+  static String getMapsApiKey() {
+    const androidKey = "AIzaSyD1LUJFCbES2C3MRDvq4L0eXSf-hJGlY70";
+    const iosKey = "AIzaSyDS6-9MRY4QZ6AgLCdePhbOto7TaiBihAg";
+    const webKey = "AIzaSyBIWdl-yke7VXhe991b8DKeMQQBmexoYkA";
+    if (Platform.isAndroid) {
+      return androidKey;
+    } else if (Platform.isIOS) {
+      return iosKey;
+    } else if (kIsWeb) {
+      return webKey;
+    } else {
+      return androidKey;
+    }
+  }
 }

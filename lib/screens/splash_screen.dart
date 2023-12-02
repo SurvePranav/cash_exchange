@@ -1,6 +1,5 @@
 import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/screens/auth_module_screens/welcome_screen.dart';
-import 'package:cashxchange/utils/local_images.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -16,11 +15,9 @@ class _SplashScreenState extends State<SplashScreen> {
     final ap = Provider.of<AuthProvider>(context, listen: false);
     await ap.checkSignIn().then((value) async {
       if (ap.isSignedIn == true) {
-        await ap.getDataFromSP().then((value) async {
-          ImageSingleton.getDataFromSP().whenComplete(
-            () => Navigator.pushReplacementNamed(context, 'home_screen'),
-          );
-        });
+        await ap.getDataFromSP().whenComplete(
+              () => Navigator.pushReplacementNamed(context, 'home_screen'),
+            );
       } else {
         Navigator.push(
           context,

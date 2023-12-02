@@ -1,5 +1,4 @@
-import 'dart:async';
-import 'package:cashxchange/constants/color_constants.dart';
+import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/location_provider.dart';
 import 'package:cashxchange/provider/request_provider.dart';
@@ -78,8 +77,8 @@ class _FullMapScreenState extends State<FullMapScreen> {
                         return Marker(
                           markerId: MarkerId(location['reqId']),
                           position: LatLng(
-                            double.parse(location['locationLat']),
-                            double.parse(location['locationLon']),
+                            location['locationLat'],
+                            location['locationLon'],
                           ),
                           infoWindow: InfoWindow(
                             title: location['reqId'],
