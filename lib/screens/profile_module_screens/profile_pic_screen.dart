@@ -1,11 +1,13 @@
-import 'package:cashxchange/model/user_model.dart';
 import 'package:flutter/material.dart';
 
-class ProfilePicScreen extends StatelessWidget {
-  final bool isLocalImage;
+class ImageFullScreen extends StatelessWidget {
   final String url;
-  const ProfilePicScreen(
-      {super.key, required this.isLocalImage, this.url = ""});
+  final String heroTag;
+  const ImageFullScreen({
+    super.key,
+    required this.url,
+    this.heroTag = 'hero_image',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,20 +24,17 @@ class ProfilePicScreen extends StatelessWidget {
           },
         ),
       ),
-      body: Container(
-        color: Colors.black,
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        child: Center(
-          child: isLocalImage
-              ? Hero(
-                  tag: "profile_pic",
-                  child: Image.network(UserModel.instance.profilePic),
-                )
-              : Hero(
-                  tag: "others_profile",
-                  child: Image.network(url),
-                ),
+      body: InteractiveViewer(
+        child: Container(
+          color: Colors.black,
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: Center(
+            child: Hero(
+              tag: heroTag,
+              child: Image.network(url),
+            ),
+          ),
         ),
       ),
     );

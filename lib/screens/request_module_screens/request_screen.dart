@@ -169,8 +169,7 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                                                   .instance.locationLat);
                                               lon = double.parse(UserModel
                                                   .instance.locationLon);
-                                              print(
-                                                  "my pos: lat: $lat, lon:$lon");
+
                                               setState(() {
                                                 activeButton = 0;
                                               });
@@ -207,9 +206,6 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                                                       .then((pos) {
                                                     lat = pos[0];
                                                     lon = pos[1];
-                                                    print(
-                                                      "current pos: lat: $lat, lon:$lon",
-                                                    );
                                                   });
                                                   value.setLoading(false);
                                                 },
@@ -260,8 +256,7 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                                                     results.isNotEmpty) {
                                                   lat = results[0];
                                                   lon = results[1];
-                                                  print(
-                                                      "lat: ${results[0]}, lon:${results[1]}");
+
                                                   setState(() {
                                                     activeButton = 2;
                                                   });

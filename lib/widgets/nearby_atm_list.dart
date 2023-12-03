@@ -1,5 +1,6 @@
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/widgets/constant_widget.dart';
+import 'package:cashxchange/widgets/my_text_style.dart';
 import 'package:flutter/material.dart';
 
 typedef MyCallBack = Function(Map<String, dynamic> request);
@@ -62,7 +63,7 @@ class NearbyAtmsList extends StatelessWidget {
                         )
                       : const EdgeInsets.only(left: 20, right: 20, bottom: 1),
               decoration: BoxDecoration(
-                color: AppColors.deepGreen,
+                color: Colors.white,
                 borderRadius: index == 0 && index == nearbyAtms.length - 1
                     ? const BorderRadius.all(
                         Radius.circular(20),
@@ -81,28 +82,29 @@ class NearbyAtmsList extends StatelessWidget {
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                 leading: CircleAvatar(
                   backgroundColor: AppColors.mintGreen,
-                  radius: 20,
+                  radius: 22,
                   backgroundImage:
-                      const AssetImage('assets/images/profile_icon.png'),
+                      const AssetImage('assets/images/atm_icon.png'),
                 ),
                 title: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "${atm['name']}",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
+                    SizedBox(
+                      height: 20,
+                      child: Text(
+                        "${atm['name']}",
+                        style: TextStyle(
+                          color: AppColors.deepGreen,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
                       ),
                     ),
                     Text(
-                      atm['rating'] == null
-                          ? "Rating -- "
-                          : "Rating ${atm['rating']}",
+                      "Rating ${atm['rating']}",
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: Colors.black,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
@@ -111,19 +113,16 @@ class NearbyAtmsList extends StatelessWidget {
                 ),
                 subtitle: Row(
                   children: [
-                    Text(
-                      '${atm['lat']}',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 13,
-                      ),
+                    MyMediumText(
+                      text:
+                          'distance: ${(atm['distance'] / 1000).toStringAsFixed(2)} KM',
                     ),
                     const Expanded(child: SizedBox()),
                   ],
                 ),
-                trailing: const Icon(
+                trailing: Icon(
                   Icons.arrow_forward_ios,
-                  color: Colors.white,
+                  color: AppColors.deepGreen,
                   size: 25,
                 ),
                 onTap: () {

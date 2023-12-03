@@ -34,7 +34,7 @@ class HomeScreenTopSection extends StatelessWidget {
                       Navigator.of(context).pushNamed('profile_screen');
                     },
                     child: Hero(
-                      tag: 'profile_pic',
+                      tag: 'hero_image',
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 15.0),
                         child: CircleAvatar(

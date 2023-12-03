@@ -193,14 +193,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 GestureDetector(
                   onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const ProfilePicScreen(
-                              isLocalImage: true,
+                        builder: (context) => ImageFullScreen(
+                              url: UserModel.instance.profilePic,
                             )));
                   },
                   child: SizedBox(
                     height: 150,
                     child: Hero(
-                        tag: "profile_pic",
+                        tag: "hero_image",
                         child: Container(
                           decoration: ShapeDecoration(
                             shape: const CircleBorder(),

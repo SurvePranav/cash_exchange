@@ -32,15 +32,15 @@ class NearbyRequestInfo extends StatelessWidget {
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => ProfilePicScreen(
-                            isLocalImage: false,
+                          builder: (context) => ImageFullScreen(
                             url: userData['profilePic']!,
+                            heroTag: 'nearby_request',
                           ),
                         ),
                       );
                     },
                     child: Hero(
-                      tag: 'others_profile',
+                      tag: 'nearby_request',
                       child: CircleAvatar(
                         backgroundColor: AppColors.deepGreen,
                         backgroundImage:

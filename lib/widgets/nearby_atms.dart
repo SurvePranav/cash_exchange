@@ -1,11 +1,10 @@
-import 'dart:convert';
-import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/provider/location_provider.dart';
+import 'package:cashxchange/screens/request_module_screens/atm_info_screen.dart';
+import 'package:cashxchange/utils/util.dart';
 import 'package:cashxchange/widgets/constant_widget.dart';
 import 'package:cashxchange/widgets/nearby_atm_list.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 
 class NearbyAtmsWidget extends StatefulWidget {
   const NearbyAtmsWidget({super.key});
@@ -24,38 +23,48 @@ class _NearbyAtmsWidgetState extends State<NearbyAtmsWidget> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const MyConstantWidget();
           } else {
-            return NearbyAtmsList(nearbyAtms: _nearbyAtms, onTap: (request) {});
+            return NearbyAtmsList(
+                nearbyAtms: _nearbyAtms,
+                onTap: (atm) {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(
+                      builder: (context) => AtmInfoScreen(atm: atm),
+                    ),
+                  );
+                });
           }
         });
   }
 
   Future<void> _getNearbyAtms() async {
-    List<double> coodrinates =
-        await Provider.of<LocationProvider>(context, listen: false)
-            .getCurrentLocation();
-    String url =
-        'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${coodrinates[0]},${coodrinates[1]}&radius=1000&type=atm&key=${ApiKey.getMapsApiKey()}';
+    final LocationProvider lp =
+        Provider.of<LocationProvider>(context, listen: false);
+    final List<double> coordinates = await lp.getCurrentLocation();
 
-    final response = await http.get(Uri.parse(url));
-    Map<String, dynamic> data = jsonDecode(response.body.toString());
-    List results = data['results'];
+    final List results = await getNearbyPlaces(
+        lat: coordinates[0], lng: coordinates[1], place: "atm");
     _nearbyAtms.clear();
-    if (response.statusCode == 200) {
-      for (Map i in results) {
-        _nearbyAtms.add(
-          {
-            'lat': i['geometry']['location']['lat'],
-            'lng': i['geometry']['location']['lng'],
-            'name': i['name'],
-            'rating': i['rating'],
-            'address': i['vicinity'],
-            'isOpen': i['opening_hours']['open_now'],
-          },
-        );
-      }
-      print("successfully received data");
-    } else {
-      print("Something went wrong ");
+    for (Map i in results) {
+      _nearbyAtms.add(
+        {
+          'currentLat': coordinates[0],
+          'currentLng': coordinates[1],
+          'lat': i['geometry']['location']['lat'],
+          'lng': i['geometry']['location']['lng'],
+          'name': i['name'],
+          'rating': i.containsKey('rating') ? i['rating'] : '--',
+          'place_id': i['place_id'],
+          'photo_reference': i.containsKey('photos')
+              ? i['photos'][0]['photo_reference']
+              : null,
+          'distance': lp.findDistanceBetweenCoordinates(
+            coordinates[0],
+            coordinates[1],
+            i['geometry']['location']['lat'],
+            i['geometry']['location']['lng'],
+          ),
+        },
+      );
     }
   }
 }

@@ -51,7 +51,6 @@ class _RequestsWidgetState extends State<RequestsWidget> {
 
   Future<List<Map<String, dynamic>>> getNearbyRequests(
       {required BuildContext context}) async {
-    print("i was called : nearbyRequests");
     final LocationProvider lp =
         Provider.of<LocationProvider>(context, listen: false);
     await lp.getCurrentLocation().then(
@@ -61,9 +60,7 @@ class _RequestsWidgetState extends State<RequestsWidget> {
             .then(
           (requests) async {
             _outputData.clear();
-            print("total requests: ${requests.length}");
             for (int i = 0; i < requests.length; i++) {
-              print("request: ${requests[i]}");
               double distance = lp.findDistanceBetweenCoordinates(
                 currentLocation[0],
                 currentLocation[1],

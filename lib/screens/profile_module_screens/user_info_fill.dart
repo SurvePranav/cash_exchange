@@ -114,7 +114,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                                   ),
                                 )
                               : Hero(
-                                  tag: "profile_pic",
+                                  tag: "hero_image",
                                   child: CircleAvatar(
                                     backgroundColor: Colors.black,
                                     backgroundImage: image != null
@@ -338,7 +338,6 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
     await checkPermission(Permission.photos, context).then((value) async {
       await pickImage(context).then((pickedImage) async {
         if (pickedImage != null) {
-          print("I was called");
           image = pickedImage;
           setState(() {});
         }

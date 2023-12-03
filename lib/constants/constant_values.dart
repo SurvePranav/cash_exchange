@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-class AppColors {
-  // static Color blue_10 = const Color(0xff0E1963);
-  static Color blue_8 = const Color(0xff004581);
+final class AppColors {
+  static Color blue_10 = const Color(0xff0E1963);
+  static Color blue_8 = const Color.fromARGB(255, 11, 45, 166);
   static Color blue_6 = const Color(0xff018abd);
   static Color blue_4 = const Color(0xff97cbdc);
   static Color blue_2 = const Color(0xffdde8f0);

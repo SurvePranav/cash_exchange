@@ -2,6 +2,7 @@ import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/location_provider.dart';
 import 'package:cashxchange/screens/request_module_screens/full_map.dart';
+import 'package:cashxchange/utils/util.dart';
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -39,7 +40,6 @@ class _ViewMapWidgetState extends State<ViewMapWidget> {
                     borderRadius: BorderRadius.circular(20),
                     child: Image.network(
                       getStaticMapUrl(
-                        apiKey: ApiKey.getMapsApiKey(),
                         lat: snapshot.data![0],
                         lon: snapshot.data![1],
                         zoom: 17,
@@ -129,16 +129,5 @@ class _ViewMapWidgetState extends State<ViewMapWidget> {
         ],
       ),
     );
-  }
-
-  String getStaticMapUrl({
-    required String apiKey,
-    required double lat,
-    required double lon,
-    required int zoom,
-    required int width,
-    required int height,
-  }) {
-    return 'https://maps.googleapis.com/maps/api/staticmap?center=$lat,$lon&zoom=$zoom&size=${width}x$height&key=AIzaSyD1LUJFCbES2C3MRDvq4L0eXSf-hJGlY70';
   }
 }
