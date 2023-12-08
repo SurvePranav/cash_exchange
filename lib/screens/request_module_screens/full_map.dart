@@ -225,7 +225,7 @@ class _FullMapScreenState extends State<FullMapScreen> {
         // loading markers
         RequestProvider rp =
             Provider.of<RequestProvider>(context, listen: false);
-        await rp.getActiveRequests(context).then((locations) {
+        await rp.getActiveRequests().then((locations) {
           for (int i = 0; i < locations.length; i++) {
             if (UserModel.instance.uid != locations[i]['uid']) {
               _locations.add(locations[i]);

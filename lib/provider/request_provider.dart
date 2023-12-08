@@ -95,7 +95,7 @@ class RequestProvider extends ChangeNotifier {
   }
 
   // get active requests from firestore
-  Future<List<Map<String, dynamic>>> getActiveRequests(BuildContext context,
+  Future<List<Map<String, dynamic>>> getActiveRequests(
       {onlyMyRequests = false}) async {
     try {
       DateTime exp = DateTime.now().subtract(const Duration(hours: 90));
@@ -118,7 +118,6 @@ class RequestProvider extends ChangeNotifier {
 
       return documents;
     } catch (e) {
-      showSlackBar(context, e.toString());
       return [];
     }
   }

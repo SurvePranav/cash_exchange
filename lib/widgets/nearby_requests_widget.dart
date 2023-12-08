@@ -1,4 +1,5 @@
 import 'package:cashxchange/model/user_model.dart';
+import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/provider/location_provider.dart';
 import 'package:cashxchange/provider/request_provider.dart';
 import 'package:cashxchange/widgets/constant_widget.dart';
@@ -25,8 +26,8 @@ class _RequestsWidgetState extends State<RequestsWidget> {
   Widget build(BuildContext context) {
     return FutureBuilder<void>(
       future: widget.nearMe
-          ? getNearbyRequests(context: context)
-          : getRequestsNearHome(context: context),
+          ? getRequests(context: context)
+          : getRequests(context: context, nearHome: true),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const MyConstantWidget();
@@ -49,55 +50,39 @@ class _RequestsWidgetState extends State<RequestsWidget> {
     );
   }
 
-  Future<List<Map<String, dynamic>>> getNearbyRequests(
-      {required BuildContext context}) async {
+  Future<List<Map<String, dynamic>>> getRequests({
+    required BuildContext context,
+    bool nearHome = false,
+  }) async {
     final LocationProvider lp =
         Provider.of<LocationProvider>(context, listen: false);
-    await lp.getCurrentLocation().then(
-      (currentLocation) async {
-        await Provider.of<RequestProvider>(context, listen: false)
-            .getActiveRequests(context)
-            .then(
-          (requests) async {
-            _outputData.clear();
-            for (int i = 0; i < requests.length; i++) {
-              double distance = lp.findDistanceBetweenCoordinates(
-                currentLocation[0],
-                currentLocation[1],
-                requests[i]['locationLat'],
-                requests[i]['locationLon'],
-              );
-              if (distance < 3000) {
-                distance /= 1000;
-                requests[i]['distance'] = distance.toStringAsFixed(2);
-                _outputData.add(requests[i]);
-              }
-            }
-            return _outputData;
-          },
-        );
-      },
-    );
-    return _outputData;
-  }
-
-  Future<List<Map<String, dynamic>>> getRequestsNearHome(
-      {required BuildContext context}) async {
-    final LocationProvider lp =
-        Provider.of<LocationProvider>(context, listen: false);
-    await Provider.of<RequestProvider>(context, listen: false)
-        .getActiveRequests(context)
-        .then(
+    final RequestProvider rp =
+        Provider.of<RequestProvider>(context, listen: false);
+    late final double lat, lng;
+    if (nearHome) {
+      lat = double.parse(UserModel.instance.locationLat);
+      lng = double.parse(UserModel.instance.locationLon);
+    } else {
+      await lp.getCurrentLocation().then((value) {
+        lat = value[0];
+        lng = value[1];
+      });
+    }
+    await rp.getActiveRequests().then(
       (requests) async {
         _outputData.clear();
         for (int i = 0; i < requests.length; i++) {
           double distance = lp.findDistanceBetweenCoordinates(
-            double.parse(UserModel.instance.locationLat),
-            double.parse(UserModel.instance.locationLon),
+            lat,
+            lng,
             requests[i]['locationLat'],
             requests[i]['locationLon'],
           );
           if (distance < 3000) {
+            var userData =
+                await Provider.of<AuthProvider>(context, listen: false)
+                    .getUserDataById(uid: requests[i]['uid']);
+            requests[i].addAll(userData);
             distance /= 1000;
             requests[i]['distance'] = distance.toStringAsFixed(2);
             _outputData.add(requests[i]);

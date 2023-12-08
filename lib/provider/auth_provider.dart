@@ -7,8 +7,8 @@ import 'package:cashxchange/utils/util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -137,21 +137,22 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> saveUserDataToFirebase({
     required BuildContext context,
-    required File profilePic,
+    required File? profilePic,
     required Function onSuccess,
     bool updateData = false,
   }) async {
     setLoading(true);
 
     try {
-      if (updateData) {
+      if (updateData && profilePic != null) {
         await storeFileToStroage("profilePic/$_uid", profilePic).then((value) {
           UserModel.instance.profilePic = value;
           notifyListeners();
         });
+      } else if (updateData && profilePic == null) {
       } else {
         // Uploading Image To Fierebase Storage
-        await storeFileToStroage("profilePic/$_uid", profilePic).then((value) {
+        await storeFileToStroage("profilePic/$_uid", profilePic!).then((value) {
           UserModel.instance.profilePic = value;
           UserModel.instance.createdAt =
               DateTime.now().millisecondsSinceEpoch.toString();

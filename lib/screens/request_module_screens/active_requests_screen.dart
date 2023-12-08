@@ -34,7 +34,7 @@ class _RequestStatusScreenState extends State<RequestStatusScreen> {
       body: Consumer<RequestProvider>(
         builder: (context, value, child) {
           return FutureBuilder<List<Map<String, dynamic>>>(
-            future: value.getActiveRequests(context, onlyMyRequests: true),
+            future: value.getActiveRequests(onlyMyRequests: true),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());

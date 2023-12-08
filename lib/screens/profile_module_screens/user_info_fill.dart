@@ -233,8 +233,6 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                                       lat = co[0].toString();
                                       lon = co[1].toString();
                                     }
-                                    // clearing cache before moving further
-                                    // await ImageSingleton.deleteCacheDir();
 
                                     //calling store data function
                                     await storeData();
@@ -346,12 +344,11 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
   }
 
   // store user data to database
-  Future<void> storeData() async {
+  Future<void> storeData({bool updateProfile = false}) async {
     final ap = Provider.of<AuthProvider>(context, listen: false);
 
     // saving the data
-    if (image != null &&
-        nameController.text != "" &&
+    if (nameController.text != "" &&
         emailController.text != "" &&
         locationController.text != "" &&
         bioController.text != "") {
@@ -364,17 +361,18 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
         UserModel.instance.locationLon = lon;
         ap.saveUserDataToFirebase(
           context: context,
-          profilePic: image!,
+          profilePic: image,
           updateData: true,
           onSuccess: () async {
             // once data is saved we need to store it locally also using shared preference library
             await ap.saveDataToSP().then((value) {
-              Navigator.of(context)
-                  .pushNamedAndRemoveUntil('profile_screen', (route) => false);
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+              Navigator.of(context).pushReplacementNamed('home_screen');
             });
           },
         );
-      } else {
+      } else if (image != null) {
         // initilizing userModel singleton instance
         UserModel.instance.initializeUser(
           name: nameController.text.trim(),
@@ -390,7 +388,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
         );
         await ap.saveUserDataToFirebase(
           context: context,
-          profilePic: image!,
+          profilePic: image,
           onSuccess: () {
             // once data is saved we need to store it locally also using shared preference library
             ap.saveDataToSP().then((value) => ap.setSignedIn()).then(
@@ -404,6 +402,8 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                 );
           },
         );
+      } else {
+        showSlackBar(context, "please Select Image");
       }
     } else {
       showSlackBar(context, "please fill all the fields");

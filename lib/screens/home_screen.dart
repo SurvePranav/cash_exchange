@@ -62,18 +62,11 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          _selectedItem == 'Nearby Requests'
-              ? RequestsWidget(
-                  nearMe: true,
-                )
-              : _selectedItem == 'Requests Near Home'
-                  ? RequestsWidget(
-                      nearMe: false,
-                    )
-                  // : RequestsWidget(
-                  //     nearMe: false,
-                  //   )
-                  : NearbyAtmsWidget(),
+          _selectedItem == 'Nearby ATM\'s'
+              ? const NearbyAtmsWidget()
+              : RequestsWidget(
+                  nearMe: _selectedItem == 'Nearby Requests',
+                ),
         ],
       ),
     );
