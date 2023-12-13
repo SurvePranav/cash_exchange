@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class RequestDetailsScreen extends StatelessWidget {
-  final Map<String, dynamic> request;
+  final RequestModel request;
   const RequestDetailsScreen({super.key, required this.request});
 
   @override
@@ -20,9 +20,9 @@ class RequestDetailsScreen extends StatelessWidget {
         body: Builder(builder: (context) {
           String location = "Current Location";
           if (UserModel.instance.locationLat ==
-                  RequestModel.instance.locationLat.toString() &&
+                  request.locationLat.toString() &&
               UserModel.instance.locationLon ==
-                  RequestModel.instance.locationLon.toString()) {
+                  request.locationLon.toString()) {
             location = "Home Location";
           }
           return Padding(
@@ -30,21 +30,14 @@ class RequestDetailsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                buildInfoRow('Creation Date',
-                    request['createdAt'].toDate().toLocal().toString()),
-                buildInfoRow(
-                    'Expiration Date',
-                    request['createdAt']
-                        .toDate()
-                        .add(const Duration(hours: 12))
-                        .toLocal()
-                        .toString()),
-                buildInfoRow('Amount', request['amount']),
-                buildInfoRow('Request Type', request['type']),
+                buildInfoRow('Creation Date', request.createdAt.toString()),
+                buildInfoRow('Expiration Date', request.createdAt.toString()),
+                buildInfoRow('Amount', request.amount),
+                buildInfoRow('Request Type', request.type),
                 buildInfoRow('Location', location),
-                buildInfoRow('Views', request['views'].toString()),
+                buildInfoRow('Views', request.views.toString()),
                 buildInfoRow('Accepted By', '--'),
-                buildInfoRow('More Info', request['info']),
+                buildInfoRow('More Info', request.info),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -55,7 +48,7 @@ class RequestDetailsScreen extends StatelessWidget {
                         onPressed: () async {
                           await Provider.of<RequestProvider>(context,
                                   listen: false)
-                              .deleteRequestById(reqId: request['reqId'])
+                              .deleteRequestById(reqId: request.reqId)
                               .then((value) {
                             Navigator.of(context).pop();
                             Navigator.of(context).pop();

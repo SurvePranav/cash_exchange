@@ -2,14 +2,10 @@ import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/request_model.dart';
 import 'package:flutter/material.dart';
 
-class RequestSuccessScreen extends StatefulWidget {
-  const RequestSuccessScreen({super.key});
+class RequestSuccessScreen extends StatelessWidget {
+  final RequestModel request;
+  const RequestSuccessScreen({super.key, required this.request});
 
-  @override
-  State<RequestSuccessScreen> createState() => _RequestSuccessScreenState();
-}
-
-class _RequestSuccessScreenState extends State<RequestSuccessScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,8 +35,7 @@ class _RequestSuccessScreenState extends State<RequestSuccessScreen> {
                         "Request Raised",
                         style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
-                      Text(
-                          "for ${RequestModel.instance.type} of Rs.${RequestModel.instance.amount}",
+                      Text("for ${request.type} of Rs.${request.amount}",
                           style: const TextStyle(
                               color: Colors.white, fontSize: 14)),
                     ],

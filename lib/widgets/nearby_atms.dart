@@ -1,10 +1,8 @@
-import 'package:cashxchange/provider/location_provider.dart';
 import 'package:cashxchange/screens/request_module_screens/atm_info_screen.dart';
-import 'package:cashxchange/utils/util.dart';
+import 'package:cashxchange/utils/location_services.dart';
 import 'package:cashxchange/widgets/constant_widget.dart';
 import 'package:cashxchange/widgets/nearby_atm_list.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:provider/provider.dart';
 
 class NearbyAtmsWidget extends StatefulWidget {
   const NearbyAtmsWidget({super.key});
@@ -18,30 +16,30 @@ class _NearbyAtmsWidgetState extends State<NearbyAtmsWidget> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: _getNearbyAtms(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const MyConstantWidget();
-          } else {
-            return NearbyAtmsList(
-                nearbyAtms: _nearbyAtms,
-                onTap: (atm) {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(
-                      builder: (context) => AtmInfoScreen(atm: atm),
-                    ),
-                  );
-                });
-          }
-        });
+      future: _getNearbyAtms(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const MyConstantWidget();
+        } else {
+          return NearbyAtmsList(
+            nearbyAtms: _nearbyAtms,
+            onTap: (atm) {
+              Navigator.of(context).push(
+                CupertinoPageRoute(
+                  builder: (context) => AtmInfoScreen(atm: atm),
+                ),
+              );
+            },
+          );
+        }
+      },
+    );
   }
 
   Future<void> _getNearbyAtms() async {
-    final LocationProvider lp =
-        Provider.of<LocationProvider>(context, listen: false);
-    final List<double> coordinates = await lp.getCurrentLocation();
-
-    final List results = await getNearbyPlaces(
+    final List<double> coordinates =
+        await LocationServices.getCurrentLocation();
+    final List results = await LocationServices.getNearbyPlaces(
         lat: coordinates[0], lng: coordinates[1], place: "atm");
     _nearbyAtms.clear();
     for (Map i in results) {
@@ -57,7 +55,7 @@ class _NearbyAtmsWidgetState extends State<NearbyAtmsWidget> {
           'photo_reference': i.containsKey('photos')
               ? i['photos'][0]['photo_reference']
               : null,
-          'distance': lp.findDistanceBetweenCoordinates(
+          'distance': LocationServices.findDistanceBetweenCoordinates(
             coordinates[0],
             coordinates[1],
             i['geometry']['location']['lat'],

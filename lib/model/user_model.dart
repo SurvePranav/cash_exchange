@@ -9,6 +9,8 @@ class UserModel {
   late String address;
   late String locationLat;
   late String locationLon;
+  late List<dynamic> connections;
+  late bool isOnline;
 
   // Private constructor
   UserModel._privateConstructor() {
@@ -22,6 +24,8 @@ class UserModel {
     address = "";
     locationLat = "";
     locationLon = "";
+    connections = [];
+    isOnline = false;
   }
 
   // Static instance of UserModel
@@ -42,6 +46,8 @@ class UserModel {
     required String address,
     required String locationLat,
     required String locationLon,
+    required List<dynamic> connections,
+    required bool isOnline,
   }) {
     this.name = name;
     this.email = email;
@@ -53,6 +59,8 @@ class UserModel {
     this.address = address;
     this.locationLat = locationLat;
     this.locationLon = locationLon;
+    this.connections = connections;
+    this.isOnline = isOnline;
   }
 
   // from Map
@@ -68,6 +76,8 @@ class UserModel {
       address: map['address'] ?? '',
       locationLat: map['locationLat'] ?? '',
       locationLon: map['locationLon'] ?? '',
+      connections: map['connections'] ?? [],
+      isOnline: map['isOnline'] ?? false,
     );
     return _instance;
   }
@@ -85,6 +95,8 @@ class UserModel {
       "address": address,
       "locationLat": locationLat,
       "locationLon": locationLon,
+      "connections": connections,
+      "isOnline": isOnline,
     };
   }
 }

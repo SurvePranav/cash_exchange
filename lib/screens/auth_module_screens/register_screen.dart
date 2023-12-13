@@ -1,4 +1,5 @@
 import 'package:cashxchange/provider/auth_provider.dart';
+import 'package:cashxchange/utils/util.dart';
 import 'package:cashxchange/widgets/custom_button.dart';
 import 'package:country_picker/country_picker.dart';
 // import 'package:flutter/cupertino.dart';
@@ -45,7 +46,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   height: 200,
                   padding: const EdgeInsets.all(25),
                   decoration: BoxDecoration(
-                    color: AppColors.blue_4,
+                    color: AppColors.skyBlue,
                     shape: BoxShape.circle,
                   ),
                   child: Image.asset(
@@ -56,7 +57,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   height: 30,
                 ),
                 Text(
-                  "Register",
+                  "Welcome",
                   style: TextStyle(
                       color: AppColors.darkBlack,
                       fontSize: 25,
@@ -67,7 +68,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   height: 15,
                 ),
                 Text(
-                  "Add your phone number, we will send you a verification code!",
+                  "Enter your phone number, we will send you a verification code!",
                   style: TextStyle(color: AppColors.dimBlack),
                   textAlign: TextAlign.center,
                 ),
@@ -157,9 +158,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   width: double.infinity,
                   child: CustomButton(
                     onPressed: () {
-                      sendPhoneNumber();
+                      sendPhoneNumber(context);
                     },
-                    text: 'Login',
+                    text: 'Get OTP',
                   ),
                 ),
               ],
@@ -170,9 +171,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  void sendPhoneNumber() {
-    final ap = Provider.of<AuthProvider>(context, listen: false);
-    String phoneNo = _controller.text.trim();
-    ap.signInWithPhone(context, "+${selectedCountry.phoneCode}$phoneNo");
+  void sendPhoneNumber(BuildContext context) {
+    if (_controller.text.length == 10) {
+      // to show progress dialog
+      MyAppServices.showProgressDialog(context);
+
+      // to signin with phone number
+      final ap = Provider.of<AuthProvider>(context, listen: false);
+      String phoneNo = _controller.text.trim();
+      ap.signInWithPhone(context, "+${selectedCountry.phoneCode}$phoneNo");
+    } else {
+      MyAppServices.showSlackBar(context, "Enter 10 digit number");
+    }
   }
 }

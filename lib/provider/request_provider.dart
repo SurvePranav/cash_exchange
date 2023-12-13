@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:cashxchange/model/request_model.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:pinput/pinput.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RequestProvider extends ChangeNotifier {
@@ -27,7 +29,6 @@ class RequestProvider extends ChangeNotifier {
   }
 
   // database operations
-
   Future<bool> checkIfRequestExists() async {
     DocumentSnapshot snapshot =
         await _firebaseFirestore.collection("requests").doc(_reqid).get();
@@ -45,26 +46,22 @@ class RequestProvider extends ChangeNotifier {
 
   Future<bool> uploadRequestToDatabase({
     required BuildContext context,
+    required RequestModel request,
   }) async {
     setLoading(true);
     try {
-      // uploading new request info to database
-      RequestModel.instance.createdAt = DateTime.now();
-
       await _firebaseFirestore
           .collection("request")
-          .add(RequestModel.instance.toMap())
+          .doc(request.reqId)
+          .set(request.toJson())
           .then((value) async {
-        await value.update({'reqId': value.id});
-        RequestModel.instance.reqId = value.id;
-        _reqid = value.id;
         _isLoading = false;
         notifyListeners();
       });
       setLoading(false);
       return true;
     } catch (e) {
-      showSlackBar(context, e.toString());
+      MyAppServices.showSlackBar(context, e.toString());
       setLoading(false);
       return false;
     }
@@ -95,8 +92,7 @@ class RequestProvider extends ChangeNotifier {
   }
 
   // get active requests from firestore
-  Future<List<Map<String, dynamic>>> getActiveRequests(
-      {onlyMyRequests = false}) async {
+  Future<List<RequestModel>> getActiveRequests({onlyMyRequests = false}) async {
     try {
       DateTime exp = DateTime.now().subtract(const Duration(hours: 90));
       QuerySnapshot querySnapshot;
@@ -112,10 +108,16 @@ class RequestProvider extends ChangeNotifier {
             .where('createdAt', isGreaterThan: exp)
             .get();
       }
-      List<Map<String, dynamic>> documents = querySnapshot.docs
-          .map((doc) => doc.data() as Map<String, dynamic>)
+      log('snapshot requests: ${querySnapshot.docs.length}');
+      final List<RequestModel> documents = querySnapshot.docs
+          .map((doc) =>
+              RequestModel.fromJson(doc.data() as Map<String, dynamic>))
           .toList();
-
+      // for (int i = 0; i < querySnapshot.docs.length; i++) {
+      //   documents.add(RequestModel.fromJson(
+      //       querySnapshot.docs[i].data() as Map<String, dynamic>));
+      //   log('data: ${querySnapshot.docs[i].data()}');
+      // }
       return documents;
     } catch (e) {
       return [];
@@ -123,7 +125,7 @@ class RequestProvider extends ChangeNotifier {
   }
 
   // get active requests from firestore
-  Future<List<Map<String, dynamic>>> getAllRequests(
+  Future<List<RequestModel>> getAllRequests(
     BuildContext context,
   ) async {
     try {
@@ -133,56 +135,24 @@ class RequestProvider extends ChangeNotifier {
           .where('uid', isEqualTo: UserModel.instance.uid)
           .get();
 
-      List<Map<String, dynamic>> documents = querySnapshot.docs
-          .map((doc) => doc.data() as Map<String, dynamic>)
+      List<RequestModel> documents = querySnapshot.docs
+          .map((doc) =>
+              RequestModel.fromJson(doc.data() as Map<String, dynamic>))
           .toList();
 
       return documents;
     } catch (e) {
-      showSlackBar(context, e.toString());
+      MyAppServices.showSlackBar(context, e.toString());
       return [];
     }
   }
 
   // get request using request id
-  Future<void> getRequestById(BuildContext context, String reqId) async {
-    try {
-      await _firebaseFirestore
-          .collection('request')
-          .doc(reqId)
-          .get()
-          .then((DocumentSnapshot doc) {
-        RequestModel.instance.initializeRequest(
-          reqId: doc['reqId'],
-          uid: doc['uid'],
-          createdAt: doc['createdAt'].toDate(),
-          amount: doc['amount'],
-          type: doc['type'],
-          info: doc['info'],
-          locationLat: doc['locationLat'],
-          locationLon: doc['locationLon'],
-          views: doc['views'],
-          isAccepted: doc['isAccepted'],
-        );
-      });
-    } catch (e) {
-      showSlackBar(context, e.toString());
-    }
-  }
-
-  // Storing Data locally(shared preference)
-  Future saveDataToSP() async {
-    SharedPreferences s = await SharedPreferences.getInstance();
-    await s.setString(
-        "request_model", jsonEncode(RequestModel.instance.toMap()));
-  }
-
-  // Get Data From local (shared preference)
-  Future getDataFromSP() async {
-    SharedPreferences s = await SharedPreferences.getInstance();
-    String data = s.getString("request_model") ?? "";
-    RequestModel.fromMap(jsonDecode(data));
-    _reqid = RequestModel.instance.reqId;
-    notifyListeners();
+  Stream<QuerySnapshot<Map<String, dynamic>>> getRequestById(
+      BuildContext context, RequestModel request) {
+    return _firebaseFirestore
+        .collection('request')
+        .where('uid', isEqualTo: request.reqId)
+        .snapshots();
   }
 }

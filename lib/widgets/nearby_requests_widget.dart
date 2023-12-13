@@ -1,7 +1,10 @@
+import 'dart:developer';
+
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
-import 'package:cashxchange/provider/location_provider.dart';
+import 'package:cashxchange/provider/utility_provider.dart';
 import 'package:cashxchange/provider/request_provider.dart';
+import 'package:cashxchange/utils/location_services.dart';
 import 'package:cashxchange/widgets/constant_widget.dart';
 import 'package:cashxchange/widgets/nearby_req_list.dart';
 import 'package:cashxchange/widgets/nearby_request_info.dart';
@@ -54,8 +57,6 @@ class _RequestsWidgetState extends State<RequestsWidget> {
     required BuildContext context,
     bool nearHome = false,
   }) async {
-    final LocationProvider lp =
-        Provider.of<LocationProvider>(context, listen: false);
     final RequestProvider rp =
         Provider.of<RequestProvider>(context, listen: false);
     late final double lat, lng;
@@ -63,29 +64,32 @@ class _RequestsWidgetState extends State<RequestsWidget> {
       lat = double.parse(UserModel.instance.locationLat);
       lng = double.parse(UserModel.instance.locationLon);
     } else {
-      await lp.getCurrentLocation().then((value) {
+      await LocationServices.getCurrentLocation().then((value) {
         lat = value[0];
         lng = value[1];
       });
     }
     await rp.getActiveRequests().then(
       (requests) async {
+        log('nearby requests: ${requests.length}');
         _outputData.clear();
         for (int i = 0; i < requests.length; i++) {
-          double distance = lp.findDistanceBetweenCoordinates(
+          double distance = LocationServices.findDistanceBetweenCoordinates(
             lat,
             lng,
-            requests[i]['locationLat'],
-            requests[i]['locationLon'],
+            requests[i].locationLat,
+            requests[i].locationLon,
           );
           if (distance < 3000) {
-            var userData =
+            Map<String, dynamic> finalData = requests[i].toJson();
+            log('converted request: $finalData');
+
+            finalData.addAll(
                 await Provider.of<AuthProvider>(context, listen: false)
-                    .getUserDataById(uid: requests[i]['uid']);
-            requests[i].addAll(userData);
+                    .getUserDataById(uid: requests[i].uid));
             distance /= 1000;
-            requests[i]['distance'] = distance.toStringAsFixed(2);
-            _outputData.add(requests[i]);
+            finalData['distance'] = distance.toStringAsFixed(2);
+            _outputData.add(finalData);
           }
         }
         return _outputData;

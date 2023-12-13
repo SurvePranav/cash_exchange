@@ -18,7 +18,7 @@ class HomeScreenTopSection extends StatelessWidget {
             0.2,
             1.0
           ], colors: [
-            AppColors.blue_4,
+            AppColors.skyBlue,
             Colors.white,
           ], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
           alignment: Alignment.topCenter,
@@ -56,7 +56,10 @@ class HomeScreenTopSection extends StatelessWidget {
                     height: 50,
                     alignment: Alignment.centerLeft,
                     width: MediaQuery.of(context).size.width * 0.6,
-                    child: Image.asset("assets/images/app_logo.png"),
+                    child: Hero(
+                      tag: 'app_logo',
+                      child: Image.asset("assets/images/app_logo.png"),
+                    ),
                   ),
                 ],
               ),

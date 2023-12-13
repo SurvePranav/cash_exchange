@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/screens/profile_module_screens/profile_pic_screen.dart';
@@ -34,18 +35,19 @@ class NearbyRequestInfo extends StatelessWidget {
                         MaterialPageRoute(
                           builder: (context) => ImageFullScreen(
                             url: userData['profilePic']!,
-                            heroTag: 'nearby_request',
+                            heroTag: request['reqId'],
                           ),
                         ),
                       );
                     },
                     child: Hero(
-                      tag: 'nearby_request',
+                      tag: request['reqId'],
                       child: CircleAvatar(
                         backgroundColor: AppColors.deepGreen,
                         backgroundImage:
                             const AssetImage("assets/images/profile_icon.png"),
-                        foregroundImage: NetworkImage(userData['profilePic']!),
+                        foregroundImage:
+                            CachedNetworkImageProvider(userData['profilePic']!),
                         radius: 60,
                       ),
                     ),
@@ -62,8 +64,8 @@ class NearbyRequestInfo extends StatelessWidget {
                       Text(userData['bio']!),
                     ],
                   ),
-                  buildInfoRow('Creation Date',
-                      request['createdAt'].toDate().toLocal().toString()),
+                  buildInfoRow(
+                      'Creation Date', request['createdAt'].toString()),
                   buildInfoRow('Amount', request['amount']),
                   buildInfoRow('Request Type', request['type']),
                   buildInfoRow('Views', request['views'].toString()),

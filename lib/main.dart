@@ -1,10 +1,15 @@
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
-import 'package:cashxchange/provider/location_provider.dart';
+import 'package:cashxchange/provider/connectivity_provider.dart';
+import 'package:cashxchange/provider/messaging_provider.dart';
+import 'package:cashxchange/provider/utility_provider.dart';
 import 'package:cashxchange/provider/request_provider.dart';
+import 'package:cashxchange/screens/auth_module_screens/register_screen.dart';
+import 'package:cashxchange/screens/auth_module_screens/welcome_screen.dart';
 import 'package:cashxchange/screens/main_body.dart';
 import 'package:cashxchange/screens/notefication_module_screens/notification_screen.dart';
 import 'package:cashxchange/screens/profile_module_screens/profile_screen.dart';
+import 'package:cashxchange/screens/profile_module_screens/user_info_fill.dart';
 import 'package:cashxchange/screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -12,9 +17,10 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 
+late Size mq;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -41,10 +47,16 @@ class _MyAppState extends State<MyApp> {
           create: (_) => AuthProvider(),
         ),
         ChangeNotifierProvider(
-          create: (_) => LocationProvider(),
+          create: (_) => UtilityProvider(),
         ),
         ChangeNotifierProvider(
           create: (_) => RequestProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ConnectivityProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => MessagingProvider(),
         ),
       ],
       child: MaterialApp(
@@ -62,6 +74,8 @@ class _MyAppState extends State<MyApp> {
           'new_request_screen': (context) => const MainBody(currentIndex: 2),
           'notification_screen': (context) => NotificationScreen(),
           'profile_screen': (context) => const ProfileScreen(),
+          'welcome_screen': (context) => const WelcomeScreen(),
+          'user_info_screen': (context) => const UserInfoScreen(),
         },
         home: const SplashScreen(),
         // home: const WelcomeScreen(),

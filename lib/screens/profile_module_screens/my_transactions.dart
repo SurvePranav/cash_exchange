@@ -1,4 +1,5 @@
 import 'package:cashxchange/constants/constant_values.dart';
+import 'package:cashxchange/model/request_model.dart';
 import 'package:cashxchange/provider/request_provider.dart';
 import 'package:cashxchange/screens/profile_module_screens/transactions_list.dart';
 import 'package:cashxchange/screens/request_module_screens/request_fullscreen.dart';
@@ -32,16 +33,16 @@ class _MyTransactionsScreenState extends State<MyTransactionsScreen> {
       ),
       body: Consumer<RequestProvider>(
         builder: (context, value, child) {
-          return FutureBuilder<List<Map<String, dynamic>>>(
+          return FutureBuilder<List<RequestModel>>(
             future: value.getAllRequests(context),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasData) {
-                List<Map<String, dynamic>> documents = snapshot.data ?? [];
+                List<RequestModel> documents = snapshot.data ?? [];
                 return TransactionsList(
                   requests: documents,
-                  onTap: (Map<String, dynamic> request) {
+                  onTap: (RequestModel request) {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => RequestDetailsScreen(

@@ -1,11 +1,12 @@
 import 'package:cashxchange/constants/constant_values.dart';
+import 'package:cashxchange/model/request_model.dart';
 import 'package:cashxchange/screens/main_body.dart';
 import 'package:flutter/material.dart';
 
-typedef MyCallBack = Function(Map<String, dynamic> request);
+typedef MyCallBack = Function(RequestModel request);
 
 class TransactionsList extends StatelessWidget {
-  final List<Map<String, dynamic>> requests;
+  final List<RequestModel> requests;
   final MyCallBack onTap;
   const TransactionsList(
       {super.key, required this.requests, required this.onTap});
@@ -70,7 +71,7 @@ class TransactionsList extends StatelessWidget {
             child: ListTile(
               contentPadding: const EdgeInsets.all(16),
               title: Text(
-                "Request for ${request['type']}",
+                "Request for ${request.type}",
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -80,7 +81,7 @@ class TransactionsList extends StatelessWidget {
               subtitle: Row(
                 children: [
                   Text(
-                    'Rs.${request['amount']}',
+                    'Rs.${request.amount}',
                     style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 16,
@@ -97,7 +98,7 @@ class TransactionsList extends StatelessWidget {
                           width: 5,
                         ),
                         Text(
-                          "${request['views']}",
+                          "${request.views}",
                           style: const TextStyle(
                               color: Colors.white70, fontSize: 13),
                         ),

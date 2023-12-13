@@ -1,126 +1,300 @@
+import 'dart:developer';
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cashxchange/main.dart';
+import 'package:cashxchange/model/connection_model.dart';
+import 'package:cashxchange/model/message_model.dart';
+import 'package:cashxchange/provider/auth_provider.dart';
+import 'package:cashxchange/provider/messaging_provider.dart';
+import 'package:cashxchange/provider/utility_provider.dart';
+import 'package:cashxchange/widgets/message_card.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
 class MessageScreen extends StatefulWidget {
-  const MessageScreen({super.key});
+  final Connection connection;
+
+  const MessageScreen({super.key, required this.connection});
 
   @override
   State<MessageScreen> createState() => _MessageScreenState();
 }
 
 class _MessageScreenState extends State<MessageScreen> {
+  // late ScrollController _scrollController;
+
+  List<Message> _list = [];
   final TextEditingController _messageController = TextEditingController();
-  final List<ChatMessage> _messages = [];
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final mp = Provider.of<MessagingProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chat with John'), // Chat partner's name
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.more_vert), // Add more actions here
-            onPressed: () {
-              // Implement action menu
-            },
-          ),
-        ],
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.white,
+        flexibleSpace: StreamBuilder(
+          stream: Provider.of<AuthProvider>(context, listen: false)
+              .getUserById(widget.connection),
+          builder: (context, snapshot) {
+            final data = snapshot.data?.docs;
+
+            final list =
+                data?.map((e) => Connection.fromJson(e.data())).toList() ?? [];
+
+            return SafeArea(
+              child: Container(
+                padding: const EdgeInsets.only(right: 16),
+                child: Row(
+                  children: <Widget>[
+                    IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 2,
+                    ),
+                    CircleAvatar(
+                      backgroundImage: CachedNetworkImageProvider(
+                        list.isNotEmpty
+                            ? list.first.profilePic
+                            : widget.connection.profilePic,
+                      ),
+                      maxRadius: 20,
+                    ),
+                    const SizedBox(
+                      width: 12,
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            list.isNotEmpty
+                                ? list.first.name
+                                : widget.connection.name,
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(
+                            height: 6,
+                          ),
+                          Text(
+                            list.isNotEmpty
+                                ? list.first.isOnline
+                                    ? 'Online'
+                                    : 'Offline'
+                                : 'Not Specified',
+                            style: TextStyle(
+                                color: Colors.grey.shade600, fontSize: 13),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(
+                      Icons.settings,
+                      color: Colors.black54,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
       ),
       body: Column(
-        children: <Widget>[
+        children: [
           Expanded(
-            child: ListView.builder(
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                return _messages[index];
+            child: StreamBuilder(
+              stream: mp.getAllMessages(widget.connection),
+              builder: (context, snapshot) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.waiting:
+                  case ConnectionState.none:
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  case ConnectionState.active:
+                  case ConnectionState.done:
+                    final data = snapshot.data?.docs;
+                    _list =
+                        data?.map((e) => Message.fromJson(e.data())).toList() ??
+                            [];
+
+                    if (_list.isNotEmpty) {
+                      return ListView.builder(
+                        itemCount: _list.length,
+                        reverse: true,
+                        padding: EdgeInsets.only(top: mq.height * 0.01),
+                        physics: const BouncingScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          return MessageCard(message: _list[index]);
+                        },
+                      );
+                    } else {
+                      return Center(
+                        child: MaterialButton(
+                          onPressed: () {},
+                          child: const Text(
+                            "Say Hi!👋",
+                            style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                }
               },
             ),
           ),
-          const Divider(height: 1.0),
-          _buildMessageComposer(),
+          Consumer<UtilityProvider>(
+            builder: (context, up, child) {
+              if (up.isLoading) {
+                return const Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 20,
+                    ),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
+                  ),
+                );
+              } else {
+                return const SizedBox();
+              }
+            },
+          ),
+          _chatInput(mp, context),
         ],
       ),
     );
   }
 
-  Widget _buildMessageComposer() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      color: Colors.white,
+  Widget _chatInput(MessagingProvider mp, BuildContext context) {
+    final up = Provider.of<UtilityProvider>(context, listen: false);
+    return Padding(
+      padding: EdgeInsets.symmetric(
+          vertical: mq.height * .01, horizontal: mq.width * .025),
       child: Row(
-        children: <Widget>[
+        children: [
+          //input field & buttons
           Expanded(
-            child: TextField(
-              controller: _messageController,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration.collapsed(
-                hintText: 'Type a message...',
+            child: Card(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
+              child: Row(
+                children: [
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                      child: TextField(
+                    controller: _messageController,
+                    keyboardType: TextInputType.multiline,
+                    minLines: 1,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                        hintText: 'Type Something...',
+                        hintStyle: TextStyle(color: Colors.blueAccent),
+                        border: InputBorder.none),
+                  )),
+
+                  //pick image from gallery button
+                  IconButton(
+                      onPressed: () async {
+                        final ImagePicker picker = ImagePicker();
+
+                        // Picking multiple images
+                        final List<XFile> images =
+                            await picker.pickMultiImage(imageQuality: 70);
+
+                        // uploading & sending image one by one
+                        for (var i in images) {
+                          log('Image Path: ${i.path}');
+                          up.setLoading(true);
+                          await mp.sendChatImage(
+                              widget.connection, File(i.path));
+                          up.setLoading(false);
+                        }
+                      },
+                      icon: const Icon(Icons.image,
+                          color: Colors.blueAccent, size: 26)),
+
+                  //take image from camera button
+                  IconButton(
+                      onPressed: () async {
+                        final ImagePicker picker = ImagePicker();
+
+                        // Pick an image
+                        final XFile? image = await picker.pickImage(
+                            source: ImageSource.camera, imageQuality: 70);
+                        if (image != null) {
+                          up.setLoading(true);
+                          await mp.sendChatImage(
+                              widget.connection, File(image.path));
+                          up.setLoading(false);
+                        }
+                      },
+                      icon: const Icon(Icons.camera_alt_rounded,
+                          color: Colors.blueAccent, size: 26)),
+
+                  //adding some space
+                  SizedBox(width: mq.width * .02),
+                ],
               ),
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.send),
-            onPressed: () {
-              _sendMessage(_messageController.text);
+
+          //send message button
+          MaterialButton(
+            onPressed: () async {
+              if (_messageController.text.trim().isNotEmpty) {
+                // if (_list.isEmpty) {
+                //   //on first message (add user to my_user collection of chat user)
+                //   APIs.sendFirstMessage(
+                //       widget.user, _textController.text, Type.text);
+                // } else {
+                //simply send message
+                await mp.sendMessage(
+                  widget.connection,
+                  _messageController.text.trim(),
+                  MsgType.text,
+                );
+                // }
+                _messageController.text = '';
+              }
             },
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _sendMessage(String text) {
-    if (text.isNotEmpty) {
-      setState(() {
-        _messages.add(ChatMessage(
-          text: text,
-          isUser: true, // Set this to false for received messages
-        ));
-        _messageController.clear();
-      });
-    }
-  }
-}
-
-class ChatMessage extends StatelessWidget {
-  final String text;
-  final bool isUser;
-
-  const ChatMessage({super.key, required this.text, required this.isUser});
-
-  @override
-  Widget build(BuildContext context) {
-    final bgColor = isUser ? Colors.blue : Colors.grey[200];
-    final align = isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start;
-    final radius = isUser
-        ? const BorderRadius.only(
-            topLeft: Radius.circular(12.0),
-            topRight: Radius.circular(0),
-            bottomLeft: Radius.circular(12.0),
-            bottomRight: Radius.circular(12.0),
+            minWidth: 0,
+            padding:
+                const EdgeInsets.only(top: 10, bottom: 10, right: 5, left: 10),
+            shape: const CircleBorder(),
+            color: Colors.green,
+            child: const Icon(Icons.send, color: Colors.white, size: 28),
           )
-        : const BorderRadius.only(
-            topLeft: Radius.circular(0),
-            topRight: Radius.circular(12.0),
-            bottomLeft: Radius.circular(12.0),
-            bottomRight: Radius.circular(12.0),
-          );
-
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10.0),
-      child: Column(
-        crossAxisAlignment: align,
-        children: <Widget>[
-          Container(
-            decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: radius,
-            ),
-            padding: const EdgeInsets.all(10.0),
-            child: Text(
-              text,
-              style: const TextStyle(fontSize: 16.0),
-            ),
-          ),
         ],
       ),
     );

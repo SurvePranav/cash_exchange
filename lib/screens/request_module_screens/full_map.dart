@@ -1,7 +1,9 @@
 import 'package:cashxchange/constants/constant_values.dart';
+import 'package:cashxchange/model/request_model.dart';
 import 'package:cashxchange/model/user_model.dart';
-import 'package:cashxchange/provider/location_provider.dart';
+import 'package:cashxchange/provider/utility_provider.dart';
 import 'package:cashxchange/provider/request_provider.dart';
+import 'package:cashxchange/utils/location_services.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:cashxchange/widgets/custom_button.dart';
 import 'package:cashxchange/widgets/panel_widget.dart';
@@ -20,7 +22,7 @@ class FullMapScreen extends StatefulWidget {
 class _FullMapScreenState extends State<FullMapScreen> {
   // late Future<CameraPosition> _currentPosition;
   // late final GoogleMapController _mapController;
-  final List<Map<String, dynamic>> _locations = [];
+  final List<RequestModel> _locations = [];
   bool _showNearbyRequests = true;
   bool _useCurrentLocation = true;
   @override
@@ -75,14 +77,14 @@ class _FullMapScreenState extends State<FullMapScreen> {
                       myLocationEnabled: true,
                       markers: _locations.map((location) {
                         return Marker(
-                          markerId: MarkerId(location['reqId']),
+                          markerId: MarkerId(location.reqId),
                           position: LatLng(
-                            location['locationLat'],
-                            location['locationLon'],
+                            location.locationLat,
+                            location.locationLon,
                           ),
                           infoWindow: InfoWindow(
-                            title: location['reqId'],
-                            snippet: location['info'],
+                            title: location.reqId,
+                            snippet: location.info,
                           ),
                         );
                       }).toSet(),
@@ -208,15 +210,13 @@ class _FullMapScreenState extends State<FullMapScreen> {
   // initiates map with current position and loads other markers
   Future<CameraPosition> initiateMapWithNearbyRequests(
       {required bool useCurrentLocation}) async {
-    final LocationProvider lp =
-        Provider.of<LocationProvider>(context, listen: false);
     CameraPosition cameraPosition = const CameraPosition(
       target: LatLng(0, 0),
       zoom: 15,
     );
 
     if (useCurrentLocation == true) {
-      await lp.getCurrentLocation().then((location) async {
+      await LocationServices.getCurrentLocation().then((location) async {
         cameraPosition = CameraPosition(
           target: LatLng(location[0], location[1]),
           zoom: 15,
@@ -227,12 +227,12 @@ class _FullMapScreenState extends State<FullMapScreen> {
             Provider.of<RequestProvider>(context, listen: false);
         await rp.getActiveRequests().then((locations) {
           for (int i = 0; i < locations.length; i++) {
-            if (UserModel.instance.uid != locations[i]['uid']) {
+            if (UserModel.instance.uid != locations[i].uid) {
               _locations.add(locations[i]);
             }
           }
           if (_locations.isEmpty) {
-            showSlackBar(context, "No Nearby Requests");
+            MyAppServices.showSlackBar(context, "No Nearby Requests");
           }
         });
 

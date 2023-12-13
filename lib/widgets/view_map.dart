@@ -1,11 +1,9 @@
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/user_model.dart';
-import 'package:cashxchange/provider/location_provider.dart';
 import 'package:cashxchange/screens/request_module_screens/full_map.dart';
-import 'package:cashxchange/utils/util.dart';
+import 'package:cashxchange/utils/location_services.dart';
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class ViewMapWidget extends StatefulWidget {
   const ViewMapWidget({super.key});
@@ -32,14 +30,13 @@ class _ViewMapWidgetState extends State<ViewMapWidget> {
             padding: const EdgeInsets.all(9),
             height: MediaQuery.of(context).size.height * 0.23,
             child: FutureBuilder(
-              future: Provider.of<LocationProvider>(context, listen: false)
-                  .getCurrentLocation(),
+              future: LocationServices.getCurrentLocation(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
                   cachedImage = ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: Image.network(
-                      getStaticMapUrl(
+                      LocationServices.getStaticMapUrl(
                         lat: snapshot.data![0],
                         lon: snapshot.data![1],
                         zoom: 17,
@@ -57,7 +54,7 @@ class _ViewMapWidgetState extends State<ViewMapWidget> {
                         alignment: const Alignment(0, -0.40),
                         child: Icon(
                           Icons.location_pin,
-                          color: AppColors.blue_4,
+                          color: AppColors.skyBlue,
                           size: 64,
                         ),
                       ),

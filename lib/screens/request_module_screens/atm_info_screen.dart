@@ -2,6 +2,7 @@ import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/screens/profile_module_screens/profile_pic_screen.dart';
 import 'package:cashxchange/screens/request_module_screens/atm_info_widget.dart';
 import 'package:cashxchange/screens/request_module_screens/atm_on_map_screen.dart';
+import 'package:cashxchange/utils/location_services.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -15,147 +16,13 @@ class AtmInfoScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Place Details'),
       ),
-
-      // body: Padding(
-      //   padding: const EdgeInsets.all(16.0),
-      //   child: Column(
-      //     crossAxisAlignment: CrossAxisAlignment.stretch,
-      //     children: [
-      //       // Displaying Image
-      //       CircleAvatar(
-      //         backgroundColor: AppColors.deepGreen,
-      //         radius: 80,
-      //         child: atm['photo_reference'] != null
-      //             ? FutureBuilder(
-      //                 future: getPhotoUrl(atm['photo_reference']),
-      //                 builder: (context, snapshot) {
-      //                   if (snapshot.connectionState ==
-      //                       ConnectionState.waiting) {
-      //                     return const Center(
-      //                         child: CircularProgressIndicator(
-      //                       color: Colors.white,
-      //                     ));
-      //                   } else if (snapshot.hasData) {
-      //                     return GestureDetector(
-      //                       onTap: () {
-      //                         Navigator.of(context).push(
-      //                           MaterialPageRoute(
-      //                             builder: (context) => ImageFullScreen(
-      //                               url: snapshot.data!,
-      //                               heroTag: 'atm_image',
-      //                             ),
-      //                           ),
-      //                         );
-      //                       },
-      //                       child: Hero(
-      //                         tag: 'atm_image',
-      //                         child: ClipOval(
-      //                           child: Image.network(
-      //                             snapshot.data!,
-      //                             width: 150,
-      //                             height: 150,
-      //                             fit: BoxFit.cover,
-      //                           ),
-      //                         ),
-      //                       ),
-      //                     );
-      //                   } else {
-      //                     return const Center(
-      //                       child: Center(
-      //                         child: Column(
-      //                           mainAxisAlignment: MainAxisAlignment.center,
-      //                           children: [
-      //                             Icon(
-      //                               Icons.business,
-      //                               color: Colors.white,
-      //                               size: 70,
-      //                             ),
-      //                             Icon(
-      //                               Icons.atm,
-      //                               color: Colors.white,
-      //                               size: 40,
-      //                             ),
-      //                           ],
-      //                         ),
-      //                       ),
-      //                     );
-      //                   }
-      //                 },
-      //               )
-      //             : const Center(
-      //                 child: Center(
-      //                   child: Column(
-      //                     mainAxisAlignment: MainAxisAlignment.center,
-      //                     children: [
-      //                       Icon(
-      //                         Icons.business,
-      //                         color: Colors.white,
-      //                         size: 70,
-      //                       ),
-      //                       Icon(
-      //                         Icons.atm,
-      //                         color: Colors.white,
-      //                         size: 40,
-      //                       ),
-      //                     ],
-      //                   ),
-      //                 ),
-      //               ),
-      //       ),
-
-      //       // Displaying Place Information
-      //       const SizedBox(height: 16),
-      //       Card(
-      //         elevation: 8.0,
-      //         shape: RoundedRectangleBorder(
-      //           borderRadius: BorderRadius.circular(12.0),
-      //         ),
-
-      //         // child: Padding(
-      //         //   padding: const EdgeInsets.all(16.0),
-      //         //   child: Column(
-      //         //     crossAxisAlignment: CrossAxisAlignment.start,
-      //         //     children: [
-      //         //       Text(
-      //         //         place.name,
-      //         //         style:
-      //         //             TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-      //         //       ),
-      //         //       SizedBox(height: 8),
-      //         //       Text(place.address),
-      //         //       Text('${place.distance} miles away'),
-      //         //       Text('Open Now: ${place.isOpenNow ? 'Yes' : 'No'}'),
-      //         //       Text('Rating: ${place.rating}'),
-      //         //     ],
-      //         //   ),
-      //         // ),
-      //       ),
-
-      //       // Buttons
-      //       SizedBox(height: 16),
-      //       ElevatedButton(
-      //         onPressed: () {
-      //           // Implement your 'Open in Maps' logic here
-      //         },
-      //         child: Text('Open in Maps'),
-      //       ),
-      //       ElevatedButton(
-      //         onPressed: () {
-      //           // Implement your 'View on Map' logic here
-      //         },
-      //         child: Text('View on Map'),
-      //       ),
-      //     ],
-      //   ),
-      // ),
-
       body: ListView(
         children: <Widget>[
           Container(
             height: 280,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppColors.mintGreen, AppColors.blue_4],
+                colors: [AppColors.mintGreen, AppColors.skyBlue],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
@@ -172,7 +39,8 @@ class AtmInfoScreen extends StatelessWidget {
                       minRadius: 78.0,
                       child: atm['photo_reference'] != null
                           ? FutureBuilder(
-                              future: getPhotoUrl(atm['photo_reference']),
+                              future: LocationServices.getPhotoUrl(
+                                  atm['photo_reference']),
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
@@ -280,7 +148,7 @@ class AtmInfoScreen extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
-                        color: AppColors.blue_4),
+                        color: AppColors.skyBlue),
                     child: ListTile(
                       onTap: () {
                         Navigator.of(context).push(
@@ -320,7 +188,7 @@ class AtmInfoScreen extends StatelessWidget {
                     ),
                     child: ListTile(
                       onTap: () {
-                        launchAnyUrl(
+                        MyAppServices.launchAnyUrl(
                           'https://www.google.com/maps/search/?api=1&query=${atm['lat']},${atm['lng']}',
                         );
                       },
@@ -345,7 +213,7 @@ class AtmInfoScreen extends StatelessWidget {
           ),
           Container(
             child: FutureBuilder(
-              future: calculateWalkingDistance(
+              future: LocationServices.calculateWalkingDistance(
                   originLat: atm['currentLat'],
                   originLng: atm['currentLng'],
                   destinationLat: atm['lat'],

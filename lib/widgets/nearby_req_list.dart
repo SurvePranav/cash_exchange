@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/widgets/constant_widget.dart';
 import 'package:cashxchange/widgets/custom_button.dart';
@@ -102,10 +103,14 @@ class NearbyRequestList extends StatelessWidget {
               child: Column(
                 children: [
                   ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: AppColors.mintGreen,
-                      radius: 20,
-                      backgroundImage: NetworkImage(request['profilePic']),
+                    leading: Hero(
+                      tag: request['reqId'],
+                      child: CircleAvatar(
+                        backgroundColor: AppColors.mintGreen,
+                        radius: 20,
+                        backgroundImage:
+                            CachedNetworkImageProvider(request['profilePic']),
+                      ),
                     ),
                     title: Column(
                       mainAxisAlignment: MainAxisAlignment.start,

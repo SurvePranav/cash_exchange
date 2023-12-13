@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:cashxchange/constants/constant_values.dart';
+import 'package:cashxchange/model/request_model.dart';
 import 'package:cashxchange/provider/request_provider.dart';
 import 'package:cashxchange/screens/request_module_screens/request_fullscreen.dart';
 import 'package:flutter/material.dart';
@@ -33,16 +36,17 @@ class _RequestStatusScreenState extends State<RequestStatusScreen> {
       ),
       body: Consumer<RequestProvider>(
         builder: (context, value, child) {
-          return FutureBuilder<List<Map<String, dynamic>>>(
+          return FutureBuilder<List<RequestModel>>(
             future: value.getActiveRequests(onlyMyRequests: true),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasData) {
-                List<Map<String, dynamic>> documents = snapshot.data ?? [];
+                log('my requests: ${snapshot.data!.length}');
+                List<RequestModel> documents = snapshot.data ?? [];
                 return ActiveRequestsList(
                   requests: documents,
-                  onTap: (Map<String, dynamic> request) {
+                  onTap: (RequestModel request) {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => RequestDetailsScreen(

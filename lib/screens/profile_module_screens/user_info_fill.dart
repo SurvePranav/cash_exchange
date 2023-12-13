@@ -2,8 +2,9 @@ import 'dart:io';
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
-import 'package:cashxchange/provider/location_provider.dart';
+import 'package:cashxchange/provider/utility_provider.dart';
 import 'package:cashxchange/screens/main_body.dart';
+import 'package:cashxchange/utils/location_services.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:cashxchange/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
@@ -168,7 +169,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                               ),
 
                               //location
-                              Consumer<LocationProvider>(
+                              Consumer<UtilityProvider>(
                                 builder: (context, value, child) {
                                   return textFeld(
                                       hintText: "Enter your address",
@@ -183,14 +184,15 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                                       // locationButtonIcon: Icons.location_pin,
                                       onLocationPressed: () async {
                                         value.setLoading(true);
-                                        await value
-                                            .getCurrentLocation()
+                                        await LocationServices
+                                                .getCurrentLocation()
                                             .then((val) async {
                                           lat = '${val[0]}';
                                           lon = '${val[1]}';
-                                          locationController.text = await value
-                                              .getAddressFromCoordinates(
-                                                  val[0], val[1]);
+                                          locationController.text =
+                                              await LocationServices
+                                                  .getAddressFromCoordinates(
+                                                      val[0], val[1]);
                                           value.setLoading(false);
                                         });
                                       });
@@ -212,33 +214,29 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                         SizedBox(
                           height: 50,
                           width: MediaQuery.of(context).size.width * 0.85,
-                          child: Consumer<LocationProvider>(
-                            builder: (context, value, child) {
-                              return CustomButton(
-                                text: widget.editProfile
-                                    ? "Update Profile"
-                                    : "Continue",
-                                onPressed: () async {
-                                  // getting latitude and longitude from address
-                                  await value
+                          child: CustomButton(
+                            text: widget.editProfile
+                                ? "Update Profile"
+                                : "Continue",
+                            onPressed: () async {
+                              // getting latitude and longitude from address
+                              await LocationServices
                                       .getCoordinatesFromAddressString(
                                           locationController.text.trim())
-                                      .then((coordinates) async {
-                                    if (coordinates.isNotEmpty) {
-                                      lat = coordinates[0].toString();
-                                      lon = coordinates[1].toString();
-                                    } else {
-                                      List co =
-                                          await value.getCurrentLocation();
-                                      lat = co[0].toString();
-                                      lon = co[1].toString();
-                                    }
+                                  .then((coordinates) async {
+                                if (coordinates.isNotEmpty) {
+                                  lat = coordinates[0].toString();
+                                  lon = coordinates[1].toString();
+                                } else {
+                                  List co = await LocationServices
+                                      .getCurrentLocation();
+                                  lat = co[0].toString();
+                                  lon = co[1].toString();
+                                }
 
-                                    //calling store data function
-                                    await storeData();
-                                  });
-                                },
-                              );
+                                //calling store data function
+                                await storeData();
+                              });
                             },
                           ),
                         )
@@ -317,7 +315,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(
-              color: AppColors.blue_4,
+              color: AppColors.skyBlue,
             ),
           ),
           hintText: hintText,
@@ -333,8 +331,9 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
   // for selecting image
 
   void selectImage() async {
-    await checkPermission(Permission.photos, context).then((value) async {
-      await pickImage(context).then((pickedImage) async {
+    await MyAppServices.checkPermission(Permission.photos, context)
+        .then((value) async {
+      await MyAppServices.pickImage(context).then((pickedImage) async {
         if (pickedImage != null) {
           image = pickedImage;
           setState(() {});
@@ -385,6 +384,8 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
           address: locationController.text.trim(),
           locationLat: lat,
           locationLon: lon,
+          connections: [],
+          isOnline: false,
         );
         await ap.saveUserDataToFirebase(
           context: context,
@@ -403,10 +404,10 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
           },
         );
       } else {
-        showSlackBar(context, "please Select Image");
+        MyAppServices.showSlackBar(context, "please Select Image");
       }
     } else {
-      showSlackBar(context, "please fill all the fields");
+      MyAppServices.showSlackBar(context, "please fill all the fields");
     }
   }
 }

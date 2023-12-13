@@ -1,18 +1,18 @@
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/request_model.dart';
 import 'package:cashxchange/model/user_model.dart';
-import 'package:cashxchange/provider/auth_provider.dart';
-import 'package:cashxchange/provider/location_provider.dart';
+import 'package:cashxchange/provider/connectivity_provider.dart';
 import 'package:cashxchange/provider/request_provider.dart';
 import 'package:cashxchange/screens/request_module_screens/active_requests_screen.dart';
-import 'package:cashxchange/screens/request_module_screens/pick_location.dart';
 import 'package:cashxchange/screens/request_module_screens/request_success_screen.dart';
+import 'package:cashxchange/utils/location_services.dart';
+import 'package:cashxchange/utils/util.dart';
 import 'package:cashxchange/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class RaiseRequestScreen extends StatefulWidget {
-  final Map<String, dynamic>? request;
+  final RequestModel? request;
   final bool editRequest;
   const RaiseRequestScreen({
     super.key,
@@ -31,16 +31,14 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
 
   final amountController = TextEditingController();
   final infoController = TextEditingController();
-  double lat = double.parse(UserModel.instance.locationLat);
-  double lon = double.parse(UserModel.instance.locationLon);
   int i = 0;
 
   @override
   void initState() {
     if (widget.editRequest) {
-      amountController.text = widget.request!['amount'];
-      infoController.text = widget.request!['info'];
-      _requestType = widget.request!['type'];
+      amountController.text = widget.request!.amount;
+      infoController.text = widget.request!.info;
+      _requestType = widget.request!.type;
     }
     super.initState();
   }
@@ -56,9 +54,9 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            AppColors.blue_4,
+            AppColors.skyBlue,
             AppColors.mintGreen,
-            AppColors.blue_2,
+            AppColors.lightMintGreen,
           ],
         ),
       ),
@@ -104,7 +102,7 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide(
-                        color: AppColors.blue_4,
+                        color: AppColors.skyBlue,
                       ),
                     ),
                   ),
@@ -142,145 +140,7 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                       const SizedBox(
                         height: 20,
                       ),
-                      widget.editRequest
-                          ? const SizedBox()
-                          : Column(
-                              children: [
-                                const Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    'Location',
-                                    style: TextStyle(fontSize: 20.0),
-                                  ),
-                                ),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        children: [
-                                          ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: activeButton == 0
-                                                  ? AppColors.blue_6
-                                                  : Colors.white,
-                                            ),
-                                            onPressed: () {
-                                              lat = double.parse(UserModel
-                                                  .instance.locationLat);
-                                              lon = double.parse(UserModel
-                                                  .instance.locationLon);
 
-                                              setState(() {
-                                                activeButton = 0;
-                                              });
-                                            },
-                                            child: Icon(
-                                              Icons.location_pin,
-                                              color: activeButton == 0
-                                                  ? Colors.white
-                                                  : AppColors.deepGreen,
-                                            ),
-                                          ),
-                                          const Text("My Location"),
-                                        ],
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Column(
-                                        children: [
-                                          Consumer<LocationProvider>(
-                                            builder: (context, value, child) {
-                                              return ElevatedButton(
-                                                style: ElevatedButton.styleFrom(
-                                                    backgroundColor:
-                                                        activeButton == 1
-                                                            ? AppColors.blue_6
-                                                            : Colors.white),
-                                                onPressed: () async {
-                                                  setState(() {
-                                                    activeButton = 1;
-                                                  });
-                                                  value.setLoading(true);
-                                                  await value
-                                                      .getCurrentLocation()
-                                                      .then((pos) {
-                                                    lat = pos[0];
-                                                    lon = pos[1];
-                                                  });
-                                                  value.setLoading(false);
-                                                },
-                                                child: value.isLoading
-                                                    ? const SizedBox(
-                                                        height: 20,
-                                                        width: 20,
-                                                        child:
-                                                            CircularProgressIndicator(
-                                                          color: Colors.white,
-                                                        ),
-                                                      )
-                                                    : Icon(
-                                                        Icons
-                                                            .location_searching,
-                                                        color: activeButton == 1
-                                                            ? Colors.white
-                                                            : AppColors
-                                                                .deepGreen),
-                                              );
-                                            },
-                                          ),
-                                          const Text("Current Location"),
-                                        ],
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Column(
-                                        children: [
-                                          ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: activeButton == 2
-                                                  ? AppColors.blue_6
-                                                  : Colors.white,
-                                            ),
-                                            onPressed: () async {
-                                              await Navigator.of(context)
-                                                  .push(
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      PickLocationScreen(
-                                                    coordinates: [lat, lon],
-                                                  ),
-                                                ),
-                                              )
-                                                  .then((results) {
-                                                if (results != null &&
-                                                    results.isNotEmpty) {
-                                                  lat = results[0];
-                                                  lon = results[1];
-
-                                                  setState(() {
-                                                    activeButton = 2;
-                                                  });
-                                                }
-                                              });
-                                            },
-                                            child: Icon(
-                                              Icons.map,
-                                              color: activeButton == 2
-                                                  ? Colors.white
-                                                  : AppColors.deepGreen,
-                                            ),
-                                          ),
-                                          const Text("From Map"),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 20,
-                                ),
-                              ],
-                            ),
                       const Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -296,6 +156,41 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                         maxLines: 3,
                         controller: infoController,
                       ),
+                      widget.editRequest
+                          ? const SizedBox()
+                          : Column(
+                              children: [
+                                const Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    'Location',
+                                    style: TextStyle(fontSize: 20.0),
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        height: 40,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          color: Colors.white,
+                                        ),
+                                        child: const Text(
+                                          "Using Current Location",
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(
+                                  height: 20,
+                                ),
+                              ],
+                            ),
                     ],
                   ),
                 ),
@@ -322,7 +217,14 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                       text:
                           widget.editRequest ? "Edit Request" : "Raise Request",
                       onPressed: () async {
-                        await raiseRequest();
+                        if (Provider.of<ConnectivityProvider>(context,
+                                listen: false)
+                            .isConnected) {
+                          await raiseRequest();
+                        } else {
+                          MyAppServices.showSlackBar(
+                              context, "No Internet Connection!");
+                        }
                       }),
                 ),
                 const SizedBox(
@@ -330,7 +232,10 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                 ),
                 Text(
                   warningText,
-                  style: const TextStyle(color: Colors.red, fontSize: 13),
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
@@ -376,7 +281,7 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(
-              color: AppColors.blue_4,
+              color: AppColors.skyBlue,
             ),
           ),
           hintText: hintText,
@@ -393,11 +298,10 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
     if (amountController.text.isNotEmpty && infoController.text.isNotEmpty) {
       final requestProvider =
           Provider.of<RequestProvider>(context, listen: false);
-
       if (widget.editRequest) {
         await requestProvider
             .updateRequestById(
-                reqId: widget.request!['reqId'],
+                reqId: widget.request!.reqId,
                 type: _requestType,
                 amount: amountController.text,
                 info: infoController.text)
@@ -411,34 +315,42 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
           );
         });
       } else {
-        RequestModel.instance.initializeRequest(
-          reqId: '',
-          uid: Provider.of<AuthProvider>(context, listen: false).uid,
-          createdAt: DateTime.now(),
-          amount: amountController.text.trim(),
-          type: _requestType,
-          info: infoController.text.trim(),
-          locationLat: lat,
-          locationLon: lon,
-          views: 0,
-          isAccepted: false,
-        );
-        await requestProvider
-            .uploadRequestToDatabase(context: context)
-            .then((success) {
-          if (success) {
-            amountController.text = '';
-            infoController.text = '';
-            _requestType = 'Cash';
-            activeButton = 0;
-            warningText = '';
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                  builder: (context) => const RequestSuccessScreen()),
-            );
-          } else {
-            warningText = 'something went wrong on server';
-          }
+        await LocationServices.getCurrentLocation().then((coordinates) {
+          final request = RequestModel(
+            reqId: DateTime.now().millisecondsSinceEpoch.toString(),
+            uid: UserModel.instance.uid,
+            createdAt: DateTime.now(),
+            amount: amountController.text.trim(),
+            type: _requestType,
+            info: infoController.text.trim(),
+            locationLat: coordinates[0],
+            locationLon: coordinates[1],
+            views: 0,
+            isAccepted: false,
+          );
+          requestProvider
+              .uploadRequestToDatabase(
+            context: context,
+            request: request,
+          )
+              .then((success) {
+            if (success) {
+              amountController.text = '';
+              infoController.text = '';
+              _requestType = 'Cash';
+              activeButton = 0;
+              warningText = '';
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => RequestSuccessScreen(
+                    request: request,
+                  ),
+                ),
+              );
+            } else {
+              warningText = 'something went wrong on server';
+            }
+          });
         });
       }
     } else {

@@ -59,16 +59,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         size: 25,
                         color: AppColors.deepGreen,
                       ),
-                      onPressed: () async {
-                        await ap.userSignOut().then(
+                      onPressed: () {
+                        ap.updateUserActiveStatus(false).then(
                           (value) {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return const WelcomeScreen();
-                                },
-                              ),
-                            );
+                            ap.userSignOut().then((value) {
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const WelcomeScreen()),
+                                (route) => false,
+                              );
+                            });
                           },
                         );
                       },
@@ -92,7 +94,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [Colors.white, AppColors.blue_2],
+                          colors: [Colors.white, AppColors.lightMintGreen],
                         ),
                       ),
                       child: Column(
