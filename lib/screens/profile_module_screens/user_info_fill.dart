@@ -386,6 +386,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
           locationLon: lon,
           connections: [],
           isOnline: false,
+          pushToken: "",
         );
         await ap.saveUserDataToFirebase(
           context: context,

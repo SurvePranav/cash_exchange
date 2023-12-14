@@ -27,11 +27,9 @@ class RaiseRequestScreen extends StatefulWidget {
 class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
   String _requestType = 'Cash';
   int activeButton = 0;
-  String warningText = '';
-
+  bool isPressed = false;
   final amountController = TextEditingController();
   final infoController = TextEditingController();
-  int i = 0;
 
   @override
   void initState() {
@@ -217,25 +215,10 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                       text:
                           widget.editRequest ? "Edit Request" : "Raise Request",
                       onPressed: () async {
-                        if (Provider.of<ConnectivityProvider>(context,
-                                listen: false)
-                            .isConnected) {
+                        if (!isPressed) {
                           await raiseRequest();
-                        } else {
-                          MyAppServices.showSlackBar(
-                              context, "No Internet Connection!");
                         }
                       }),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Text(
-                  warningText,
-                  style: const TextStyle(
-                    color: Colors.red,
-                    fontSize: 13,
-                  ),
                 ),
               ],
             ),
@@ -295,67 +278,82 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
   }
 
   Future<void> raiseRequest() async {
-    if (amountController.text.isNotEmpty && infoController.text.isNotEmpty) {
-      final requestProvider =
-          Provider.of<RequestProvider>(context, listen: false);
-      if (widget.editRequest) {
-        await requestProvider
-            .updateRequestById(
-                reqId: widget.request!.reqId,
-                type: _requestType,
-                amount: amountController.text,
-                info: infoController.text)
-            .then((success) {
-          Navigator.of(context).pop();
-          Navigator.of(context).pop();
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => const RequestStatusScreen(),
-            ),
-          );
-        });
-      } else {
-        await LocationServices.getCurrentLocation().then((coordinates) {
-          final request = RequestModel(
-            reqId: DateTime.now().millisecondsSinceEpoch.toString(),
-            uid: UserModel.instance.uid,
-            createdAt: DateTime.now(),
-            amount: amountController.text.trim(),
-            type: _requestType,
-            info: infoController.text.trim(),
-            locationLat: coordinates[0],
-            locationLon: coordinates[1],
-            views: 0,
-            isAccepted: false,
-          );
-          requestProvider
-              .uploadRequestToDatabase(
-            context: context,
-            request: request,
-          )
-              .then((success) {
-            if (success) {
-              amountController.text = '';
-              infoController.text = '';
-              _requestType = 'Cash';
-              activeButton = 0;
-              warningText = '';
-              Navigator.of(context).push(
+    if (Provider.of<ConnectivityProvider>(context, listen: false).isConnected) {
+      if (amountController.text.isNotEmpty && infoController.text.isNotEmpty) {
+        if (int.parse(amountController.text) <= 2000) {
+          final requestProvider =
+              Provider.of<RequestProvider>(context, listen: false);
+          requestProvider.setLoading(true);
+          isPressed = true;
+          if (widget.editRequest) {
+            await requestProvider
+                .updateRequestById(
+                    reqId: widget.request!.reqId,
+                    type: _requestType,
+                    amount: amountController.text,
+                    info: infoController.text)
+                .then((success) {
+              requestProvider.setLoading(false);
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+              Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
-                  builder: (context) => RequestSuccessScreen(
-                    request: request,
-                  ),
+                  builder: (context) => const RequestStatusScreen(),
                 ),
               );
-            } else {
-              warningText = 'something went wrong on server';
-            }
-          });
-        });
+            });
+          } else {
+            await LocationServices.getCurrentLocation().then((coordinates) {
+              final request = RequestModel(
+                reqId: DateTime.now().millisecondsSinceEpoch.toString(),
+                uid: UserModel.instance.uid,
+                createdAt: DateTime.now(),
+                amount: amountController.text.trim(),
+                type: _requestType,
+                info: infoController.text.trim(),
+                locationLat: coordinates[0],
+                locationLon: coordinates[1],
+                views: 0,
+                isAccepted: false,
+              );
+              requestProvider
+                  .uploadRequestToDatabase(
+                context: context,
+                request: request,
+              )
+                  .then((success) {
+                if (success) {
+                  amountController.text = '';
+                  infoController.text = '';
+                  _requestType = 'Cash';
+                  activeButton = 0;
+                  isPressed = false;
+                  requestProvider.setLoading(false);
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => RequestSuccessScreen(
+                        request: request,
+                      ),
+                    ),
+                  );
+                } else {
+                  MyAppServices.showSlackBar(
+                      context, "something went wrong on server");
+                }
+              });
+            });
+          }
+        } else {
+          MyAppServices.showSlackBar(
+            context,
+            "Amount Should be less than Rs.2000",
+          );
+        }
+      } else {
+        MyAppServices.showSlackBar(context, "fill all the details");
       }
     } else {
-      warningText = 'Fill all the details';
+      MyAppServices.showSlackBar(context, "No internet Connection");
     }
-    setState(() {});
   }
 }

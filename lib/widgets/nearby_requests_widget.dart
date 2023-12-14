@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
-import 'package:cashxchange/provider/utility_provider.dart';
 import 'package:cashxchange/provider/request_provider.dart';
 import 'package:cashxchange/utils/location_services.dart';
 import 'package:cashxchange/widgets/constant_widget.dart';

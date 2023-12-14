@@ -1,12 +1,9 @@
-import 'dart:convert';
 import 'dart:developer';
 import 'package:cashxchange/model/request_model.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:pinput/pinput.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class RequestProvider extends ChangeNotifier {
   bool _isLoading = false;
@@ -48,7 +45,6 @@ class RequestProvider extends ChangeNotifier {
     required BuildContext context,
     required RequestModel request,
   }) async {
-    setLoading(true);
     try {
       await _firebaseFirestore
           .collection("request")
@@ -58,11 +54,9 @@ class RequestProvider extends ChangeNotifier {
         _isLoading = false;
         notifyListeners();
       });
-      setLoading(false);
       return true;
     } catch (e) {
       MyAppServices.showSlackBar(context, e.toString());
-      setLoading(false);
       return false;
     }
   }

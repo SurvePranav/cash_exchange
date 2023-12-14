@@ -1,6 +1,5 @@
 import 'dart:developer';
 import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cashxchange/main.dart';
 import 'package:cashxchange/model/connection_model.dart';
@@ -8,6 +7,7 @@ import 'package:cashxchange/model/message_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/provider/messaging_provider.dart';
 import 'package:cashxchange/provider/utility_provider.dart';
+import 'package:cashxchange/screens/chat_module_screens/view_profile_screen.dart';
 import 'package:cashxchange/widgets/message_card.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -23,8 +23,6 @@ class MessageScreen extends StatefulWidget {
 }
 
 class _MessageScreenState extends State<MessageScreen> {
-  // late ScrollController _scrollController;
-
   List<Message> _list = [];
   final TextEditingController _messageController = TextEditingController();
 
@@ -56,65 +54,80 @@ class _MessageScreenState extends State<MessageScreen> {
                 data?.map((e) => Connection.fromJson(e.data())).toList() ?? [];
 
             return SafeArea(
-              child: Container(
-                padding: const EdgeInsets.only(right: 16),
-                child: Row(
-                  children: <Widget>[
-                    IconButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: const Icon(
-                        Icons.arrow_back,
-                        color: Colors.black,
+              child: InkWell(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) =>
+                          ViewProfileScreen(connection: widget.connection)));
+                },
+                child: Container(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: Row(
+                    children: <Widget>[
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.black,
+                        ),
                       ),
-                    ),
-                    const SizedBox(
-                      width: 2,
-                    ),
-                    CircleAvatar(
-                      backgroundImage: CachedNetworkImageProvider(
-                        list.isNotEmpty
-                            ? list.first.profilePic
-                            : widget.connection.profilePic,
+                      const SizedBox(
+                        width: 2,
                       ),
-                      maxRadius: 20,
-                    ),
-                    const SizedBox(
-                      width: 12,
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            list.isNotEmpty
-                                ? list.first.name
-                                : widget.connection.name,
-                            style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w600),
-                          ),
-                          const SizedBox(
-                            height: 6,
-                          ),
-                          Text(
-                            list.isNotEmpty
-                                ? list.first.isOnline
-                                    ? 'Online'
-                                    : 'Offline'
-                                : 'Not Specified',
-                            style: TextStyle(
-                                color: Colors.grey.shade600, fontSize: 13),
-                          ),
-                        ],
+                      CircleAvatar(
+                        backgroundImage: CachedNetworkImageProvider(
+                          list.isNotEmpty
+                              ? list.first.profilePic
+                              : widget.connection.profilePic,
+                        ),
+                        maxRadius: 20,
                       ),
-                    ),
-                    const Icon(
-                      Icons.settings,
-                      color: Colors.black54,
-                    ),
-                  ],
+                      const SizedBox(
+                        width: 12,
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              list.isNotEmpty
+                                  ? list.first.name
+                                  : widget.connection.name,
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(
+                              height: 6,
+                            ),
+                            Text(
+                              list.isNotEmpty
+                                  ? list.first.isOnline
+                                      ? 'Online'
+                                      : 'Offline'
+                                  : 'Not Specified',
+                              style: list.isNotEmpty && list.first.isOnline
+                                  ? TextStyle(
+                                      color: Colors.green.shade600,
+                                      fontSize: 13)
+                                  : TextStyle(
+                                      color: Colors.grey.shade600,
+                                      fontSize: 13),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.phone,
+                          color: Colors.black54,
+                        ),
+                        onPressed: () {},
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );

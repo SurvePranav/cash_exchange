@@ -11,6 +11,7 @@ class Connection {
     required this.locationLat,
     required this.locationLon,
     required this.isOnline,
+    required this.pushToken,
   });
 
   late final String name;
@@ -24,6 +25,7 @@ class Connection {
   late final String locationLat;
   late final String locationLon;
   late final bool isOnline;
+  late final String pushToken;
 
   // from json
   Connection.fromJson(Map<String, dynamic> json) {
@@ -38,6 +40,7 @@ class Connection {
     locationLat = json['locationLat'] ?? '';
     locationLon = json['locationLon'] ?? '';
     isOnline = json['isOnline'] ?? false;
+    pushToken = json['pushToken'] ?? '';
   }
 
   // to json
@@ -54,6 +57,7 @@ class Connection {
     data['locationLat'] = locationLat;
     data['locationLon'] = locationLon;
     data['isOnline'] = isOnline;
+    data['pushToken'] = pushToken;
     return data;
   }
 
@@ -70,6 +74,7 @@ class Connection {
         'uid: $uid, '
         'address: $address, '
         'isOnline: $isOnline, '
+        'pushToken: $pushToken, '
         'locationLat: $locationLat, '
         'locationLon: $locationLon'
         '}';

@@ -5,6 +5,7 @@ import 'package:cashxchange/model/message_model.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/messaging_provider.dart';
 import 'package:cashxchange/utils/date_util.dart';
+import 'package:cashxchange/widgets/dialogs/profile_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -47,13 +48,22 @@ class _ChatTileState extends State<ChatTile> {
                   Expanded(
                     child: Row(
                       children: <Widget>[
-                        CircleAvatar(
-                          backgroundColor: AppColors.deepGreen,
-                          backgroundImage: const AssetImage(
-                              'assets/images/profile_icon.png'),
-                          foregroundImage: CachedNetworkImageProvider(
-                              widget.connection.profilePic),
-                          maxRadius: 30,
+                        InkWell(
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) =>
+                                  ProfileDialog(connection: widget.connection),
+                            );
+                          },
+                          child: CircleAvatar(
+                            backgroundColor: AppColors.deepGreen,
+                            backgroundImage: const AssetImage(
+                                'assets/images/profile_icon.png'),
+                            foregroundImage: CachedNetworkImageProvider(
+                                widget.connection.profilePic),
+                            maxRadius: 30,
+                          ),
                         ),
                         const SizedBox(
                           width: 16,

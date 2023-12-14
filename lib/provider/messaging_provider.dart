@@ -1,7 +1,9 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:cashxchange/model/connection_model.dart';
 import 'package:cashxchange/model/message_model.dart';
 import 'package:cashxchange/model/user_model.dart';
+import 'package:cashxchange/utils/notification_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -43,7 +45,9 @@ class MessagingProvider with ChangeNotifier {
     final time = DateTime.now().millisecondsSinceEpoch.toString();
     final ref = _firebaseFirestore
         .collection('chats/${_getConversationId(connection.uid)}/messages');
-    await ref.doc(time).set(
+    await ref
+        .doc(time)
+        .set(
           Message(
             toId: connection.uid,
             msg: msg,
@@ -52,6 +56,16 @@ class MessagingProvider with ChangeNotifier {
             sent: time,
             fromId: UserModel.instance.uid,
           ).toJson(),
+        )
+        .then(
+          (value) => NotificationServics.sendChatPushNotification(
+            connection,
+            type == MsgType.text
+                ? msg
+                : type == MsgType.image
+                    ? '📷 Photo'
+                    : 'Accepted Request',
+          ),
         );
   }
 

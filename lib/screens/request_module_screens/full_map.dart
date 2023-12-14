@@ -1,7 +1,6 @@
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/request_model.dart';
 import 'package:cashxchange/model/user_model.dart';
-import 'package:cashxchange/provider/utility_provider.dart';
 import 'package:cashxchange/provider/request_provider.dart';
 import 'package:cashxchange/utils/location_services.dart';
 import 'package:cashxchange/utils/util.dart';

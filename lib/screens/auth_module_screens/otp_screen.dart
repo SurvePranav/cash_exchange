@@ -1,11 +1,9 @@
-import 'dart:developer';
-
 import 'package:cashxchange/constants/constant_values.dart';
+import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/provider/connectivity_provider.dart';
+import 'package:cashxchange/provider/messaging_provider.dart';
 import 'package:cashxchange/provider/utility_provider.dart';
-import 'package:cashxchange/screens/home_screen.dart';
-import 'package:cashxchange/screens/profile_module_screens/user_info_fill.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:cashxchange/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
@@ -159,6 +157,7 @@ class _OTPScreenState extends State<OTPScreen> {
     if (Provider.of<ConnectivityProvider>(context, listen: false).isConnected) {
       final up = Provider.of<UtilityProvider>(context, listen: false);
       final ap = Provider.of<AuthProvider>(context, listen: false);
+      final mp = Provider.of<MessagingProvider>(context, listen: false);
       up.setLoading(true);
       ap.verifyOtp(
         verificationId: widget.verificationId,

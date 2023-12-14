@@ -1,10 +1,9 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:cashxchange/model/connection_model.dart';
 import 'package:cashxchange/model/user_model.dart';
-import 'package:cashxchange/provider/utility_provider.dart';
+import 'package:cashxchange/provider/messaging_provider.dart';
 import 'package:cashxchange/screens/auth_module_screens/otp_screen.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -169,7 +168,7 @@ class AuthProvider extends ChangeNotifier {
         // Uploading Image To Fierebase Storage
         final ext = profilePic!.path.split('.').last;
         await storeFileToStroage("profilePic/$_uid.$ext", profilePic!)
-            .then((value) {
+            .then((value) async {
           UserModel.instance.profilePic = value;
           UserModel.instance.createdAt =
               DateTime.now().millisecondsSinceEpoch.toString();
@@ -215,6 +214,7 @@ class AuthProvider extends ChangeNotifier {
         locationLon: snapshot['locationLon'],
         connections: snapshot['connections'] ?? [],
         isOnline: snapshot['isOnline'] ?? false,
+        pushToken: snapshot['pushToken'] ?? '',
       );
       _uid = UserModel.instance.uid;
       notifyListeners();
@@ -262,10 +262,10 @@ class AuthProvider extends ChangeNotifier {
 
   // update user's active status
   Future<void> updateUserActiveStatus(bool isOnline) async {
-    _firebaseFirestore
-        .collection('users')
-        .doc(UserModel.instance.uid)
-        .update({'isOnline': isOnline});
+    _firebaseFirestore.collection('users').doc(UserModel.instance.uid).update({
+      'isOnline': isOnline,
+      'pushToken': UserModel.instance.pushToken,
+    });
   }
 
   Stream<QuerySnapshot<Map<String, dynamic>>> getUserById(
