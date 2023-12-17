@@ -1,9 +1,9 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:cashxchange/model/connection_model.dart';
 import 'package:cashxchange/model/user_model.dart';
-import 'package:cashxchange/provider/messaging_provider.dart';
 import 'package:cashxchange/screens/auth_module_screens/otp_screen.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,7 +11,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -127,6 +126,8 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  ////////////////////////////////////***************** Authentication Functions End Here   ****************///////////////////////////////// */
+
   // database operations
 
   Future<bool> checkIfUserExists() async {
@@ -175,6 +176,7 @@ class AuthProvider extends ChangeNotifier {
           UserModel.instance.phoneNumber =
               _firebaseAuth.currentUser!.phoneNumber!;
           UserModel.instance.uid = _firebaseAuth.currentUser!.uid;
+
           notifyListeners();
         });
       }
@@ -212,9 +214,11 @@ class AuthProvider extends ChangeNotifier {
         address: snapshot['address'],
         locationLat: snapshot['locationLat'],
         locationLon: snapshot['locationLon'],
-        connections: snapshot['connections'] ?? [],
         isOnline: snapshot['isOnline'] ?? false,
         pushToken: snapshot['pushToken'] ?? '',
+        connections: (snapshot['connections'] as List<dynamic>)
+            .map((e) => e.toString())
+            .toList(),
       );
       _uid = UserModel.instance.uid;
       notifyListeners();
@@ -222,19 +226,9 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // retrive user info by id
-  Future<Map<String, String>> getUserDataById({required String uid}) async {
-    Map<String, String> userData = {};
-    await _firebaseFirestore
-        .collection("users")
-        .doc(uid)
-        .get()
-        .then((DocumentSnapshot snapshot) {
-      userData['name'] = snapshot['name'];
-      userData['profilePic'] = snapshot['profilePic'];
-      userData['bio'] = snapshot['bio'];
-      return userData;
-    });
-    return userData;
+  Future<Map<String, dynamic>> getUserDataById({required String uid}) async {
+    final data = await _firebaseFirestore.collection("users").doc(uid).get();
+    return data.data() ?? {};
   }
 
   // upload image file fuc
@@ -268,11 +262,93 @@ class AuthProvider extends ChangeNotifier {
     });
   }
 
-  Stream<QuerySnapshot<Map<String, dynamic>>> getUserById(
-      Connection connection) {
+  // add new connection to senders connections(sedondary)
+  Future<void> addToReceiversConnection({required String receiverUid}) async {
+    _firebaseFirestore
+        .collection('users')
+        .doc(receiverUid)
+        .collection('my_connections')
+        .doc(UserModel.instance.uid)
+        .set({
+      'uid': UserModel.instance.uid,
+      'canMessage': true,
+      'primary': false,
+    });
+  }
+
+  // add new connection to my connections
+  Future<void> addToMyConnection({
+    required String senderUid,
+  }) async {
+    _firebaseFirestore
+        .collection('users')
+        .doc(UserModel.instance.uid)
+        .collection('my_connections')
+        .doc(senderUid)
+        .set({
+      'uid': uid,
+      'canMessage': true,
+      'primary': true,
+    });
+    _firebaseFirestore.collection('users').doc(UserModel.instance.uid).update(
+      {
+        'connections': FieldValue.arrayUnion([uid]),
+      },
+    );
+    UserModel.instance.connections.add(uid);
+    saveDataToSP();
+  }
+
+  // get my connections stream (primary)
+  Stream<QuerySnapshot<Map<String, dynamic>>> getMyConnections(
+      List<String> users) {
+    log("my connections: ${UserModel.instance.connections}");
+    if (users.isNotEmpty) {
+      return _firebaseFirestore
+          .collection('users')
+          .where(FieldPath.documentId, whereIn: users)
+          .snapshots();
+    } else {
+      return const Stream<QuerySnapshot<Map<String, dynamic>>>.empty();
+    }
+  }
+
+  // get my secondary connections
+  Stream<QuerySnapshot<Map<String, dynamic>>> getMySecondaryConnections() {
     return _firebaseFirestore
         .collection('users')
-        .where('uid', isEqualTo: connection.uid)
+        .doc(UserModel.instance.uid)
+        .collection('my_connections')
+        .where('primary', isEqualTo: false)
+        .snapshots();
+  }
+
+// check if user is connected or not
+  Future<bool> checkIfUsersConnectedBefore(String userId) async {
+    final querySnapshot = await _firebaseFirestore
+        .collection('users')
+        .doc(UserModel.instance.uid)
+        .collection('my_connections')
+        .where('uid', isEqualTo: userId)
+        .get();
+
+    // Check if there are any documents that match the query
+    return querySnapshot.docs.isNotEmpty;
+  }
+
+  // get all users stream accept me
+  Stream<QuerySnapshot<Map<String, dynamic>>> getAllUsers() {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .where('uid', isNotEqualTo: UserModel.instance.uid)
+        .snapshots();
+  }
+
+  /// get single user stream by id
+  Stream<QuerySnapshot<Map<String, dynamic>>> getUserById(String uid) {
+    return _firebaseFirestore
+        .collection('users')
+        .where('uid', isEqualTo: uid)
         .snapshots();
   }
 }

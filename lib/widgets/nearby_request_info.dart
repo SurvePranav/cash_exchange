@@ -15,14 +15,14 @@ class NearbyRequestInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Request Info")),
-      body: FutureBuilder<Map<String, String>>(
+      body: FutureBuilder<Map<String, dynamic>>(
         future: Provider.of<AuthProvider>(context, listen: false)
             .getUserDataById(uid: request['uid']),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.connectionState == ConnectionState.done) {
-            final Map<String, String> userData = snapshot.data ?? {};
+            final Map<String, dynamic> userData = snapshot.data ?? {};
 
             return Padding(
               padding: const EdgeInsets.all(16.0),

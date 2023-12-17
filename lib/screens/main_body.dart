@@ -2,14 +2,12 @@ import 'dart:developer';
 
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
-import 'package:cashxchange/provider/messaging_provider.dart';
 import 'package:cashxchange/screens/chat_module_screens/chat_screen.dart';
 import 'package:cashxchange/screens/home_screen.dart';
 import 'package:cashxchange/screens/request_module_screens/request_screen.dart';
 import 'package:cashxchange/utils/notification_services.dart';
 import 'package:cashxchange/widgets/custom_bottom_navigation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 
@@ -20,34 +18,20 @@ class MainBody extends StatefulWidget {
   State<MainBody> createState() => _MainBodyState();
 }
 
-class _MainBodyState extends State<MainBody> {
+class _MainBodyState extends State<MainBody> with WidgetsBindingObserver {
   int _currentPage = 0;
-
+  late final AuthProvider ap;
   @override
   void initState() {
     _currentPage = widget.currentIndex;
     initializeNotifications();
-    final ap = Provider.of<AuthProvider>(context, listen: false);
+    ap = Provider.of<AuthProvider>(context, listen: false);
     NotificationServics.getFirebaseMessagingToken(getMyToken: true)
         .then((value) {
       log('setting user online for first time');
       ap.updateUserActiveStatus(true);
     });
-    SystemChannels.lifecycle.setMessageHandler((message) {
-      log('My message: $message');
-      if (ap.isSignedIn) {
-        if (message.toString().contains('pause')) {
-          log("setting online false");
-          ap.updateUserActiveStatus(false);
-        }
-        if (message.toString().contains('resume')) {
-          log("setting online true");
-          ap.updateUserActiveStatus(true);
-        }
-      }
-
-      return Future.value(message);
-    });
+    WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
 
@@ -86,10 +70,34 @@ class _MainBodyState extends State<MainBody> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (ap.isSignedIn) {
+      switch (state) {
+        case AppLifecycleState.resumed:
+          ap.updateUserActiveStatus(true);
+        case AppLifecycleState.detached:
+          ap.updateUserActiveStatus(false);
+        case AppLifecycleState.inactive:
+          ap.updateUserActiveStatus(false);
+        case AppLifecycleState.paused:
+          ap.updateUserActiveStatus(false);
+        default:
+          break;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: _currentPage == 0 ? true : false,
-      onPopInvoked: (myval) async {
+      onPopInvoked: (didPop) {
         _currentPage = 0;
         setState(() {});
       },
@@ -121,8 +129,10 @@ class _MainBodyState extends State<MainBody> {
         bottomNavigationBar: MyCustomBottomNaviationBar(
           selectedIndex: _currentPage,
           onTabChange: (int index) {
-            _currentPage = index;
-            setState(() {});
+            if (_currentPage != index) {
+              _currentPage = index;
+              setState(() {});
+            }
           },
         ),
       ),

@@ -9,10 +9,12 @@ typedef MyCallBack = Function(Map<String, dynamic> request);
 class NearbyRequestList extends StatelessWidget {
   final List<Map<String, dynamic>> requests;
   final MyCallBack onTap;
+  final MyCallBack onAccept;
   const NearbyRequestList({
     super.key,
     required this.requests,
     required this.onTap,
+    required this.onAccept,
   });
 
   @override
@@ -209,7 +211,9 @@ class NearbyRequestList extends StatelessWidget {
                                   child: SizedBox(),
                                 ),
                                 CustomButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    onAccept(request);
+                                  },
                                   text: "Accept",
                                 ),
                               ],

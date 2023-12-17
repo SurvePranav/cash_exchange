@@ -1,4 +1,18 @@
 class Connection {
+  late String name;
+  late String email;
+  late String bio;
+  late String profilePic;
+  late String createdAt;
+  late String phoneNumber;
+  late String uid;
+  late String address;
+  late String locationLat;
+  late String locationLon;
+  late bool isOnline;
+  late String pushToken;
+  late List<String> connections;
+
   Connection({
     required this.name,
     required this.email,
@@ -12,71 +26,45 @@ class Connection {
     required this.locationLon,
     required this.isOnline,
     required this.pushToken,
+    required this.connections,
   });
 
-  late final String name;
-  late final String email;
-  late final String bio;
-  late final String profilePic;
-  late final String createdAt;
-  late final String phoneNumber;
-  late final String uid;
-  late final String address;
-  late final String locationLat;
-  late final String locationLon;
-  late final bool isOnline;
-  late final String pushToken;
+  // From JSON
+  Connection.fromJson(Map<String, dynamic> json)
+      : name = json['name'] ?? '',
+        email = json['email'] ?? '',
+        bio = json['bio'] ?? '',
+        profilePic = json['profilePic'] ?? '',
+        createdAt = json['createdAt'] ?? '',
+        phoneNumber = json['phoneNumber'] ?? '',
+        uid = json['uid'] ?? '',
+        address = json['address'] ?? '',
+        locationLat = json['locationLat'] ?? '',
+        locationLon = json['locationLon'] ?? '',
+        isOnline = json['isOnline'] ?? false,
+        pushToken = json['pushToken'] ?? '',
+        connections = json['connections'] == null
+            ? []
+            : (json['connections'] as List<dynamic>)
+                .map((e) => e.toString())
+                .toList();
 
-  // from json
-  Connection.fromJson(Map<String, dynamic> json) {
-    name = json['name'] ?? '';
-    email = json['email'] ?? '';
-    bio = json['bio'] ?? '';
-    profilePic = json['profilePic'] ?? '';
-    createdAt = json['createdAt'] ?? '';
-    phoneNumber = json['phoneNumber'] ?? '';
-    uid = json['uid'] ?? '';
-    address = json['address'] ?? '';
-    locationLat = json['locationLat'] ?? '';
-    locationLon = json['locationLon'] ?? '';
-    isOnline = json['isOnline'] ?? false;
-    pushToken = json['pushToken'] ?? '';
-  }
-
-  // to json
+  // To JSON
   Map<String, dynamic> toJson() {
-    final data = <String, dynamic>{};
-    data['name'] = name;
-    data['email'] = email;
-    data['bio'] = bio;
-    data['profilePic'] = profilePic;
-    data['createdAt'] = createdAt;
-    data['phoneNumber'] = phoneNumber;
-    data['uid'] = uid;
-    data['address'] = address;
-    data['locationLat'] = locationLat;
-    data['locationLon'] = locationLon;
-    data['isOnline'] = isOnline;
-    data['pushToken'] = pushToken;
-    return data;
-  }
-
-  // to string override
-  @override
-  String toString() {
-    return 'Connection {'
-        'name: $name, '
-        'email: $email, '
-        'bio: $bio, '
-        'profilePic: $profilePic, '
-        'createdAt: $createdAt, '
-        'phoneNumber: $phoneNumber, '
-        'uid: $uid, '
-        'address: $address, '
-        'isOnline: $isOnline, '
-        'pushToken: $pushToken, '
-        'locationLat: $locationLat, '
-        'locationLon: $locationLon'
-        '}';
+    return {
+      'name': name,
+      'email': email,
+      'bio': bio,
+      'profilePic': profilePic,
+      'createdAt': createdAt,
+      'phoneNumber': phoneNumber,
+      'uid': uid,
+      'address': address,
+      'locationLat': locationLat,
+      'locationLon': locationLon,
+      'isOnline': isOnline,
+      'pushToken': pushToken,
+      'connections': connections,
+    };
   }
 }

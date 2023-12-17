@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
@@ -61,7 +63,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       onPressed: () {
                         ap.updateUserActiveStatus(false).then(
-                          (value) {
+                          (value) async {
+                            final data = await ap.getUserDataById(
+                                uid: UserModel.instance.uid);
+                            log("isOnline: ${data['isOnline']}");
                             ap.userSignOut().then((value) {
                               Navigator.pushAndRemoveUntil(
                                 context,

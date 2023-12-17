@@ -1,9 +1,13 @@
 import 'dart:developer';
 
+import 'package:cashxchange/model/connection_model.dart';
+import 'package:cashxchange/model/message_model.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
+import 'package:cashxchange/provider/messaging_provider.dart';
 import 'package:cashxchange/provider/request_provider.dart';
 import 'package:cashxchange/utils/location_services.dart';
+import 'package:cashxchange/utils/util.dart';
 import 'package:cashxchange/widgets/constant_widget.dart';
 import 'package:cashxchange/widgets/nearby_req_list.dart';
 import 'package:cashxchange/widgets/nearby_request_info.dart';
@@ -35,16 +39,38 @@ class _RequestsWidgetState extends State<RequestsWidget> {
           return const MyConstantWidget();
         } else if (snapshot.connectionState == ConnectionState.done) {
           return NearbyRequestList(
-            requests: _outputData,
-            onTap: (Map<String, dynamic> request) async {
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                return NearbyRequestInfo(
-                  request: request,
-                  distance: request['distance']!,
-                );
-              }));
-            },
-          );
+              requests: _outputData,
+              onTap: (Map<String, dynamic> request) async {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) {
+                  return NearbyRequestInfo(
+                    request: request,
+                    distance: request['distance']!,
+                  );
+                }));
+              },
+              onAccept: (Map<String, dynamic> request) async {
+                final ap = Provider.of<AuthProvider>(context, listen: false);
+                final mp =
+                    Provider.of<MessagingProvider>(context, listen: false);
+                final connection = Connection.fromJson(
+                    await ap.getUserDataById(uid: request['uid']));
+
+                if (!await ap.checkIfUsersConnectedBefore(connection.uid)) {
+                  await ap.addToMyConnection(senderUid: connection.uid);
+                  await ap.addToReceiversConnection(
+                      receiverUid: connection.uid);
+                }
+                if (!UserModel.instance.connections.contains(connection.uid)) {
+                  await ap.addToMyConnection(senderUid: connection.uid);
+                }
+                await mp
+                    .sendMessage(
+                        connection, 'I accept your request', MsgType.text)
+                    .then((value) {
+                  MyAppServices.showSlackBar(context, "request accepted");
+                });
+              });
         } else {
           return const Center(child: Text("Something Went wrong"));
         }
@@ -70,7 +96,6 @@ class _RequestsWidgetState extends State<RequestsWidget> {
     }
     await rp.getActiveRequests().then(
       (requests) async {
-        log('nearby requests: ${requests.length}');
         _outputData.clear();
         for (int i = 0; i < requests.length; i++) {
           double distance = LocationServices.findDistanceBetweenCoordinates(
@@ -81,8 +106,6 @@ class _RequestsWidgetState extends State<RequestsWidget> {
           );
           if (distance < 3000) {
             Map<String, dynamic> finalData = requests[i].toJson();
-            log('converted request: $finalData');
-
             finalData.addAll(
                 await Provider.of<AuthProvider>(context, listen: false)
                     .getUserDataById(uid: requests[i].uid));

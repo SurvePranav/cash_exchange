@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cashxchange/main.dart';
 import 'package:cashxchange/model/message_model.dart';
@@ -5,7 +7,9 @@ import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/messaging_provider.dart';
 import 'package:cashxchange/screens/profile_module_screens/profile_pic_screen.dart';
 import 'package:cashxchange/utils/date_util.dart';
+import 'package:cashxchange/utils/util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class MessageCard extends StatefulWidget {
@@ -40,7 +44,7 @@ class _MessageCardState extends State<MessageCard> {
     );
   }
 
-  // sender or another user message
+  // sender/ another user message
   Widget _blueMessage() {
     //update last read message if sender and receiver are different
     if (widget.message.read.isEmpty) {
@@ -214,58 +218,16 @@ class _MessageCardState extends State<MessageCard> {
                         color: Colors.blue, size: 26),
                     name: 'Copy Text',
                     onTap: () async {
-                      // await Clipboard.setData(
-                      //         ClipboardData(text: widget.message.msg))
-                      //     .then((value) {
-                      //   //for hiding bottom sheet
-                      //   Navigator.pop(context);
+                      await Clipboard.setData(
+                              ClipboardData(text: widget.message.msg))
+                          .then((value) {
+                        //for hiding bottom sheet
+                        Navigator.pop(context);
 
-                      //   Dialogs.showSnackbar(context, 'Text Copied!');
-                      // });
+                        MyAppServices.showSlackBar(context, 'Text Copied!');
+                      });
                     })
-                :
-                //save option
-                _OptionItem(
-                    icon: const Icon(Icons.download_rounded,
-                        color: Colors.blue, size: 26),
-                    name: 'Save Image',
-                    onTap: () async {
-                      // try {
-                      //   log('Image Url: ${widget.message.msg}');
-                      //   await GallerySaver.saveImage(widget.message.msg,
-                      //           albumName: 'We Chat')
-                      //       .then((success) {
-                      //     //for hiding bottom sheet
-                      //     Navigator.pop(context);
-                      //     if (success != null && success) {
-                      //       MyAppServices.showSlackBar(
-                      //           context, 'Image Successfully Saved!');
-                      //     }
-                      //   });
-                      // } catch (e) {
-                      //   log('ErrorWhileSavingImg: $e');
-                      // }
-                    }),
-
-            //separator or divider
-            if (isMe)
-              Divider(
-                color: Colors.black54,
-                endIndent: mq.width * .04,
-                indent: mq.width * .04,
-              ),
-
-            //edit option
-            if (widget.message.type == MsgType.text && isMe)
-              _OptionItem(
-                  icon: const Icon(Icons.edit, color: Colors.blue, size: 26),
-                  name: 'Edit Message',
-                  onTap: () {
-                    //for hiding bottom sheet
-                    Navigator.pop(context);
-
-                    _showMessageUpdateDialog();
-                  }),
+                : const SizedBox(),
 
             //delete option
             if (isMe)
@@ -274,10 +236,13 @@ class _MessageCardState extends State<MessageCard> {
                       color: Colors.red, size: 26),
                   name: 'Delete Message',
                   onTap: () async {
-                    // await APIs.deleteMessage(widget.message).then((value) {
-                    //   //for hiding bottom sheet
-                    //   Navigator.pop(context);
-                    // });
+                    //for hiding bottom sheet
+                    Navigator.pop(context);
+                    await Provider.of<MessagingProvider>(context, listen: false)
+                        .deleteMessage(widget.message)
+                        .then((value) {
+                      MyAppServices.showSlackBar(context, 'Message deleted!');
+                    });
                   }),
 
             //separator or divider
@@ -290,84 +255,21 @@ class _MessageCardState extends State<MessageCard> {
             //sent time
             _OptionItem(
                 icon: const Icon(Icons.remove_red_eye, color: Colors.blue),
-                name: '',
-                // 'Sent At: ${MyDateUtil.getMessageTime(context: context, time: widget.message.sent)}',
+                name:
+                    'Sent At: ${MyDateUtil.getMessageTime(context: context, time: widget.message.sent)}',
                 onTap: () {}),
 
             //read time
             _OptionItem(
                 icon: const Icon(Icons.remove_red_eye, color: Colors.green),
-                name:
-                    widget.message.read.isEmpty ? 'Read At: Not seen yet' : '',
-                // : 'Read At: ${MyDateUtil.getMessageTime(context: context, time: widget.message.read)}',
+                name: widget.message.read.isEmpty
+                    ? 'Read At: Not seen yet'
+                    : 'Read At: ${MyDateUtil.getMessageTime(context: context, time: widget.message.read)}',
                 onTap: () {}),
           ],
         );
       },
     );
-  }
-
-  //dialog for updating message content
-  void _showMessageUpdateDialog() {
-    String updatedMsg = widget.message.msg;
-
-    showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-              contentPadding: const EdgeInsets.only(
-                  left: 24, right: 24, top: 20, bottom: 10),
-
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)),
-
-              //title
-              title: Row(
-                children: const [
-                  Icon(
-                    Icons.message,
-                    color: Colors.blue,
-                    size: 28,
-                  ),
-                  Text(' Update Message')
-                ],
-              ),
-
-              //content
-              content: TextFormField(
-                initialValue: updatedMsg,
-                maxLines: null,
-                onChanged: (value) => updatedMsg = value,
-                decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15))),
-              ),
-
-              //actions
-              actions: [
-                //cancel button
-                MaterialButton(
-                    onPressed: () {
-                      //hide alert dialog
-                      Navigator.pop(context);
-                    },
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.blue, fontSize: 16),
-                    )),
-
-                //update button
-                MaterialButton(
-                    onPressed: () {
-                      //hide alert dialog
-                      // Navigator.pop(context);
-                      // APIs.updateMessage(widget.message, updatedMsg);
-                    },
-                    child: const Text(
-                      'Update',
-                      style: TextStyle(color: Colors.blue, fontSize: 16),
-                    ))
-              ],
-            ));
   }
 }
 

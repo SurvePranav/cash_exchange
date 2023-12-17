@@ -13,6 +13,7 @@ class MyAppServices {
         content: Text(content),
         backgroundColor: AppColors.deepGreen,
         behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 1),
       ),
     );
   }

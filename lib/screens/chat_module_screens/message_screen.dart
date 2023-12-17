@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cashxchange/main.dart';
 import 'package:cashxchange/model/connection_model.dart';
 import 'package:cashxchange/model/message_model.dart';
+import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/provider/messaging_provider.dart';
 import 'package:cashxchange/provider/utility_provider.dart';
@@ -46,7 +47,7 @@ class _MessageScreenState extends State<MessageScreen> {
         backgroundColor: Colors.white,
         flexibleSpace: StreamBuilder(
           stream: Provider.of<AuthProvider>(context, listen: false)
-              .getUserById(widget.connection),
+              .getUserById(widget.connection.uid),
           builder: (context, snapshot) {
             final data = snapshot.data?.docs;
 
@@ -285,19 +286,30 @@ class _MessageScreenState extends State<MessageScreen> {
           //send message button
           MaterialButton(
             onPressed: () async {
+              final ap = Provider.of<AuthProvider>(context, listen: false);
               if (_messageController.text.trim().isNotEmpty) {
-                // if (_list.isEmpty) {
-                //   //on first message (add user to my_user collection of chat user)
-                //   APIs.sendFirstMessage(
-                //       widget.user, _textController.text, Type.text);
-                // } else {
-                //simply send message
-                await mp.sendMessage(
-                  widget.connection,
-                  _messageController.text.trim(),
-                  MsgType.text,
-                );
-                // }
+                if (_list.isEmpty) {
+                  //on first message (add user to my_connections collection of receiver)
+                  if (!await ap
+                      .checkIfUsersConnectedBefore(widget.connection.uid)) {
+                    await ap.addToMyConnection(
+                        senderUid: widget.connection.uid);
+                    await ap.addToReceiversConnection(
+                        receiverUid: widget.connection.uid);
+                  }
+                  await mp.sendMessage(
+                    widget.connection,
+                    _messageController.text.trim(),
+                    MsgType.text,
+                  );
+                } else {
+                  //simply send message
+                  await mp.sendMessage(
+                    widget.connection,
+                    _messageController.text.trim(),
+                    MsgType.text,
+                  );
+                }
                 _messageController.text = '';
               }
             },

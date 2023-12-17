@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 import 'package:cashxchange/model/connection_model.dart';
 import 'package:cashxchange/model/message_model.dart';
@@ -30,17 +29,12 @@ class MessagingProvider with ChangeNotifier {
         .snapshots();
   }
 
-  // get all connections
-  Stream<QuerySnapshot<Map<String, dynamic>>> getAllConnections() {
-    return FirebaseFirestore.instance
-        .collection('users')
-        .where('uid', isNotEqualTo: UserModel.instance.uid)
-        .snapshots();
-  }
-
   // for sending message
   Future<void> sendMessage(
-      Connection connection, String msg, MsgType type) async {
+    Connection connection,
+    String msg,
+    MsgType type,
+  ) async {
     // message sending time also a doc id for a message
     final time = DateTime.now().millisecondsSinceEpoch.toString();
     final ref = _firebaseFirestore
@@ -57,16 +51,16 @@ class MessagingProvider with ChangeNotifier {
             fromId: UserModel.instance.uid,
           ).toJson(),
         )
-        .then(
-          (value) => NotificationServics.sendChatPushNotification(
-            connection,
-            type == MsgType.text
-                ? msg
-                : type == MsgType.image
-                    ? '📷 Photo'
-                    : 'Accepted Request',
-          ),
-        );
+        .then((value) {
+      NotificationServics.sendChatPushNotification(
+        connection,
+        type == MsgType.text
+            ? msg
+            : type == MsgType.image
+                ? '📷 Photo'
+                : 'Accepted Request',
+      );
+    });
   }
 
   // to update read status of the message
@@ -104,5 +98,16 @@ class MessagingProvider with ChangeNotifier {
     await sendMessage(connection, imageUrl, MsgType.image);
   }
 
-  // get connection(other user) information
+  // delete chat message
+  Future<void> deleteMessage(Message message) async {
+    //delete message
+    await _firebaseFirestore
+        .collection('chats/${_getConversationId(message.toId)}/messages/')
+        .doc(message.sent)
+        .delete();
+    // delete image from storage
+    if (message.type == MsgType.image) {
+      await _firebaseStorage.refFromURL(message.msg).delete();
+    }
+  }
 }
