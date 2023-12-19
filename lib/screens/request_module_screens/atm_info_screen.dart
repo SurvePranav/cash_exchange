@@ -211,38 +211,36 @@ class AtmInfoScreen extends StatelessWidget {
               ],
             ),
           ),
-          Container(
-            child: FutureBuilder(
-              future: LocationServices.calculateWalkingDistance(
-                  originLat: atm['currentLat'],
-                  originLng: atm['currentLng'],
-                  destinationLat: atm['lat'],
-                  destinationLng: atm['lng']),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const AtmInfoWidget(
-                    address: 'getting address...',
-                    duration: 'finding duration...',
-                    distance: 'finding distance...',
+          FutureBuilder(
+            future: LocationServices.calculateWalkingDistance(
+                originLat: atm['currentLat'],
+                originLng: atm['currentLng'],
+                destinationLat: atm['lat'],
+                destinationLng: atm['lng']),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const AtmInfoWidget(
+                  address: 'getting address...',
+                  duration: 'finding duration...',
+                  distance: 'finding distance...',
+                );
+              } else {
+                if (snapshot.hasData) {
+                  return AtmInfoWidget(
+                    address: snapshot.data!['destination_address'],
+                    distance:
+                        "${(snapshot.data!['distance_value'] / 1000).toStringAsFixed(2)} KM",
+                    duration: snapshot.data!['duration_text'],
                   );
                 } else {
-                  if (snapshot.hasData) {
-                    return AtmInfoWidget(
-                      address: snapshot.data!['destination_address'],
-                      distance:
-                          "${(snapshot.data!['distance_value'] / 1000).toStringAsFixed(2)} KM",
-                      duration: snapshot.data!['duration_text'],
-                    );
-                  } else {
-                    return const AtmInfoWidget(
-                      address: 'could not get address',
-                      duration: 'could not find duration',
-                      distance: 'could not find distance',
-                    );
-                  }
+                  return const AtmInfoWidget(
+                    address: 'could not get address',
+                    duration: 'could not find duration',
+                    distance: 'could not find distance',
+                  );
                 }
-              },
-            ),
+              }
+            },
           )
         ],
       ),

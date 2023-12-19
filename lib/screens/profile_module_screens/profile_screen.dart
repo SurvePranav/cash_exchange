@@ -156,10 +156,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ],
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 30,
                           ),
-                          Divider(),
+                          const Divider(),
                           ListTile(
                             onTap: () {
                               Navigator.of(context).push(
@@ -183,15 +183,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             title: const Text("My Transactions"),
                             trailing: const Icon(Icons.arrow_forward_ios),
                           ),
-                          Divider(),
-                          ListTile(
+                          const Divider(),
+                          const ListTile(
                             title: Text("First list tile"),
                           ),
-                          Divider(),
-                          ListTile(
+                          const Divider(),
+                          const ListTile(
                             title: Text("First list tile"),
                           ),
-                          Divider(),
+                          const Divider(),
                         ],
                       ),
                     ),

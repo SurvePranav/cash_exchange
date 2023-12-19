@@ -16,7 +16,7 @@ class AtmInfoWidget extends StatelessWidget {
     return Column(
       children: [
         ListTile(
-          title: Text(
+          title: const Text(
             'Address',
             style: TextStyle(
               color: Colors.deepOrange,
@@ -31,9 +31,9 @@ class AtmInfoWidget extends StatelessWidget {
             ),
           ),
         ),
-        Divider(),
+        const Divider(),
         ListTile(
-          title: Text(
+          title: const Text(
             'Walking Distance',
             style: TextStyle(
               color: Colors.deepOrange,
@@ -43,14 +43,14 @@ class AtmInfoWidget extends StatelessWidget {
           ),
           subtitle: Text(
             distance,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
             ),
           ),
         ),
-        Divider(),
+        const Divider(),
         ListTile(
-          title: Text(
+          title: const Text(
             'Estimated Duration to reach',
             style: TextStyle(
               color: Colors.deepOrange,
@@ -60,7 +60,7 @@ class AtmInfoWidget extends StatelessWidget {
           ),
           subtitle: Text(
             duration,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
             ),
           ),

@@ -47,15 +47,13 @@ class NotificationServics {
         },
       };
 
-      var res = await post(Uri.parse('https://fcm.googleapis.com/fcm/send'),
+      await post(Uri.parse('https://fcm.googleapis.com/fcm/send'),
           headers: {
             HttpHeaders.contentTypeHeader: 'application/json',
             HttpHeaders.authorizationHeader:
                 'key=AAAAUrs3Zmc:APA91bEs4bscRbP7eCmQHgTlhygsxH-FgIbgXpbYmAJQAuTiA8SWse3sgPF3bKSePuvDrfC6wDAgrk_olFItrU4raMu4truofjO8nlG8IooSaauAGChknSCXodriNmngz8JpC9v7udrC'
           },
           body: jsonEncode(body));
-      log('Response status: ${res.statusCode}');
-      log('Response body: ${res.body}');
     } catch (e) {
       log('\nsendPushNotificationE: $e');
     }

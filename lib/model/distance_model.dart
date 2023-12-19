@@ -19,12 +19,12 @@ class DistanceModel {
   }
 
   Map<String, dynamic> toJson() {
-    final _data = <String, dynamic>{};
-    _data['destination_addresses'] = destinationAddresses;
-    _data['origin_addresses'] = originAddresses;
-    _data['rows'] = rows.map((e) => e.toJson()).toList();
-    _data['status'] = status;
-    return _data;
+    final data = <String, dynamic>{};
+    data['destination_addresses'] = destinationAddresses;
+    data['origin_addresses'] = originAddresses;
+    data['rows'] = rows.map((e) => e.toJson()).toList();
+    data['status'] = status;
+    return data;
   }
 }
 
@@ -40,9 +40,9 @@ class Rows {
   }
 
   Map<String, dynamic> toJson() {
-    final _data = <String, dynamic>{};
-    _data['elements'] = elements.map((e) => e.toJson()).toList();
-    return _data;
+    final data = <String, dynamic>{};
+    data['elements'] = elements.map((e) => e.toJson()).toList();
+    return data;
   }
 }
 
@@ -63,11 +63,11 @@ class Elements {
   }
 
   Map<String, dynamic> toJson() {
-    final _data = <String, dynamic>{};
-    _data['distance'] = distance.toJson();
-    _data['duration'] = duration.toJson();
-    _data['status'] = status;
-    return _data;
+    final data = <String, dynamic>{};
+    data['distance'] = distance.toJson();
+    data['duration'] = duration.toJson();
+    data['status'] = status;
+    return data;
   }
 }
 
@@ -85,10 +85,10 @@ class Distance {
   }
 
   Map<String, dynamic> toJson() {
-    final _data = <String, dynamic>{};
-    _data['text'] = text;
-    _data['value'] = value;
-    return _data;
+    final data = <String, dynamic>{};
+    data['text'] = text;
+    data['value'] = value;
+    return data;
   }
 }
 
@@ -106,9 +106,9 @@ class Duration {
   }
 
   Map<String, dynamic> toJson() {
-    final _data = <String, dynamic>{};
-    _data['text'] = text;
-    _data['value'] = value;
-    return _data;
+    final data = <String, dynamic>{};
+    data['text'] = text;
+    data['value'] = value;
+    return data;
   }
 }

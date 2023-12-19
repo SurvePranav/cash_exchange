@@ -1,5 +1,8 @@
 import 'package:cashxchange/constants/constant_values.dart';
+import 'package:cashxchange/provider/messaging_provider.dart';
+import 'package:cashxchange/provider/utility_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class MyCustomBottomNaviationBar extends StatelessWidget {
   final int selectedIndex;
@@ -47,9 +50,37 @@ class MyCustomBottomNaviationBar extends StatelessWidget {
               Icons.chat,
               color: AppColors.deepGreen,
             ),
-            icon: Icon(
-              Icons.chat_outlined,
-              color: AppColors.deepGreen,
+            icon: SizedBox(
+              height: 26,
+              width: 25,
+              child: Stack(
+                children: [
+                  Icon(
+                    Icons.chat_outlined,
+                    color: AppColors.deepGreen,
+                  ),
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: Consumer<MessagingProvider>(
+                      builder: (BuildContext context, MessagingProvider mp,
+                          Widget? child) {
+                        return Visibility(
+                          visible: mp.hasMessage,
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              color: Colors.red,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
             label: "chat"),
       ],

@@ -1,20 +1,17 @@
 import 'dart:developer';
 
 import 'package:cashxchange/constants/constant_values.dart';
-import 'package:cashxchange/model/connection_model.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/provider/messaging_provider.dart';
-import 'package:cashxchange/screens/chat_module_screens/chat_list.dart';
 import 'package:cashxchange/screens/chat_module_screens/message_screen.dart';
-import 'package:cashxchange/utils/location_services.dart';
+import 'package:cashxchange/screens/chat_module_screens/single_chat_tile.dart';
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
-
   @override
   State<ChatScreen> createState() => _ChatScreenState();
 }
@@ -22,8 +19,9 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final FocusNode _focusNode = FocusNode();
   final TextEditingController _searchTextController = TextEditingController();
-  List<Connection> _connections = [];
-  final List<Connection> _searchList = [];
+  List<String> _connectionNames = [];
+  List<String> _userIds = [];
+  final List<String> _searchList = [];
   bool isSearching = false;
 
   @override
@@ -42,6 +40,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _onFocusChange() {
     if (_focusNode.hasFocus) {
+      if (_searchTextController.text == "") {
+        _searchList.clear();
+        _searchList.addAll(_userIds);
+      }
       setState(() {
         isSearching = true;
       });
@@ -50,9 +52,14 @@ class _ChatScreenState extends State<ChatScreen> {
         isSearching = false;
         _searchTextController.text = "";
         _searchList.clear();
-        _searchList.addAll(_connections);
+        _searchList.addAll(_userIds);
       });
     }
+  }
+
+  void onNewMessageReceived() {
+    log('show red dot');
+    Provider.of<MessagingProvider>(context, listen: false).setNewMessage(true);
   }
 
   @override
@@ -108,11 +115,11 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                       onChanged: (value) {
                         _searchList.clear();
-                        for (var i in _connections) {
-                          if (i.name
+                        for (int i = 0; i < _connectionNames.length; i++) {
+                          if (_connectionNames[i]
                               .toLowerCase()
                               .contains(value.trim().toLowerCase())) {
-                            _searchList.add(i);
+                            _searchList.add(_userIds[i]);
                           }
                         }
                         setState(() {
@@ -126,177 +133,128 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
           ),
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: 'Your Connections'),
+          bottom: TabBar(
+            indicatorColor: AppColors.deepGreen,
+            labelColor: AppColors.deepGreen,
+            tabs: const [
               Tab(
-                text: 'Nearby Users',
+                text: 'Conversations',
+              ),
+              Tab(
+                text: 'Direct',
               ),
             ],
           ),
         ),
         body: TabBarView(
           children: [
-            Container(
-              color: Colors.white,
-              child: Column(
-                children: [
-                  isSearching
-                      ? Expanded(
-                          child: ChatsList(
-                            connections: _searchList,
-                            onTap: (connection) {
-                              setState(() {
-                                _focusNode.unfocus();
-                                _searchTextController.clear();
-                                _searchList.clear();
-                                isSearching = false;
-                              });
-                              Navigator.of(context).push(
-                                CupertinoPageRoute(
-                                  builder: (context) => MessageScreen(
-                                    connection: connection,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        )
-                      : Expanded(
-                          child: StreamBuilder(
-                          stream:
-                              Provider.of<AuthProvider>(context, listen: false)
-                                  .getUserById(UserModel.instance.uid),
-                          builder: (context, snapshot) {
-                            final data = snapshot.data?.docs;
-                            List<String> userIds = [];
-                            if (data != null) {
-                              userIds = (data.first.data()['connections']
-                                      as List<dynamic>)
-                                  .map((e) => e.toString())
-                                  .toList();
-                            }
-                            switch (snapshot.connectionState) {
-                              case ConnectionState.none:
-                              case ConnectionState.waiting:
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              case ConnectionState.active:
-                              case ConnectionState.done:
-                                return StreamBuilder(
-                                  stream: Provider.of<AuthProvider>(context)
-                                      .getMyConnections(userIds),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return const Center(
-                                        child: CircularProgressIndicator(),
-                                      );
-                                    } else {
-                                      if (snapshot.hasData) {
-                                        final data = snapshot.data?.docs;
-                                        _connections = data!.map((e) {
-                                          return Connection.fromJson(e.data());
-                                        }).toList();
-                                        _searchList.clear();
-                                        _searchList.addAll(_connections);
-                                        return ChatsList(
-                                          connections: _connections,
-                                          onTap: (connection) {
-                                            Navigator.of(context).push(
-                                              CupertinoPageRoute(
-                                                builder: (context) =>
-                                                    MessageScreen(
-                                                        connection: connection),
-                                              ),
-                                            );
-                                          },
-                                        );
-                                      } else {
-                                        return const Center(
-                                          child: Text(
-                                              'you are not connected to any users'),
-                                        );
-                                      }
-                                    }
-                                  },
-                                );
-                            }
-                          },
-                        )),
-                ],
-              ),
-            ),
-            Container(
-              color: Colors.white,
-              child: Column(
-                children: [
-                  isSearching
-                      ? Expanded(
-                          child: ChatsList(
-                            connections: _searchList,
-                            onTap: (connection) {
-                              setState(() {
-                                _focusNode.unfocus();
-                                _searchTextController.clear();
-                                _searchList.clear();
-                                isSearching = false;
-                              });
-                              Navigator.of(context).push(
-                                CupertinoPageRoute(
-                                  builder: (context) => MessageScreen(
-                                    connection: connection,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        )
-                      : Expanded(
-                          child: StreamBuilder(
-                            stream: Provider.of<AuthProvider>(context)
-                                .getMySecondaryConnections(),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              } else {
-                                if (snapshot.hasData) {
-                                  final data = snapshot.data?.docs;
-                                  _connections = data!.map((e) {
-                                    return Connection.fromJson(e.data());
-                                  }).toList();
-                                  _searchList.clear();
-                                  _searchList.addAll(_connections);
-                                  return ChatsList(
-                                    connections: _connections,
-                                    onTap: (connection) {
-                                      Navigator.of(context).push(
-                                        CupertinoPageRoute(
-                                          builder: (context) => MessageScreen(
-                                              connection: connection),
-                                        ),
-                                      );
-                                    },
-                                  );
-                                } else {
-                                  return const Center(
-                                    child: Text(
-                                        'you are not connected to any users'),
-                                  );
-                                }
-                              }
-                            },
-                          ),
-                        ),
-                ],
-              ),
-            ),
+            _tabBarViewItem(primary: true),
+            _tabBarViewItem(primary: false),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _tabBarViewItem({required bool primary}) {
+    return Container(
+      color: Colors.white,
+      child: Column(
+        children: [
+          isSearching
+              ? Expanded(
+                  child: Builder(builder: (context) {
+                    if (_searchList.isEmpty) {
+                      return const Center(
+                        child: Text('No Users'),
+                      );
+                    } else {
+                      return ListView.builder(
+                        itemCount: _searchList.length,
+                        itemBuilder: (context, index) {
+                          return ChatTile(
+                            uid: _searchList[index],
+                            onTap: (connection) {
+                              setState(() {
+                                _focusNode.unfocus();
+                                _searchTextController.clear();
+                                _searchList.clear();
+                                isSearching = false;
+                              });
+                              Navigator.of(context).push(
+                                CupertinoPageRoute(
+                                  builder: (context) => MessageScreen(
+                                    connection: connection,
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      );
+                    }
+                  }),
+                )
+              : Expanded(
+                  child: StreamBuilder(
+                    stream: Provider.of<AuthProvider>(context, listen: false)
+                        .getMyConnections(primary: primary),
+                    builder: (context, snapshot) {
+                      final data = snapshot.data?.docs;
+                      if (data != null) {
+                        _userIds = data.map((e) {
+                          return e.data()['uid'] as String;
+                        }).toList();
+
+                        // adding names to connection names
+                        _connectionNames = data.map(
+                          (e) {
+                            return e.data()['name'] as String;
+                          },
+                        ).toList();
+                        log('fetetched userIds: $_userIds');
+                        log('fetetched userNames: $_connectionNames');
+                        if (primary) {
+                          UserModel.instance.connections = _userIds;
+                        }
+                      }
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.none:
+                        case ConnectionState.waiting:
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        case ConnectionState.active:
+                        case ConnectionState.done:
+                          if (_userIds.isEmpty) {
+                            return Center(
+                              child: Text(primary
+                                  ? 'No Conversations Yet!'
+                                  : 'No Direct Messages!'),
+                            );
+                          } else {
+                            return ListView.builder(
+                              itemCount: _userIds.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return ChatTile(
+                                  uid: _userIds[index],
+                                  onTap: (connection) {
+                                    Navigator.of(context).push(
+                                      CupertinoPageRoute(
+                                        builder: (context) => MessageScreen(
+                                            connection: connection),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            );
+                          }
+                      }
+                    },
+                  ),
+                ),
+        ],
       ),
     );
   }

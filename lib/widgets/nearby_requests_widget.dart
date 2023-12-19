@@ -54,21 +54,35 @@ class _RequestsWidgetState extends State<RequestsWidget> {
                 final mp =
                     Provider.of<MessagingProvider>(context, listen: false);
                 final connection = Connection.fromJson(
+
+                    // getting user information (who raised request)
                     await ap.getUserDataById(uid: request['uid']));
 
-                if (!await ap.checkIfUsersConnectedBefore(connection.uid)) {
-                  await ap.addToMyConnection(senderUid: connection.uid);
-                  await ap.addToReceiversConnection(
-                      receiverUid: connection.uid);
-                }
-                if (!UserModel.instance.connections.contains(connection.uid)) {
-                  await ap.addToMyConnection(senderUid: connection.uid);
-                }
-                await mp
-                    .sendMessage(
-                        connection, 'I accept your request', MsgType.text)
-                    .then((value) {
-                  MyAppServices.showSlackBar(context, "request accepted");
+                // checking if the users are connected before
+                await ap
+                    .checkIfUsersConnectedBefore(connection.uid)
+                    .then((connectedBefore) async {
+                  if (!connectedBefore) {
+                    // if not connected connecting each other using my_users collection
+                    log('not connected before');
+                    await ap.addToMyConnection(user: connection);
+                    await ap.addToReceiversConnection(user: connection);
+                  } else if (connectedBefore &&
+                      !UserModel.instance.connections
+                          .contains(connection.uid)) {
+                    // if users are connected but not in primary then making connection primary
+                    log('connected before but not in primary');
+                    log('making primary');
+                    await ap.updateConnectionPriority(
+                        senderUid: connection.uid, primary: true);
+                  }
+                }).then((value) async {
+                  await mp
+                      .sendMessage(connection, 'I accept your request',
+                          MsgType.text, context)
+                      .then((value) {
+                    MyAppServices.showSlackBar(context, "request accepted");
+                  });
                 });
               });
         } else {
@@ -98,20 +112,22 @@ class _RequestsWidgetState extends State<RequestsWidget> {
       (requests) async {
         _outputData.clear();
         for (int i = 0; i < requests.length; i++) {
-          double distance = LocationServices.findDistanceBetweenCoordinates(
-            lat,
-            lng,
-            requests[i].locationLat,
-            requests[i].locationLon,
-          );
-          if (distance < 3000) {
-            Map<String, dynamic> finalData = requests[i].toJson();
-            finalData.addAll(
-                await Provider.of<AuthProvider>(context, listen: false)
-                    .getUserDataById(uid: requests[i].uid));
-            distance /= 1000;
-            finalData['distance'] = distance.toStringAsFixed(2);
-            _outputData.add(finalData);
+          if (requests[i].uid != UserModel.instance.uid) {
+            double distance = LocationServices.findDistanceBetweenCoordinates(
+              lat,
+              lng,
+              requests[i].locationLat,
+              requests[i].locationLon,
+            );
+            if (distance < 3000) {
+              Map<String, dynamic> finalData = requests[i].toJson();
+              finalData.addAll(
+                  await Provider.of<AuthProvider>(context, listen: false)
+                      .getUserDataById(uid: requests[i].uid));
+              distance /= 1000;
+              finalData['distance'] = distance.toStringAsFixed(2);
+              _outputData.add(finalData);
+            }
           }
         }
         return _outputData;

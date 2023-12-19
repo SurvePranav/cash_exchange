@@ -57,9 +57,12 @@ class _MessageScreenState extends State<MessageScreen> {
             return SafeArea(
               child: InkWell(
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
                       builder: (_) =>
-                          ViewProfileScreen(connection: widget.connection)));
+                          ViewProfileScreen(connection: widget.connection),
+                    ),
+                  );
                 },
                 child: Container(
                   padding: const EdgeInsets.only(right: 16),
@@ -243,17 +246,18 @@ class _MessageScreenState extends State<MessageScreen> {
                         final ImagePicker picker = ImagePicker();
 
                         // Picking multiple images
-                        final List<XFile> images =
-                            await picker.pickMultiImage(imageQuality: 70);
-
-                        // uploading & sending image one by one
-                        for (var i in images) {
-                          log('Image Path: ${i.path}');
-                          up.setLoading(true);
-                          await mp.sendChatImage(
-                              widget.connection, File(i.path));
-                          up.setLoading(false);
-                        }
+                        await picker
+                            .pickMultiImage(imageQuality: 70)
+                            .then((images) async {
+                          // uploading & sending image one by one
+                          for (var i in images) {
+                            log('Image Path: ${i.path}');
+                            up.setLoading(true);
+                            await mp.sendChatImage(
+                                widget.connection, File(i.path), context);
+                            up.setLoading(false);
+                          }
+                        });
                       },
                       icon: const Icon(Icons.image,
                           color: Colors.blueAccent, size: 26)),
@@ -264,14 +268,17 @@ class _MessageScreenState extends State<MessageScreen> {
                         final ImagePicker picker = ImagePicker();
 
                         // Pick an image
-                        final XFile? image = await picker.pickImage(
-                            source: ImageSource.camera, imageQuality: 70);
-                        if (image != null) {
-                          up.setLoading(true);
-                          await mp.sendChatImage(
-                              widget.connection, File(image.path));
-                          up.setLoading(false);
-                        }
+                        await picker
+                            .pickImage(
+                                source: ImageSource.camera, imageQuality: 70)
+                            .then((image) async {
+                          if (image != null) {
+                            up.setLoading(true);
+                            await mp.sendChatImage(
+                                widget.connection, File(image.path), context);
+                            up.setLoading(false);
+                          }
+                        });
                       },
                       icon: const Icon(Icons.camera_alt_rounded,
                           color: Colors.blueAccent, size: 26)),
@@ -290,24 +297,29 @@ class _MessageScreenState extends State<MessageScreen> {
               if (_messageController.text.trim().isNotEmpty) {
                 if (_list.isEmpty) {
                   //on first message (add user to my_connections collection of receiver)
-                  if (!await ap
-                      .checkIfUsersConnectedBefore(widget.connection.uid)) {
-                    await ap.addToMyConnection(
-                        senderUid: widget.connection.uid);
-                    await ap.addToReceiversConnection(
-                        receiverUid: widget.connection.uid);
-                  }
-                  await mp.sendMessage(
-                    widget.connection,
-                    _messageController.text.trim(),
-                    MsgType.text,
-                  );
+                  await ap
+                      .checkIfUsersConnectedBefore(widget.connection.uid)
+                      .then((areConnected) async {
+                    if (!areConnected) {
+                      await ap.addToMyConnection(user: widget.connection);
+                      await ap.addToReceiversConnection(
+                          user: widget.connection);
+                    }
+                  }).then((value) async {
+                    await mp.sendMessage(
+                      widget.connection,
+                      _messageController.text.trim(),
+                      MsgType.text,
+                      context,
+                    );
+                  });
                 } else {
                   //simply send message
                   await mp.sendMessage(
                     widget.connection,
                     _messageController.text.trim(),
                     MsgType.text,
+                    context,
                   );
                 }
                 _messageController.text = '';

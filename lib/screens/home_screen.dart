@@ -1,6 +1,5 @@
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/provider/connectivity_provider.dart';
-import 'package:cashxchange/provider/messaging_provider.dart';
 import 'package:cashxchange/widgets/home_screen_top.dart';
 import 'package:cashxchange/widgets/my_dropdown_button.dart';
 import 'package:cashxchange/widgets/nearby_atms.dart';

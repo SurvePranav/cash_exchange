@@ -2,13 +2,16 @@ import 'dart:developer';
 
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
+import 'package:cashxchange/provider/messaging_provider.dart';
 import 'package:cashxchange/screens/chat_module_screens/chat_screen.dart';
 import 'package:cashxchange/screens/home_screen.dart';
 import 'package:cashxchange/screens/request_module_screens/request_screen.dart';
 import 'package:cashxchange/utils/notification_services.dart';
+import 'package:cashxchange/utils/util.dart';
 import 'package:cashxchange/widgets/custom_bottom_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 class MainBody extends StatefulWidget {
@@ -64,9 +67,10 @@ class _MainBodyState extends State<MainBody> with WidgetsBindingObserver {
     await flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(channel2);
-
-    log('channels are created!!!');
+        ?.createNotificationChannel(channel2)
+        .then((value) async {
+      await MyAppServices.checkPermission(Permission.location, context);
+    });
   }
 
   @override
@@ -130,6 +134,11 @@ class _MainBodyState extends State<MainBody> with WidgetsBindingObserver {
           selectedIndex: _currentPage,
           onTabChange: (int index) {
             if (_currentPage != index) {
+              if (index == 2) {
+                log('hide red dot');
+                Provider.of<MessagingProvider>(context, listen: false)
+                    .setNewMessage(false);
+              }
               _currentPage = index;
               setState(() {});
             }

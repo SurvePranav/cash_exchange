@@ -157,7 +157,6 @@ class _OTPScreenState extends State<OTPScreen> {
     if (Provider.of<ConnectivityProvider>(context, listen: false).isConnected) {
       final up = Provider.of<UtilityProvider>(context, listen: false);
       final ap = Provider.of<AuthProvider>(context, listen: false);
-      final mp = Provider.of<MessagingProvider>(context, listen: false);
       up.setLoading(true);
       ap.verifyOtp(
         verificationId: widget.verificationId,

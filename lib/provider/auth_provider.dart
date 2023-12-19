@@ -1,7 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
-
 import 'package:cashxchange/model/connection_model.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/screens/auth_module_screens/otp_screen.dart';
@@ -156,7 +154,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       if (updateData && profilePic != null) {
         // update user info and profile pic both
-        final ext = profilePic!.path.split('.').last;
+        final ext = profilePic.path.split('.').last;
         await storeFileToStroage("profilePic/$_uid.$ext", profilePic)
             .then((value) {
           UserModel.instance.profilePic = value;
@@ -168,7 +166,7 @@ class AuthProvider extends ChangeNotifier {
         // creating new user --- uploading info and image
         // Uploading Image To Fierebase Storage
         final ext = profilePic!.path.split('.').last;
-        await storeFileToStroage("profilePic/$_uid.$ext", profilePic!)
+        await storeFileToStroage("profilePic/$_uid.$ext", profilePic)
             .then((value) async {
           UserModel.instance.profilePic = value;
           UserModel.instance.createdAt =
@@ -262,64 +260,85 @@ class AuthProvider extends ChangeNotifier {
     });
   }
 
-  // add new connection to senders connections(sedondary)
-  Future<void> addToReceiversConnection({required String receiverUid}) async {
+  // add new connection to my connections
+  Future<void> addToMyConnection({
+    required Connection user,
+  }) async {
     _firebaseFirestore
         .collection('users')
-        .doc(receiverUid)
+        .doc(UserModel.instance.uid)
+        .collection('my_connections')
+        .doc(user.uid)
+        .set({
+      'uid': user.uid,
+      'canMessage': true,
+      'primary': true,
+      'lastMessage': DateTime.now().millisecondsSinceEpoch.toString(),
+      'name': user.name
+    });
+    if (!UserModel.instance.connections.contains(user.uid)) {
+      UserModel.instance.connections.add(user.uid);
+      _firebaseFirestore.collection('users').doc(UserModel.instance.uid).update(
+        {
+          'connections': UserModel.instance.connections,
+        },
+      );
+      saveDataToSP();
+    }
+  }
+
+  // add new connection to senders connections(sedondary)
+  Future<void> addToReceiversConnection({required Connection user}) async {
+    _firebaseFirestore
+        .collection('users')
+        .doc(user.uid)
         .collection('my_connections')
         .doc(UserModel.instance.uid)
         .set({
       'uid': UserModel.instance.uid,
       'canMessage': true,
       'primary': false,
+      'lastMessage': DateTime.now().millisecondsSinceEpoch.toString(),
+      'name': UserModel.instance.name,
     });
   }
 
-  // add new connection to my connections
-  Future<void> addToMyConnection({
+  // update last message time for my_connections collection
+  void updateLastMessageTime({required String fromId, required String toId}) {
+    _firebaseFirestore
+        .collection('users')
+        .doc(fromId)
+        .collection('my_connections')
+        .doc(toId)
+        .update({
+      'lastMessage': DateTime.now().millisecondsSinceEpoch.toString(),
+    });
+  }
+
+  // update connection to primary
+  Future<void> updateConnectionPriority({
     required String senderUid,
+    required bool primary,
   }) async {
     _firebaseFirestore
         .collection('users')
         .doc(UserModel.instance.uid)
         .collection('my_connections')
         .doc(senderUid)
-        .set({
-      'uid': uid,
-      'canMessage': true,
-      'primary': true,
+        .update({
+      'primary': primary,
     });
-    _firebaseFirestore.collection('users').doc(UserModel.instance.uid).update(
-      {
-        'connections': FieldValue.arrayUnion([uid]),
-      },
-    );
-    UserModel.instance.connections.add(uid);
-    saveDataToSP();
   }
 
-  // get my connections stream (primary)
+  // get my connections (primary or secondary) as stream
   Stream<QuerySnapshot<Map<String, dynamic>>> getMyConnections(
-      List<String> users) {
-    log("my connections: ${UserModel.instance.connections}");
-    if (users.isNotEmpty) {
-      return _firebaseFirestore
-          .collection('users')
-          .where(FieldPath.documentId, whereIn: users)
-          .snapshots();
-    } else {
-      return const Stream<QuerySnapshot<Map<String, dynamic>>>.empty();
-    }
-  }
-
-  // get my secondary connections
-  Stream<QuerySnapshot<Map<String, dynamic>>> getMySecondaryConnections() {
+      {required bool primary}) {
     return _firebaseFirestore
         .collection('users')
         .doc(UserModel.instance.uid)
         .collection('my_connections')
-        .where('primary', isEqualTo: false)
+        .where('primary', isEqualTo: primary)
+        .orderBy('lastMessage', descending: true)
         .snapshots();
   }
 
@@ -349,6 +368,7 @@ class AuthProvider extends ChangeNotifier {
     return _firebaseFirestore
         .collection('users')
         .where('uid', isEqualTo: uid)
+        .limit(1)
         .snapshots();
   }
 }

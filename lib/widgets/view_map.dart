@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/screens/request_module_screens/full_map.dart';
@@ -35,8 +36,8 @@ class _ViewMapWidgetState extends State<ViewMapWidget> {
                 if (snapshot.connectionState == ConnectionState.done) {
                   cachedImage = ClipRRect(
                     borderRadius: BorderRadius.circular(20),
-                    child: Image.network(
-                      LocationServices.getStaticMapUrl(
+                    child: CachedNetworkImage(
+                      imageUrl: LocationServices.getStaticMapUrl(
                         lat: snapshot.data![0],
                         lon: snapshot.data![1],
                         zoom: 17,
@@ -44,6 +45,10 @@ class _ViewMapWidgetState extends State<ViewMapWidget> {
                         height:
                             (MediaQuery.of(context).size.height * 0.26).toInt(),
                       ),
+                      errorWidget: (context, error, obj) {
+                        return const Center(
+                            child: Text("something went wrong"));
+                      },
                       fit: BoxFit.cover,
                     ),
                   );

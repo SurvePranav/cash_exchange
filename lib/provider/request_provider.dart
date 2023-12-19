@@ -1,7 +1,6 @@
 import 'dart:developer';
 import 'package:cashxchange/model/request_model.dart';
 import 'package:cashxchange/model/user_model.dart';
-import 'package:cashxchange/utils/util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -56,7 +55,7 @@ class RequestProvider extends ChangeNotifier {
       });
       return true;
     } catch (e) {
-      MyAppServices.showSlackBar(context, e.toString());
+      log('error while uploading request: $e');
       return false;
     }
   }
@@ -136,7 +135,7 @@ class RequestProvider extends ChangeNotifier {
 
       return documents;
     } catch (e) {
-      MyAppServices.showSlackBar(context, e.toString());
+      log('error while getting my requests: $e');
       return [];
     }
   }
