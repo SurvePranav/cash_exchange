@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:flutter/material.dart';
@@ -28,10 +29,54 @@ class MyAppServices {
         image = File(pickedImage.path);
       }
     } catch (e) {
-      showSlackBar(context, e.toString());
+      log('failed to pick image: $e');
     }
 
     return image;
+  }
+
+  // show alert dialog
+  static Future<bool> showConfirmationDialog({
+    required BuildContext context,
+    required String title,
+    required String body,
+  }) async {
+    bool? result = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(body),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false); // Return false on cancel
+              },
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: AppColors.deepGreen),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true); // Return true on continue
+              },
+              child: Text(
+                'Yes',
+                style: TextStyle(color: AppColors.deepGreen),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result != null && result) {
+      // User pressed Continue
+      return true;
+    } else {
+      return false;
+    }
   }
 
 // Check for Permission

@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 _selectedItem == 'Nearby ATM\'s'
                     ? const NearbyAtmsWidget()
                     : RequestsWidget(
-                        nearMe: _selectedItem == 'Nearby Requests',
+                        nearby: _selectedItem == 'Nearby Requests',
                       ),
               ],
             ),

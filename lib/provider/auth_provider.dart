@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'package:cashxchange/model/connection_model.dart';
 import 'package:cashxchange/model/user_model.dart';
@@ -109,18 +110,23 @@ class AuthProvider extends ChangeNotifier {
         smsCode: userOtp,
       );
 
-      User? user = (await _firebaseAuth.signInWithCredential(creds)).user;
-
-      if (user != null) {
-        // carry out logic
-        _uid = user.uid;
-        await onSuccess();
-      } else {
-        throw Exception("something went wrong");
-      }
-    } on Exception {
+      // User? user =
+      await _firebaseAuth
+          .signInWithCredential(creds)
+          .then((userCredential) async {
+        User? user = userCredential.user;
+        if (user != null) {
+          // carry out logic
+          _uid = user.uid;
+          await onSuccess();
+        } else {
+          MyAppServices.showSlackBar(context, 'something went wrong');
+          throw Exception("something went wrong");
+        }
+      });
+    } catch (e) {
       // when otp verification failed
-      MyAppServices.showSlackBar(context, 'something went wrong');
+      log('verification failed: $e');
     }
   }
 
@@ -189,7 +195,7 @@ class AuthProvider extends ChangeNotifier {
         setLoading(false);
       });
     } on FirebaseAuthException catch (e) {
-      MyAppServices.showSlackBar(context, e.toString());
+      log('error while uploading user data: $e');
       setLoading(false);
     }
   }
@@ -253,10 +259,11 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // update user's active status
-  Future<void> updateUserActiveStatus(bool isOnline) async {
+  Future<void> updateUserActiveStatus(bool isOnline,
+      {bool removePushToken = false}) async {
     _firebaseFirestore.collection('users').doc(UserModel.instance.uid).update({
       'isOnline': isOnline,
-      'pushToken': UserModel.instance.pushToken,
+      'pushToken': removePushToken ? "" : UserModel.instance.pushToken,
     });
   }
 
@@ -315,19 +322,103 @@ class AuthProvider extends ChangeNotifier {
     });
   }
 
-  // update connection to primary
+  // update connection to priority primary or secondary
   Future<void> updateConnectionPriority({
     required String senderUid,
     required bool primary,
+  }) async {
+    if (primary) {
+      _firebaseFirestore
+          .collection('users')
+          .doc(UserModel.instance.uid)
+          .collection('my_connections')
+          .doc(senderUid)
+          .update({
+        'primary': true,
+      });
+      if (!UserModel.instance.connections.contains(senderUid)) {
+        UserModel.instance.connections.add(senderUid);
+        _firebaseFirestore
+            .collection('users')
+            .doc(UserModel.instance.uid)
+            .update(
+          {
+            'connections': UserModel.instance.connections,
+          },
+        );
+        saveDataToSP();
+      }
+    } else {
+      _firebaseFirestore
+          .collection('users')
+          .doc(UserModel.instance.uid)
+          .collection('my_connections')
+          .doc(senderUid)
+          .update({
+        'primary': false,
+      });
+      if (UserModel.instance.connections.contains(senderUid)) {
+        UserModel.instance.connections.remove(senderUid);
+        _firebaseFirestore
+            .collection('users')
+            .doc(UserModel.instance.uid)
+            .update(
+          {
+            'connections': UserModel.instance.connections,
+          },
+        );
+        saveDataToSP();
+      }
+    }
+  }
+
+// remove connection from both users
+  Future<void> removeConnection({
+    required Connection connection,
   }) async {
     _firebaseFirestore
         .collection('users')
         .doc(UserModel.instance.uid)
         .collection('my_connections')
-        .doc(senderUid)
-        .update({
-      'primary': primary,
-    });
+        .doc(connection.uid)
+        .delete();
+    _firebaseFirestore
+        .collection('users')
+        .doc(connection.uid)
+        .collection('my_connections')
+        .doc(UserModel.instance.uid)
+        .delete();
+
+    if (UserModel.instance.connections.contains(connection.uid)) {
+      UserModel.instance.connections.remove(connection.uid);
+      _firebaseFirestore.collection('users').doc(UserModel.instance.uid).update(
+        {
+          'connections': UserModel.instance.connections,
+        },
+      );
+      saveDataToSP();
+    }
+    if (connection.connections.contains(UserModel.instance.uid)) {
+      var updatedConnections = connection.connections;
+      updatedConnections.remove(UserModel.instance.uid);
+      _firebaseFirestore.collection('users').doc(connection.uid).update(
+        {
+          'connections': updatedConnections,
+        },
+      );
+    }
+  }
+
+  // get my connections info by id as stream
+  Stream<QuerySnapshot<Map<String, dynamic>>> getConnectionInfo(
+      {required String userId}) {
+    return _firebaseFirestore
+        .collection('users')
+        .doc(UserModel.instance.uid)
+        .collection('my_connections')
+        .where('uid', isEqualTo: userId)
+        .limit(1)
+        .snapshots();
   }
 
   // get my connections (primary or secondary) as stream

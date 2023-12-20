@@ -1,20 +1,30 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cashxchange/constants/constant_values.dart';
+import 'package:cashxchange/model/connection_model.dart';
+import 'package:cashxchange/model/request_model.dart';
+import 'package:cashxchange/provider/auth_provider.dart';
+import 'package:cashxchange/utils/location_services.dart';
 import 'package:cashxchange/widgets/constant_widget.dart';
-import 'package:cashxchange/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-typedef MyCallBack = Function(Map<String, dynamic> request);
+typedef MyCallBack = Function(
+    RequestModel request, Connection connection, String distance);
+typedef MyCallBack2 = Function(RequestModel request);
 
 class NearbyRequestList extends StatelessWidget {
-  final List<Map<String, dynamic>> requests;
+  final List<RequestModel> requests;
   final MyCallBack onTap;
-  final MyCallBack onAccept;
+  final MyCallBack2 onAccept;
+  final double myLat;
+  final double myLng;
   const NearbyRequestList({
     super.key,
     required this.requests,
     required this.onTap,
     required this.onAccept,
+    required this.myLat,
+    required this.myLng,
   });
 
   @override
@@ -66,85 +76,112 @@ class NearbyRequestList extends StatelessWidget {
       return SliverList(
         delegate: SliverChildBuilderDelegate(
           (context, index) {
+            String distance = "--";
             final request = requests.elementAt(index);
             return Container(
-              margin: index == 0
-                  ? const EdgeInsets.only(
-                      top: 20,
-                      left: 20,
-                      right: 20,
-                      bottom: 1,
-                    )
-                  : index == requests.length - 1
-                      ? const EdgeInsets.only(
-                          bottom: 20,
-                          left: 20,
-                          right: 20,
-                        )
-                      : const EdgeInsets.only(
-                          left: 20,
-                          right: 20,
-                          bottom: 1,
-                        ),
+              margin: const EdgeInsets.only(
+                bottom: 20,
+                left: 20,
+                right: 20,
+              ),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: index == 0 && index == requests.length - 1
-                    ? const BorderRadius.all(
-                        Radius.circular(20),
-                      )
-                    : index == 0
-                        ? const BorderRadius.vertical(
-                            top: Radius.circular(20),
-                          )
-                        : index == requests.length - 1
-                            ? const BorderRadius.vertical(
-                                bottom: Radius.circular(20),
-                              )
-                            : null,
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(20),
+                ),
+                border: Border.all(color: AppColors.deepGreen, width: 1),
               ),
               child: Column(
                 children: [
-                  ListTile(
-                    leading: Hero(
-                      tag: request['reqId'],
-                      child: CircleAvatar(
-                        backgroundColor: AppColors.mintGreen,
-                        radius: 20,
-                        backgroundImage:
-                            CachedNetworkImageProvider(request['profilePic']),
-                      ),
-                    ),
-                    title: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "${request['name']}",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
-                        ),
-                        Text(
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                          "${request['bio']}",
-                        ),
-                      ],
-                    ),
-                    onTap: () {
-                      onTap(request);
+                  StreamBuilder(
+                    stream: Provider.of<AuthProvider>(context, listen: false)
+                        .getUserById(request.uid),
+                    builder: (context, snapshot) {
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.none:
+                        case ConnectionState.waiting:
+                          return ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: AppColors.mintGreen,
+                              radius: 20,
+                              backgroundImage: const AssetImage(
+                                  'assets/images/profile_icon.png'),
+                            ),
+                            title: const Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "......",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                Text(
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                  "......",
+                                ),
+                              ],
+                            ),
+                          );
+                        case ConnectionState.active:
+                        case ConnectionState.done:
+                          final data = snapshot.data?.docs;
+                          final user = data
+                                  ?.map((e) => Connection.fromJson(e.data()))
+                                  .toList() ??
+                              [];
+
+                          return ListTile(
+                            leading: Hero(
+                              tag: request.reqId,
+                              child: CircleAvatar(
+                                backgroundColor: AppColors.mintGreen,
+                                radius: 20,
+                                backgroundImage: CachedNetworkImageProvider(
+                                    user.first.profilePic),
+                              ),
+                            ),
+                            title: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user.first.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                Text(
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                  user.first.bio,
+                                ),
+                              ],
+                            ),
+                            onTap: () {
+                              onTap(request, user.first, distance);
+                            },
+                          );
+                      }
                     },
                   ),
-                  // const Divider(),
+                  Divider(
+                    color: AppColors.deepGreen,
+                  ),
                   Stack(
                     children: [
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Image.asset(
-                          request['type'] == 'Cash'
+                          request.type == 'Cash'
                               ? 'assets/images/want_cash.png'
                               : 'assets/images/want_online_money.png',
                           height: 250,
@@ -174,7 +211,7 @@ class NearbyRequestList extends StatelessWidget {
                               height: 15,
                             ),
                             Text(
-                              "Want ${request['type']}",
+                              "Want ${request.type}",
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 15,
@@ -185,20 +222,56 @@ class NearbyRequestList extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,
                               ),
-                              "Rs.${request['amount']}",
+                              "Rs.${request.amount}",
                             ),
-                            Text(
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                              "walking distance.${request['distance']} KM",
+                            FutureBuilder(
+                              future: LocationServices.calculateWalkingDistance(
+                                  originLat: myLat,
+                                  originLng: myLng,
+                                  destinationLat: request.locationLat,
+                                  destinationLng: request.locationLon),
+                              builder: (context, snapshot) {
+                                switch (snapshot.connectionState) {
+                                  case ConnectionState.none:
+                                  case ConnectionState.waiting:
+                                  case ConnectionState.active:
+                                    return const Text(
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                      "walking distance: calculating...",
+                                    );
+                                  case ConnectionState.done:
+                                    if (snapshot.hasData) {
+                                      distance =
+                                          (snapshot.data!['distance_value'] /
+                                                  1000)
+                                              .toStringAsFixed(2);
+                                      return Text(
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                        ),
+                                        "Walking distance: $distance KM",
+                                      );
+                                    } else {
+                                      return const Text(
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                        ),
+                                        "walking distance: could not get!",
+                                      );
+                                    }
+                                }
+                              },
                             ),
                             const Text("Accepted By: --"),
                             SizedBox(
                               height: 55,
                               child: Text(
-                                "More Info : ${request['info']}",
+                                "More Info : ${request.info}",
                                 softWrap: true,
                               ),
                             ),
@@ -207,15 +280,28 @@ class NearbyRequestList extends StatelessWidget {
                             ),
                             Row(
                               children: [
-                                const Expanded(
-                                  child: SizedBox(),
-                                ),
-                                CustomButton(
-                                  onPressed: () {
-                                    onAccept(request);
-                                  },
-                                  text: "Accept",
-                                ),
+                                Expanded(
+                                  child: TextButton(
+                                    onPressed: () {
+                                      onAccept(request);
+                                    },
+                                    style: ButtonStyle(
+                                      overlayColor:
+                                          MaterialStateProperty.all<Color>(
+                                              Colors.white.withAlpha(200)),
+                                      side:
+                                          MaterialStateProperty.all<BorderSide>(
+                                        BorderSide(
+                                            color: AppColors.deepGreen,
+                                            width: 1.0),
+                                      ),
+                                      foregroundColor:
+                                          MaterialStateProperty.all<Color>(
+                                              AppColors.deepGreen),
+                                    ),
+                                    child: const Text('Accept'),
+                                  ),
+                                )
                               ],
                             )
                           ],
@@ -230,75 +316,6 @@ class NearbyRequestList extends StatelessWidget {
           childCount: requests.length,
         ),
       );
-
-      // return ListView.builder(
-      //   itemCount: requests.length,
-      //   itemBuilder: (bcontext, index) {
-      //     final request = requests.elementAt(index);
-      //     Card(
-      //       color: AppColors.deepGreen,
-      //       elevation: 5,
-      //       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 13),
-      //       shape: RoundedRectangleBorder(
-      //         borderRadius: BorderRadius.circular(15),
-      //       ),
-      //       child: ListTile(
-      //         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      //         leading: CircleAvatar(
-      //           backgroundColor: AppColors.mintGreen,
-      //           radius: 20,
-      //           backgroundImage:
-      //               const AssetImage('assets/images/profile_icon.png'),
-      //         ),
-      //         title: Text(
-      //           "Want ${request['type']} for Rs.${request['amount']}",
-      //           style: const TextStyle(
-      //             color: Colors.white,
-      //             fontWeight: FontWeight.bold,
-      //             fontSize: 15,
-      //           ),
-      //         ),
-      //         subtitle: Row(
-      //           children: [
-      //             Text(
-      //               'distance: ${request['distance']} KM',
-      //               style: const TextStyle(
-      //                 color: Colors.white70,
-      //                 fontSize: 13,
-      //               ),
-      //             ),
-      //             const Expanded(child: SizedBox()),
-      //             SizedBox(
-      //               width: 50,
-      //               child: Row(
-      //                 children: [
-      //                   const Icon(Icons.remove_red_eye,
-      //                       size: 18, color: Colors.white70),
-      //                   const SizedBox(
-      //                     width: 5,
-      //                   ),
-      //                   Text(
-      //                     "${request['views']}",
-      //                     style: const TextStyle(
-      //                         color: Colors.white70, fontSize: 13),
-      //                   ),
-      //                 ],
-      //               ),
-      //             ),
-      //           ],
-      //         ),
-      //         trailing: const Icon(
-      //           Icons.arrow_forward_ios,
-      //           color: Colors.white,
-      //           size: 25,
-      //         ),
-      //         onTap: () {
-      //           onTap(request);
-      //         },
-      //       ),
-      //     );
-      //   },
-      // );
     }
   }
 }

@@ -69,10 +69,24 @@ class _ChatScreenState extends State<ChatScreen> {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: AppColors.blue_4,
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              color: AppColors.deepGreen,
+            ),
+            onPressed: () {
+              if (isSearching) {
+                _focusNode.unfocus();
+                _searchTextController.text = "";
+              } else {
+                Navigator.of(context).pop();
+              }
+            },
+          ),
           title: SizedBox(
             height: 80,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              padding: const EdgeInsets.symmetric(vertical: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -215,7 +229,10 @@ class _ChatScreenState extends State<ChatScreen> {
                         log('fetetched userIds: $_userIds');
                         log('fetetched userNames: $_connectionNames');
                         if (primary) {
+                          log('updating connections....');
                           UserModel.instance.connections = _userIds;
+                          Provider.of<AuthProvider>(context, listen: false)
+                              .saveDataToSP();
                         }
                       }
                       switch (snapshot.connectionState) {

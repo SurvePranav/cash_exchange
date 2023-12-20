@@ -4,12 +4,13 @@ import 'package:cashxchange/provider/connectivity_provider.dart';
 import 'package:cashxchange/provider/messaging_provider.dart';
 import 'package:cashxchange/provider/utility_provider.dart';
 import 'package:cashxchange/provider/request_provider.dart';
-import 'package:cashxchange/screens/auth_module_screens/register_screen.dart';
 import 'package:cashxchange/screens/auth_module_screens/welcome_screen.dart';
+import 'package:cashxchange/screens/chat_module_screens/chat_screen.dart';
 import 'package:cashxchange/screens/main_body.dart';
 import 'package:cashxchange/screens/notefication_module_screens/notification_screen.dart';
 import 'package:cashxchange/screens/profile_module_screens/profile_screen.dart';
 import 'package:cashxchange/screens/profile_module_screens/user_info_fill.dart';
+import 'package:cashxchange/screens/request_module_screens/request_screen.dart';
 import 'package:cashxchange/screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -69,13 +70,13 @@ class _MyAppState extends State<MyApp> {
           iconTheme: IconThemeData(color: AppColors.deepGreen),
         ),
         routes: {
-          'home_screen': (context) => const MainBody(currentIndex: 0),
-          'chats_screen': (context) => const MainBody(currentIndex: 1),
-          'new_request_screen': (context) => const MainBody(currentIndex: 2),
+          'home_screen': (context) => const MainBody(),
           'notification_screen': (context) => NotificationScreen(),
           'profile_screen': (context) => const ProfileScreen(),
           'welcome_screen': (context) => const WelcomeScreen(),
           'user_info_screen': (context) => const UserInfoScreen(),
+          'chat_screen': (context) => const ChatScreen(),
+          'request_screen': (context) => const RaiseRequestScreen(),
         },
         home: const SplashScreen(),
         // home: const WelcomeScreen(),

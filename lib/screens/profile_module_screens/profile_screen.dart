@@ -62,17 +62,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: AppColors.deepGreen,
                       ),
                       onPressed: () {
-                        ap.updateUserActiveStatus(false).then(
+                        ap
+                            .updateUserActiveStatus(false,
+                                removePushToken: true)
+                            .then(
                           (value) async {
                             final data = await ap.getUserDataById(
                                 uid: UserModel.instance.uid);
                             log("isOnline: ${data['isOnline']}");
                             ap.userSignOut().then((value) {
-                              Navigator.pushAndRemoveUntil(
+                              Navigator.pushNamedAndRemoveUntil(
                                 context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const WelcomeScreen()),
+                                'welcome_screen',
                                 (route) => false,
                               );
                             });

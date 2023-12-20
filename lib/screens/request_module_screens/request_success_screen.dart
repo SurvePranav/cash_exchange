@@ -45,6 +45,7 @@ class RequestSuccessScreen extends StatelessWidget {
             child: GestureDetector(
               onTap: () {
                 Navigator.pop(context);
+                Navigator.pop(context);
               },
               child: Container(
                 color: Colors.white,

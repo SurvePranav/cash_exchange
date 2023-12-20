@@ -394,13 +394,8 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
           onSuccess: () {
             // once data is saved we need to store it locally also using shared preference library
             ap.saveDataToSP().then((value) => ap.setSignedIn()).then(
-                  (value) => Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                        builder: (context) => const MainBody(
-                          currentIndex: 0,
-                        ),
-                      ),
-                      (route) => false),
+                  (value) => Navigator.of(context)
+                      .pushNamedAndRemoveUntil('home_screen', (route) => false),
                 );
           },
         );

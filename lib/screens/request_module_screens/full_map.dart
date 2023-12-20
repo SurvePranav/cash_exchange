@@ -51,7 +51,7 @@ class _FullMapScreenState extends State<FullMapScreen> {
         child: SlidingUpPanel(
           minHeight: MediaQuery.of(context).size.height * 0.1,
           maxHeight: MediaQuery.of(context).size.height * 0.5,
-          borderRadius: BorderRadius.vertical(
+          borderRadius: const BorderRadius.vertical(
             top: Radius.circular(18),
           ),
           panelBuilder: (sc) {
@@ -90,7 +90,7 @@ class _FullMapScreenState extends State<FullMapScreen> {
                     ),
                     Align(
                       alignment: Alignment.topCenter,
-                      child: Container(
+                      child: SizedBox(
                         // color: Colors.green,
                         height: 50,
                         child: Row(

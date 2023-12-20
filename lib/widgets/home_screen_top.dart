@@ -1,5 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cashxchange/constants/constant_values.dart';
+import 'package:cashxchange/main.dart';
 import 'package:cashxchange/model/user_model.dart';
+import 'package:cashxchange/screens/chat_module_screens/chat_screen.dart';
 import 'package:cashxchange/screens/request_module_screens/active_requests_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -27,41 +30,54 @@ class HomeScreenTopSection extends StatelessWidget {
               const SizedBox(
                 height: 55,
               ),
-              Row(
-                children: [
-                  InkWell(
-                    onTap: () {
-                      Navigator.of(context).pushNamed('profile_screen');
-                    },
-                    child: Hero(
-                      tag: 'hero_image',
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15.0),
+              Padding(
+                padding: const EdgeInsets.only(left: 20, right: 50),
+                child: Row(
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        Navigator.of(context).pushNamed('profile_screen');
+                      },
+                      child: Hero(
+                        tag: 'hero_image',
                         child: CircleAvatar(
                           backgroundColor: AppColors.deepGreen,
-                          radius: 25,
+                          radius: mq.width * 0.06,
                           child: Center(
                             child: CircleAvatar(
-                              backgroundImage:
-                                  NetworkImage(UserModel.instance.profilePic),
-                              // FileImage(ImageSingleton.getLocalImage()!),
-                              radius: 23,
+                              backgroundImage: CachedNetworkImageProvider(
+                                  UserModel.instance.profilePic),
+                              radius: mq.width * 0.055,
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  Container(
-                    height: 50,
-                    alignment: Alignment.centerLeft,
-                    width: MediaQuery.of(context).size.width * 0.6,
-                    child: Hero(
-                      tag: 'app_logo',
-                      child: Image.asset("assets/images/app_logo.png"),
+                    Expanded(
+                      child: Container(
+                        // color: Colors.red,
+                        height: 50,
+                        alignment: Alignment.centerLeft,
+                        width: mq.width * 0.60,
+                        child: Hero(
+                          tag: 'app_logo',
+                          child: Image.asset("assets/images/app_logo.png"),
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                    IconButton(
+                      icon: const Icon(
+                        Icons.notifications,
+                      ),
+                      iconSize: 35,
+                      onPressed: () {
+                        Navigator.of(context).pushNamed(
+                          'notification_screen',
+                        );
+                      },
+                    )
+                  ],
+                ),
               ),
             ],
           ),
@@ -137,7 +153,7 @@ class HomeScreenTopSection extends StatelessWidget {
                     const Expanded(child: SizedBox()),
                     GestureDetector(
                       onTap: () {
-                        Navigator.of(context).pushNamed('notification_screen');
+                        Navigator.of(context).pushNamed('chat_screen');
                       },
                       child: CircleAvatar(
                         backgroundColor: Colors.white,
@@ -146,7 +162,7 @@ class HomeScreenTopSection extends StatelessWidget {
                           radius: 30,
                           backgroundColor: AppColors.deepGreen,
                           child: const Icon(
-                            Icons.notifications,
+                            Icons.chat_rounded,
                             size: 30,
                             color: Colors.white,
                           ),

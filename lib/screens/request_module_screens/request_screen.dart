@@ -43,184 +43,201 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 18),
-      height: MediaQuery.of(context).size.height,
-      width: MediaQuery.of(context).size.width,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            AppColors.skyBlue,
-            AppColors.mintGreen,
-            AppColors.lightMintGreen,
-          ],
+    return Scaffold(
+      body: Container(
+        padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 18),
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.skyBlue,
+              AppColors.mintGreen,
+              AppColors.lightMintGreen,
+            ],
+          ),
         ),
-      ),
-      child: SafeArea(
-        child: SingleChildScrollView(
-          child: Center(
-            child: Column(
-              children: [
-                Text(
-                  widget.editRequest ? 'Edit Request ' : 'New Request',
-                  style: const TextStyle(
-                      fontSize: 26.0, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Select Request Type:',
-                    style: TextStyle(fontSize: 20.0),
-                  ),
-                ),
-                DropdownButtonFormField<String>(
-                  value: _requestType,
-                  onChanged: (value) {
-                    setState(() {
-                      _requestType = value!;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        color: Colors.transparent,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(
-                        color: AppColors.skyBlue,
-                      ),
-                    ),
-                  ),
-                  items: ['Cash', 'Online Money']
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Amount',
-                    style: TextStyle(fontSize: 20.0),
-                  ),
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  child: Column(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Center(
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // name field
-                      textFeld(
-                        hintText: "eg.Rs.200",
-                        icon: Icons.money,
-                        inputType: TextInputType.number,
-                        maxLines: 1,
-                        controller: amountController,
-                      ),
-
-                      const SizedBox(
-                        height: 20,
-                      ),
-
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'More Info',
-                          style: TextStyle(fontSize: 20.0),
+                      IconButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        icon: const Icon(
+                          Icons.arrow_back,
                         ),
                       ),
-                      // more info
-                      textFeld(
-                        hintText: "provide info about request...",
-                        icon: Icons.info,
-                        inputType: TextInputType.name,
-                        maxLines: 3,
-                        controller: infoController,
+                      Text(
+                        widget.editRequest ? 'Edit Request ' : 'New Request',
+                        style: const TextStyle(
+                            fontSize: 26.0, fontWeight: FontWeight.bold),
                       ),
-                      widget.editRequest
-                          ? const SizedBox()
-                          : Column(
-                              children: [
-                                const Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    'Location',
-                                    style: TextStyle(fontSize: 20.0),
-                                  ),
-                                ),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Container(
-                                        height: 40,
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          color: Colors.white,
-                                        ),
-                                        child: const Text(
-                                          "Using Current Location",
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 20,
-                                ),
-                              ],
-                            ),
                     ],
                   ),
-                ),
-                SizedBox(
-                  height: 35,
-                  width: 35,
-                  child: Padding(
-                    padding: const EdgeInsets.all(7),
-                    child: Consumer<RequestProvider>(
-                      builder: (context, rp, widget) {
-                        if (rp.isLoading) {
-                          return const CircularProgressIndicator();
-                        } else {
-                          return const SizedBox();
-                        }
-                      },
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Select Request Type:',
+                      style: TextStyle(fontSize: 20.0),
                     ),
                   ),
-                ),
-                SizedBox(
-                  height: 50,
-                  width: MediaQuery.of(context).size.width * 0.85,
-                  child: CustomButton(
-                      text:
-                          widget.editRequest ? "Edit Request" : "Raise Request",
-                      onPressed: () async {
-                        if (!isPressed) {
-                          await raiseRequest();
-                        }
-                      }),
-                ),
-              ],
+                  DropdownButtonFormField<String>(
+                    value: _requestType,
+                    onChanged: (value) {
+                      setState(() {
+                        _requestType = value!;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(
+                          color: Colors.transparent,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(
+                          color: AppColors.skyBlue,
+                        ),
+                      ),
+                    ),
+                    items: ['Cash', 'Online Money']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Amount',
+                      style: TextStyle(fontSize: 20.0),
+                    ),
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: Column(
+                      children: [
+                        // name field
+                        textFeld(
+                          hintText: "eg.Rs.200",
+                          icon: Icons.money,
+                          inputType: TextInputType.number,
+                          maxLines: 1,
+                          controller: amountController,
+                        ),
+
+                        const SizedBox(
+                          height: 20,
+                        ),
+
+                        const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'More Info',
+                            style: TextStyle(fontSize: 20.0),
+                          ),
+                        ),
+                        // more info
+                        textFeld(
+                          hintText: "provide info about request...",
+                          icon: Icons.info,
+                          inputType: TextInputType.name,
+                          maxLines: 3,
+                          controller: infoController,
+                        ),
+                        widget.editRequest
+                            ? const SizedBox()
+                            : Column(
+                                children: [
+                                  const Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      'Location',
+                                      style: TextStyle(fontSize: 20.0),
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Container(
+                                          height: 40,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            color: Colors.white,
+                                          ),
+                                          child: const Text(
+                                            "Using Current Location",
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
+                                ],
+                              ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 35,
+                    width: 35,
+                    child: Padding(
+                      padding: const EdgeInsets.all(7),
+                      child: Consumer<RequestProvider>(
+                        builder: (context, rp, widget) {
+                          if (rp.isLoading) {
+                            return const CircularProgressIndicator();
+                          } else {
+                            return const SizedBox();
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 50,
+                    width: MediaQuery.of(context).size.width * 0.85,
+                    child: CustomButton(
+                        text: widget.editRequest
+                            ? "Edit Request"
+                            : "Raise Request",
+                        onPressed: () async {
+                          if (!isPressed) {
+                            await raiseRequest();
+                          }
+                        }),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

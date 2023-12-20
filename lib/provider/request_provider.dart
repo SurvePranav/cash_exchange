@@ -106,18 +106,36 @@ class RequestProvider extends ChangeNotifier {
           .map((doc) =>
               RequestModel.fromJson(doc.data() as Map<String, dynamic>))
           .toList();
-      // for (int i = 0; i < querySnapshot.docs.length; i++) {
-      //   documents.add(RequestModel.fromJson(
-      //       querySnapshot.docs[i].data() as Map<String, dynamic>));
-      //   log('data: ${querySnapshot.docs[i].data()}');
-      // }
       return documents;
     } catch (e) {
       return [];
     }
   }
 
-  // get active requests from firestore
+  // get active requests stream from firestore
+  Stream<QuerySnapshot<Map<String, dynamic>>> getActiveRequestsAsStream(
+      {onlyMyRequests = false}) {
+    try {
+      DateTime exp = DateTime.now().subtract(const Duration(hours: 90));
+
+      if (onlyMyRequests) {
+        return _firebaseFirestore
+            .collection('request')
+            .where('uid', isEqualTo: UserModel.instance.uid)
+            .where('createdAt', isGreaterThan: exp)
+            .snapshots();
+      } else {
+        return _firebaseFirestore
+            .collection('request')
+            .where('createdAt', isGreaterThan: exp)
+            .snapshots();
+      }
+    } catch (e) {
+      return const Stream<QuerySnapshot<Map<String, dynamic>>>.empty();
+    }
+  }
+
+  // get my active requests from firestore
   Future<List<RequestModel>> getAllRequests(
     BuildContext context,
   ) async {

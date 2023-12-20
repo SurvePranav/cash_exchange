@@ -32,11 +32,8 @@ class ActiveRequestsList extends StatelessWidget {
                       shape: const CircleBorder(),
                       backgroundColor: AppColors.deepGreen),
                   onPressed: () {
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(
-                      builder: (context) => const MainBody(
-                        currentIndex: 2,
-                      ),
-                    ));
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pushNamed('request_screen');
                   },
                   child: const Icon(
                     Icons.add,

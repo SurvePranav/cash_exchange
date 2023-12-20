@@ -44,12 +44,9 @@ class _SplashScreenState extends State<SplashScreen> {
                 () => Navigator.pushReplacementNamed(context, 'home_screen'),
               );
         } else {
-          Navigator.pushReplacement(
+          Navigator.pushReplacementNamed(
             context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  const WelcomeScreen(), // SecondPage is the destination page
-            ),
+            'welcome_screen',
           );
         }
       },
