@@ -400,10 +400,10 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
           },
         );
       } else {
-        MyAppServices.showSlackBar(context, "please Select Image");
+        MyAppServices.showSnackBar(context, "please Select Image");
       }
     } else {
-      MyAppServices.showSlackBar(context, "please fill all the fields");
+      MyAppServices.showSnackBar(context, "please fill all the fields");
     }
   }
 }

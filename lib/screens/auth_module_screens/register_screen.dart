@@ -181,7 +181,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       String phoneNo = _controller.text.trim();
       ap.signInWithPhone(context, "+${selectedCountry.phoneCode}$phoneNo");
     } else {
-      MyAppServices.showSlackBar(context, "Enter 10 digit number");
+      MyAppServices.showSnackBar(context, "Enter 10 digit number");
     }
   }
 }

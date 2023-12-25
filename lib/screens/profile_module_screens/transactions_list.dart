@@ -1,6 +1,6 @@
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/request_model.dart';
-import 'package:cashxchange/screens/main_body.dart';
+import 'package:cashxchange/utils/date_util.dart';
 import 'package:flutter/material.dart';
 
 typedef MyCallBack = Function(RequestModel request);
@@ -60,7 +60,9 @@ class TransactionsList extends StatelessWidget {
         itemBuilder: (context, index) {
           final request = requests.elementAt(index);
           return Card(
-            color: AppColors.blue_8,
+            color: request.confirmedTo.isNotEmpty
+                ? Colors.green
+                : AppColors.blue_8,
             elevation: 5,
             margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
             shape: RoundedRectangleBorder(
@@ -86,22 +88,10 @@ class TransactionsList extends StatelessWidget {
                     ),
                   ),
                   const Expanded(child: SizedBox()),
-                  SizedBox(
-                    width: 50,
-                    child: Row(
-                      children: [
-                        const Icon(Icons.remove_red_eye,
-                            size: 18, color: Colors.white70),
-                        const SizedBox(
-                          width: 5,
-                        ),
-                        Text(
-                          "${request.views}",
-                          style: const TextStyle(
-                              color: Colors.white70, fontSize: 13),
-                        ),
-                      ],
-                    ),
+                  Text(
+                    MyDateUtil.getTimeStamp(
+                        context: context, time: request.createdAt.toString()),
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
                   ),
                 ],
               ),

@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:cashxchange/constants/constant_values.dart';
-import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/provider/messaging_provider.dart';
 import 'package:cashxchange/screens/chat_module_screens/message_screen.dart';
@@ -228,12 +227,6 @@ class _ChatScreenState extends State<ChatScreen> {
                         ).toList();
                         log('fetetched userIds: $_userIds');
                         log('fetetched userNames: $_connectionNames');
-                        if (primary) {
-                          log('updating connections....');
-                          UserModel.instance.connections = _userIds;
-                          Provider.of<AuthProvider>(context, listen: false)
-                              .saveDataToSP();
-                        }
                       }
                       switch (snapshot.connectionState) {
                         case ConnectionState.none:

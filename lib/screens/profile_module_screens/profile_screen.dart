@@ -1,12 +1,16 @@
 import 'dart:developer';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cashxchange/constants/constant_values.dart';
+import 'package:cashxchange/main.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
+import 'package:cashxchange/screens/profile_module_screens/I_accepted.dart';
 import 'package:cashxchange/screens/profile_module_screens/my_transactions.dart';
 import 'package:cashxchange/screens/profile_module_screens/profile_pic_screen.dart';
 import 'package:cashxchange/screens/profile_module_screens/user_info_fill.dart';
 import 'package:cashxchange/screens/auth_module_screens/welcome_screen.dart';
+import 'package:cashxchange/utils/util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -62,23 +66,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: AppColors.deepGreen,
                       ),
                       onPressed: () {
-                        ap
-                            .updateUserActiveStatus(false,
-                                removePushToken: true)
-                            .then(
-                          (value) async {
-                            final data = await ap.getUserDataById(
-                                uid: UserModel.instance.uid);
-                            log("isOnline: ${data['isOnline']}");
-                            ap.userSignOut().then((value) {
-                              Navigator.pushNamedAndRemoveUntil(
-                                context,
-                                'welcome_screen',
-                                (route) => false,
-                              );
-                            });
-                          },
-                        );
+                        MyAppServices.showConfirmationDialog(
+                                context: context,
+                                title: 'Logout',
+                                body: 'do you want to logout?')
+                            .then((value) {
+                          if (value) {
+                            ap
+                                .updateUserActiveStatus(false,
+                                    removePushToken: true)
+                                .then(
+                              (value) async {
+                                final data = await ap.getUserDataById(
+                                    uid: UserModel.instance.uid);
+                                log("isOnline: ${data['isOnline']}");
+                                ap.userSignOut().then((value) {
+                                  Navigator.pushNamedAndRemoveUntil(
+                                    context,
+                                    'welcome_screen',
+                                    (route) => false,
+                                  );
+                                });
+                              },
+                            );
+                          }
+                        });
                       },
                     ),
                   ),
@@ -157,8 +169,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ],
                             ),
                           ),
-                          const SizedBox(
-                            height: 30,
+                          const Expanded(
+                            child: SizedBox(),
                           ),
                           const Divider(),
                           ListTile(
@@ -181,18 +193,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     color: Colors.white,
                                   ),
                                 )),
-                            title: const Text("My Transactions"),
+                            title: const Text("My Requests"),
                             trailing: const Icon(Icons.arrow_forward_ios),
                           ),
                           const Divider(),
-                          const ListTile(
-                            title: Text("First list tile"),
+                          ListTile(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                CupertinoPageRoute(
+                                  builder: (context) => const IAcceptedScreen(),
+                                ),
+                              );
+                            },
+                            leading: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Container(
+                                height: 40,
+                                width: 40,
+                                color: AppColors.deepGreen,
+                                child: const Icon(
+                                  Icons.done,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            title: const Text("Requests Confirmed To Me"),
+                            trailing: const Icon(Icons.arrow_forward_ios),
                           ),
                           const Divider(),
-                          const ListTile(
-                            title: Text("First list tile"),
+                          const SizedBox(
+                            height: 80,
                           ),
-                          const Divider(),
                         ],
                       ),
                     ),
@@ -200,10 +231,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
                         builder: (context) => ImageFullScreen(
-                              url: UserModel.instance.profilePic,
-                            )));
+                          url: UserModel.instance.profilePic,
+                        ),
+                      ),
+                    );
                   },
                   child: SizedBox(
                     height: 150,
@@ -215,9 +249,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             color: Colors.black,
                             image: DecorationImage(
                               fit: BoxFit.contain,
-                              // image: FileImage(ImageSingleton.getLocalImage()!),
-                              image:
-                                  NetworkImage(UserModel.instance.profilePic),
+                              image: CachedNetworkImageProvider(
+                                  UserModel.instance.profilePic),
                             ),
                           ),
                         )),

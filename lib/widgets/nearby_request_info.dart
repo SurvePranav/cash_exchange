@@ -3,6 +3,7 @@ import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/connection_model.dart';
 import 'package:cashxchange/model/request_model.dart';
 import 'package:cashxchange/screens/profile_module_screens/profile_pic_screen.dart';
+import 'package:cashxchange/utils/date_util.dart';
 import 'package:flutter/material.dart';
 
 class NearbyRequestInfo extends StatelessWidget {
@@ -22,7 +23,7 @@ class NearbyRequestInfo extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             InkWell(
               onTap: () {
@@ -35,21 +36,26 @@ class NearbyRequestInfo extends StatelessWidget {
                   ),
                 );
               },
-              child: Hero(
-                tag: request.reqId,
-                child: CircleAvatar(
-                  backgroundColor: AppColors.deepGreen,
-                  backgroundImage:
-                      const AssetImage("assets/images/profile_icon.png"),
-                  foregroundImage:
-                      CachedNetworkImageProvider(connection.profilePic),
-                  radius: 60,
+              child: Center(
+                child: Hero(
+                  tag: request.reqId,
+                  child: CircleAvatar(
+                    backgroundColor: AppColors.deepGreen,
+                    backgroundImage:
+                        const AssetImage("assets/images/profile_icon.png"),
+                    foregroundImage:
+                        CachedNetworkImageProvider(connection.profilePic),
+                    radius: 60,
+                  ),
                 ),
               ),
             ),
-            Text(
-              connection.name,
-              style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+            Center(
+              child: Text(
+                connection.name,
+                style:
+                    const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+              ),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -58,11 +64,13 @@ class NearbyRequestInfo extends StatelessWidget {
                 Text(connection.bio),
               ],
             ),
-            buildInfoRow('Creation Date', request.createdAt.toString()),
+            buildInfoRow(
+                'Creation Date',
+                MyDateUtil.getTimeStamp(
+                    context: context, time: request.createdAt.toString())),
             buildInfoRow('Amount', request.amount),
             buildInfoRow('Request Type', request.type),
-            buildInfoRow('Views', request.views.toString()),
-            buildInfoRow('Accepted By', '--'),
+            buildInfoRow('Accepted By', request.acceptedBy.length.toString()),
             buildInfoRow('More Info', request.info),
             buildInfoRow('Distance From you', "$distance KM"),
           ],
@@ -74,8 +82,9 @@ class NearbyRequestInfo extends StatelessWidget {
   Widget buildInfoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,

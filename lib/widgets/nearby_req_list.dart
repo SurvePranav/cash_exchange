@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/connection_model.dart';
 import 'package:cashxchange/model/request_model.dart';
+import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/utils/location_services.dart';
 import 'package:cashxchange/widgets/constant_widget.dart';
@@ -78,6 +79,8 @@ class NearbyRequestList extends StatelessWidget {
           (context, index) {
             String distance = "--";
             final request = requests.elementAt(index);
+            final bool isAccepted =
+                request.acceptedBy.contains(UserModel.instance.uid);
             return Container(
               margin: const EdgeInsets.only(
                 bottom: 20,
@@ -130,11 +133,12 @@ class NearbyRequestList extends StatelessWidget {
                           );
                         case ConnectionState.active:
                         case ConnectionState.done:
-                          final data = snapshot.data?.docs;
-                          final user = data
-                                  ?.map((e) => Connection.fromJson(e.data()))
-                                  .toList() ??
-                              [];
+                          final Connection user;
+                          if (snapshot.data != null) {
+                            user = Connection.fromJson(snapshot.data!.data()!);
+                          } else {
+                            user = Connection.fromJson({});
+                          }
 
                           return ListTile(
                             leading: Hero(
@@ -142,8 +146,8 @@ class NearbyRequestList extends StatelessWidget {
                               child: CircleAvatar(
                                 backgroundColor: AppColors.mintGreen,
                                 radius: 20,
-                                backgroundImage: CachedNetworkImageProvider(
-                                    user.first.profilePic),
+                                backgroundImage:
+                                    CachedNetworkImageProvider(user.profilePic),
                               ),
                             ),
                             title: Column(
@@ -151,7 +155,7 @@ class NearbyRequestList extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  user.first.name,
+                                  user.name,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15,
@@ -162,12 +166,12 @@ class NearbyRequestList extends StatelessWidget {
                                     fontWeight: FontWeight.bold,
                                     fontSize: 12,
                                   ),
-                                  user.first.bio,
+                                  user.bio,
                                 ),
                               ],
                             ),
                             onTap: () {
-                              onTap(request, user.first, distance);
+                              onTap(request, user, distance);
                             },
                           );
                       }
@@ -184,11 +188,11 @@ class NearbyRequestList extends StatelessWidget {
                           request.type == 'Cash'
                               ? 'assets/images/want_cash.png'
                               : 'assets/images/want_online_money.png',
-                          height: 250,
+                          height: 270,
                         ),
                       ),
                       Container(
-                        height: 250,
+                        height: 270,
                         width: MediaQuery.of(context).size.width,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
@@ -267,11 +271,20 @@ class NearbyRequestList extends StatelessWidget {
                                 }
                               },
                             ),
-                            const Text("Accepted By: --"),
+                            Text(
+                              "Accepted By ${request.acceptedBy.length} peoples",
+                            ),
+                            const Text(
+                              "More info:",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
                             SizedBox(
                               height: 55,
                               child: Text(
-                                "More Info : ${request.info}",
+                                request.info,
                                 softWrap: true,
                               ),
                             ),
@@ -283,23 +296,41 @@ class NearbyRequestList extends StatelessWidget {
                                 Expanded(
                                   child: TextButton(
                                     onPressed: () {
-                                      onAccept(request);
+                                      if (!request.acceptedBy
+                                          .contains(UserModel.instance.uid)) {
+                                        onAccept(request);
+                                      }
                                     },
                                     style: ButtonStyle(
                                       overlayColor:
                                           MaterialStateProperty.all<Color>(
-                                              Colors.white.withAlpha(200)),
+                                              isAccepted
+                                                  ? Colors.green.withAlpha(200)
+                                                  : Colors.white
+                                                      .withAlpha(200)),
                                       side:
                                           MaterialStateProperty.all<BorderSide>(
                                         BorderSide(
-                                            color: AppColors.deepGreen,
+                                            color: isAccepted
+                                                ? Colors.white
+                                                : AppColors.deepGreen,
                                             width: 1.0),
                                       ),
                                       foregroundColor:
                                           MaterialStateProperty.all<Color>(
-                                              AppColors.deepGreen),
+                                        isAccepted
+                                            ? Colors.white
+                                            : AppColors.deepGreen,
+                                      ),
+                                      backgroundColor:
+                                          MaterialStateProperty.all<Color>(
+                                              isAccepted
+                                                  ? AppColors.deepGreen
+                                                      .withAlpha(170)
+                                                  : Colors.transparent),
                                     ),
-                                    child: const Text('Accept'),
+                                    child: Text(
+                                        isAccepted ? 'Accepted' : 'Accept'),
                                   ),
                                 )
                               ],

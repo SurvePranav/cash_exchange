@@ -8,12 +8,13 @@ import 'package:url_launcher/url_launcher.dart';
 
 class MyAppServices {
   // showing snackbar
-  static void showSlackBar(BuildContext context, String content) {
+  static void showSnackBar(BuildContext context, String content,
+      {Color? bgColor}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(content),
-        backgroundColor: AppColors.deepGreen,
-        behavior: SnackBarBehavior.floating,
+        backgroundColor: bgColor ?? AppColors.deepGreen,
+        behavior: SnackBarBehavior.fixed,
         duration: const Duration(seconds: 1),
       ),
     );

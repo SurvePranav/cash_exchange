@@ -4,6 +4,7 @@ import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/request_model.dart';
 import 'package:cashxchange/provider/request_provider.dart';
 import 'package:cashxchange/screens/request_module_screens/request_fullscreen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -34,35 +35,37 @@ class _RequestStatusScreenState extends State<RequestStatusScreen> {
         ),
         backgroundColor: AppColors.deepGreen,
       ),
-      body: Consumer<RequestProvider>(
-        builder: (context, value, child) {
-          return FutureBuilder<List<RequestModel>>(
-            future: value.getActiveRequests(onlyMyRequests: true),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasData) {
-                log('my requests: ${snapshot.data!.length}');
-                List<RequestModel> documents = snapshot.data ?? [];
-                return ActiveRequestsList(
-                  requests: documents,
-                  onTap: (RequestModel request) {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => RequestDetailsScreen(
-                          request: request,
-                        ),
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: Provider.of<RequestProvider>(context, listen: false)
+            .getActiveRequestsAsStream(onlyMyRequests: true),
+        builder: (context, snapshot) {
+          List<RequestModel> requests = [];
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+            case ConnectionState.waiting:
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            case ConnectionState.active:
+            case ConnectionState.done:
+              final data = snapshot.data?.docs;
+              requests =
+                  data?.map((e) => RequestModel.fromJson(e.data())).toList() ??
+                      [];
+              requests.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+              return ActiveRequestsList(
+                requests: requests,
+                onTap: (RequestModel request) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => RequestDetailsScreen(
+                        reqId: request.reqId,
                       ),
-                    );
-                  },
-                );
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {
-                return const Center(child: Text("Something Went wrong"));
-              }
-            },
-          );
+                    ),
+                  );
+                },
+              );
+          }
         },
       ),
     );

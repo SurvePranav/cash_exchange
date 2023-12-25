@@ -113,7 +113,7 @@ class _OTPScreenState extends State<OTPScreen> {
                             if (otpCode != null) {
                               verifyOtp(context, otpCode!);
                             } else {
-                              MyAppServices.showSlackBar(
+                              MyAppServices.showSnackBar(
                                   context, "Enter 6-digt Code!");
                             }
                           },
@@ -184,7 +184,7 @@ class _OTPScreenState extends State<OTPScreen> {
         },
       );
     } else {
-      MyAppServices.showSlackBar(
+      MyAppServices.showSnackBar(
         context,
         "No internet Connection",
       );

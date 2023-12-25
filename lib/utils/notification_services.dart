@@ -3,13 +3,18 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cashxchange/model/connection_model.dart';
+import 'package:cashxchange/model/message_model.dart';
+import 'package:cashxchange/model/notification_model.dart';
 import 'package:cashxchange/model/user_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart';
 
 class NotificationServics {
   static final FirebaseMessaging _firebaseMessaging =
       FirebaseMessaging.instance;
+  static final FirebaseFirestore _firebaseFirestore =
+      FirebaseFirestore.instance;
 
   // get firebase messaging token
   static Future<void> getFirebaseMessagingToken(
@@ -32,15 +37,18 @@ class NotificationServics {
   }
 
   // for sending push notification for chat
-  static Future<void> sendChatPushNotification(
-      Connection connection, String msg) async {
+  static Future<void> sendPushNotification(
+      Connection connection, String msg, MsgType msgType,
+      {title = ''}) async {
     try {
       final body = {
         "to": connection.pushToken,
         "notification": {
-          "title": UserModel.instance.name, //our name should be send
+          "title": title == ''
+              ? UserModel.instance.name
+              : title, //our name should be send
           "body": msg,
-          "android_channel_id": "chats"
+          "android_channel_id": msgType == MsgType.custom ? "requests" : "chats"
         },
         "data": {
           "uid": UserModel.instance.uid,
@@ -55,7 +63,39 @@ class NotificationServics {
           },
           body: jsonEncode(body));
     } catch (e) {
-      log('\nsendPushNotificationE: $e');
+      log('could not send Push Notification: $e');
     }
+  }
+
+  // send inApp notification
+  static void sendInAppNotification({
+    required String uid,
+    required String title,
+    required String body,
+  }) {
+    int timeStamp = DateTime.now().millisecondsSinceEpoch;
+    MyNotification notification = MyNotification(
+        id: timeStamp.toString(),
+        uid: uid,
+        title: title,
+        body: body,
+        timeStamp: timeStamp);
+    _firebaseFirestore
+        .collection('notifications')
+        .doc(notification.id)
+        .set(notification.toJson());
+  }
+
+  // read user's inApp notifications
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getMyInAppNotifications() {
+    return _firebaseFirestore
+        .collection('notifications')
+        .where('uid', isEqualTo: UserModel.instance.uid)
+        .snapshots();
+  }
+
+  // delete a notification by id
+  static void deleteInAppNotification(String id) {
+    _firebaseFirestore.collection('notifications').doc(id).delete();
   }
 }

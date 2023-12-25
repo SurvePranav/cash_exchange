@@ -73,6 +73,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     : RequestsWidget(
                         nearby: _selectedItem == 'Nearby Requests',
                       ),
+                const SliverList(
+                    delegate: SliverChildListDelegate.fixed([
+                  SizedBox(
+                    height: 70,
+                  )
+                ]))
               ],
             ),
           );

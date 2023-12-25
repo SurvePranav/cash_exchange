@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/main.dart';
 import 'package:cashxchange/model/user_model.dart';
-import 'package:cashxchange/screens/chat_module_screens/chat_screen.dart';
 import 'package:cashxchange/screens/request_module_screens/active_requests_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

@@ -1,15 +1,13 @@
 import 'dart:developer';
 
 import 'package:cashxchange/model/connection_model.dart';
-import 'package:cashxchange/model/message_model.dart';
 import 'package:cashxchange/model/request_model.dart';
 import 'package:cashxchange/model/user_model.dart';
-import 'package:cashxchange/provider/auth_provider.dart';
-import 'package:cashxchange/provider/messaging_provider.dart';
 import 'package:cashxchange/provider/request_provider.dart';
 import 'package:cashxchange/utils/location_services.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:cashxchange/widgets/constant_widget.dart';
+import 'package:cashxchange/widgets/dialogs/accept_request_dialog.dart';
 import 'package:cashxchange/widgets/nearby_req_list.dart';
 import 'package:cashxchange/widgets/nearby_request_info.dart';
 import 'package:flutter/material.dart';
@@ -68,39 +66,34 @@ class _RequestsWidgetState extends State<RequestsWidget> {
           log('waiting...');
           return const MyConstantWidget();
         } else if (snapshot.connectionState
-            case ConnectionState.active || ConnectionState.done) {
+            case ConnectionState.done || ConnectionState.active) {
           List<RequestModel> requests = [];
           if (snapshot.hasData) {
             final data = snapshot.data?.docs;
 
-            // fetching all active requests
-            requests =
+            //    fetching all active requests
+            var tempRequests =
                 data?.map((e) => RequestModel.fromJson(e.data())).toList() ??
                     [];
-            log('total requests: ${requests.length}');
-            for (int i = 0; i < requests.length; i++) {
-              // removing my active requests
-              // if (requests[i].uid == UserModel.instance.uid) {
-              //   log('removing request: ${requests[i].reqId}');
-              //   requests.remove(requests[i]);
-              // }
-
-              // calculating distance between user and request
+            tempRequests.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+            log('total requests: ${tempRequests.length}');
+            for (int i = 0; i < tempRequests.length; i++) {
+              //  calculating distance between user and request
               double distance = LocationServices.findDistanceBetweenCoordinates(
                 lat,
                 lng,
-                requests[i].locationLat,
-                requests[i].locationLon,
+                tempRequests[i].locationLat,
+                tempRequests[i].locationLon,
               );
               log('My lat: $lat');
               log('My lng: $lng');
-              log('Request lat: ${requests[i].locationLat}');
-              log('Request lng: ${requests[i].locationLon}');
+              log('Request lat: ${tempRequests[i].locationLat}');
+              log('Request lng: ${tempRequests[i].locationLon}');
               log('distance: $distance');
               // removing active requests based on distance
-              if (distance > 3000) {
-                log('removing request: ${requests[i].reqId}');
-                requests.remove(requests[i]);
+              if (tempRequests[i].uid != UserModel.instance.uid &&
+                  distance < 2000) {
+                requests.add(tempRequests[i]);
               }
             }
           }
@@ -117,37 +110,39 @@ class _RequestsWidgetState extends State<RequestsWidget> {
               }));
             },
             onAccept: (RequestModel request) async {
-              final ap = Provider.of<AuthProvider>(context, listen: false);
-              final mp = Provider.of<MessagingProvider>(context, listen: false);
-              final connection = Connection.fromJson(
-
-                  // getting user information (who raised request)
-                  await ap.getUserDataById(uid: request.uid));
-
-              // checking if the users are connected before
-              await ap
-                  .checkIfUsersConnectedBefore(connection.uid)
-                  .then((connectedBefore) async {
-                if (!connectedBefore) {
-                  // if not connected connecting each other using my_users collection
-                  log('not connected before');
-                  await ap.addToMyConnection(user: connection);
-                  await ap.addToReceiversConnection(user: connection);
-                } else if (connectedBefore &&
-                    !UserModel.instance.connections.contains(connection.uid)) {
-                  // if users are connected but not in primary then making connection primary
-                  log('connected before but not in primary');
-                  log('making primary');
-                  await ap.updateConnectionPriority(
-                      senderUid: connection.uid, primary: true);
+              await showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) {
+                  return AcceptRequestDialog(
+                      title: "${request.type} : ${request.amount}",
+                      request: request);
+                },
+              ).then((value) {
+                if (value != null) {
+                  if (value) {
+                    // on not accepting request
+                    MyAppServices.showSnackBar(
+                      context,
+                      'Request Accepted Successfully',
+                    );
+                  } else {
+                    // on error
+                    MyAppServices.showSnackBar(
+                      context,
+                      'Could Not Accept Request',
+                      bgColor: Colors.red,
+                    );
+                  }
+                } else {
+                  // making loading false if it is loading
+                  if (Provider.of<RequestProvider>(context, listen: false)
+                      .isLoading) {
+                    Provider.of<RequestProvider>(context, listen: false)
+                        .setLoading(false);
+                  }
+                  ;
                 }
-              }).then((value) async {
-                await mp
-                    .sendMessage(connection, 'I accept your request',
-                        MsgType.text, context)
-                    .then((value) {
-                  MyAppServices.showSlackBar(context, "request accepted");
-                });
               });
             },
             myLat: lat,
@@ -159,82 +154,4 @@ class _RequestsWidgetState extends State<RequestsWidget> {
       },
     );
   }
-
-  // Future<List<Map<String, dynamic>>> getRequests({
-  //   required BuildContext context,
-  //   bool nearHome = false,
-  // }) async {
-  //   final RequestProvider rp =
-  //       Provider.of<RequestProvider>(context, listen: false);
-  //   late final double lat, lng;
-  //   if (nearHome) {
-  //     lat = double.parse(UserModel.instance.locationLat);
-  //     lng = double.parse(UserModel.instance.locationLon);
-  //   } else {
-  //     await LocationServices.getCurrentLocation().then((value) {
-  //       lat = value[0];
-  //       lng = value[1];
-  //     });
-  //   }
-  //   await rp.getActiveRequests().then(
-  //     (requests) async {
-  //       _outputData.clear();
-  //       for (int i = 0; i < requests.length; i++) {
-  //         if (requests[i].uid != UserModel.instance.uid) {
-  //           double distance = LocationServices.findDistanceBetweenCoordinates(
-  //             lat,
-  //             lng,
-  //             requests[i].locationLat,
-  //             requests[i].locationLon,
-  //           );
-  //           if (distance < 3000) {
-  //             Map<String, dynamic> finalData = requests[i].toJson();
-  //             finalData.addAll(
-  //                 await Provider.of<AuthProvider>(context, listen: false)
-  //                     .getUserDataById(uid: requests[i].uid));
-  //             distance /= 1000;
-  //             finalData['distance'] = distance.toStringAsFixed(2);
-  //             _outputData.add(finalData);
-  //           }
-  //         }
-  //       }
-  //       return _outputData;
-  //     },
-  //   );
-  //   return _outputData;
-  // }
-
-  // Stream<QuerySnapshot<Map<String, dynamic>>> getRequestsStream({
-  //   required BuildContext context,
-  //   required double lat,
-  //   required double lng,
-  //   bool nearHome = false,
-  // })  {
-  //   await rp.getActiveRequests().then(
-  //     (requests) async {
-  //       _outputData.clear();
-  //       for (int i = 0; i < requests.length; i++) {
-  //         if (requests[i].uid != UserModel.instance.uid) {
-  //           double distance = LocationServices.findDistanceBetweenCoordinates(
-  //             lat,
-  //             lng,
-  //             requests[i].locationLat,
-  //             requests[i].locationLon,
-  //           );
-  //           if (distance < 3000) {
-  //             Map<String, dynamic> finalData = requests[i].toJson();
-  //             finalData.addAll(
-  //                 await Provider.of<AuthProvider>(context, listen: false)
-  //                     .getUserDataById(uid: requests[i].uid));
-  //             distance /= 1000;
-  //             finalData['distance'] = distance.toStringAsFixed(2);
-  //             _outputData.add(finalData);
-  //           }
-  //         }
-  //       }
-  //       return _outputData;
-  //     },
-  //   );
-  //   return _outputData;
-  // }
 }

@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class MyDateUtil {
   // for getting formatted time from milliSecondsSinceEpochs String
@@ -14,16 +17,23 @@ class MyDateUtil {
     final DateTime sent = DateTime.fromMillisecondsSinceEpoch(int.parse(time));
     final DateTime now = DateTime.now();
 
-    final formattedTime = TimeOfDay.fromDateTime(sent).format(context);
     if (now.day == sent.day &&
         now.month == sent.month &&
         now.year == sent.year) {
-      return formattedTime;
+      log('returning from here');
+      return DateFormat('jm').format(sent.toLocal());
+    } else if (now.year == sent.year) {
+      log('returning from here full date');
+      return DateFormat('d MMM h:mm a').format(sent.toLocal());
+    } else {
+      return DateFormat('dd/MM/yy h:mm a').format(sent.toLocal());
     }
+  }
 
-    return now.year == sent.year
-        ? '$formattedTime - ${sent.day} ${_getMonth(sent)}'
-        : '$formattedTime - ${sent.day} ${_getMonth(sent)} ${sent.year}';
+  static String getTimeStamp(
+      {required BuildContext context, required String time}) {
+    final DateTime sent = DateTime.fromMillisecondsSinceEpoch(int.parse(time));
+    return DateFormat('dd/MM/yy h:mm a').format(sent.toLocal());
   }
 
   //get last message time (used in chat user card)
@@ -37,69 +47,63 @@ class MyDateUtil {
     if (now.day == sent.day &&
         now.month == sent.month &&
         now.year == sent.year) {
-      return TimeOfDay.fromDateTime(sent).format(context);
+      return DateFormat('jm').format(sent.toLocal());
+    } else if (now.day - 1 == sent.day) {
+      return 'Yesterday';
+    } else if (now.year == sent.year) {
+      return DateFormat('d MMM').format(sent.toLocal());
+    } else {
+      return DateFormat('dd/MM/yyyy').format(sent.toLocal());
     }
-
-    return showYear
-        ? '${sent.day} ${_getMonth(sent)} ${sent.year}'
-        : '${sent.day} ${_getMonth(sent)}';
   }
 
-  //get formatted last active time of user in chat screen
-  static String getLastActiveTime(
-      {required BuildContext context, required String lastActive}) {
-    final int i = int.tryParse(lastActive) ?? -1;
-
-    //if time is not available then return below statement
-    if (i == -1) return 'Last seen not available';
-
-    DateTime time = DateTime.fromMillisecondsSinceEpoch(i);
-    DateTime now = DateTime.now();
-
-    String formattedTime = TimeOfDay.fromDateTime(time).format(context);
-    if (time.day == now.day &&
-        time.month == now.month &&
-        time.year == time.year) {
-      return 'Last seen today at $formattedTime';
-    }
-
-    if ((now.difference(time).inHours / 24).round() == 1) {
-      return 'Last seen yesterday at $formattedTime';
-    }
-
-    String month = _getMonth(time);
-
-    return 'Last seen on ${time.day} $month on $formattedTime';
+  String formatMillisecondsSinceEpoch(int millisecondsSinceEpoch) {
+    DateTime dateTime =
+        DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch);
+    String formattedDateTime =
+        DateFormat('dd MMM hh:mm a').format(dateTime.toLocal());
+    return formattedDateTime;
   }
 
-  // get month name from month no. or index
-  static String _getMonth(DateTime date) {
-    switch (date.month) {
-      case 1:
-        return 'Jan';
-      case 2:
-        return 'Feb';
-      case 3:
-        return 'Mar';
-      case 4:
-        return 'Apr';
-      case 5:
-        return 'May';
-      case 6:
-        return 'Jun';
-      case 7:
-        return 'Jul';
-      case 8:
-        return 'Aug';
-      case 9:
-        return 'Sept';
-      case 10:
-        return 'Oct';
-      case 11:
-        return 'Nov';
-      case 12:
-        return 'Dec';
+  // formatted time ago
+  static String formatTimeAgo(int millisecondsSinceEpoch) {
+    final DateTime currentDate = DateTime.now();
+    final DateTime providedDate =
+        DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch);
+
+    final Duration difference = currentDate.difference(providedDate);
+
+    if (isToday(providedDate)) {
+      return DateFormat.jm().format(providedDate); // Today's time with AM/PM
+    } else if (isYesterday(providedDate)) {
+      return 'Yesterday';
+    } else if (difference.inDays >= 3 && difference.inDays <= 6) {
+      return '${difference.inDays} days ago';
+    } else if (difference.inDays == 7) {
+      return '1 week ago';
+    } else if (difference.inDays > 7 && difference.inDays <= 30) {
+      return '${difference.inDays ~/ 7} weeks ago';
+    } else if (difference.inDays > 30 && difference.inDays <= 365) {
+      return '${difference.inDays ~/ 30} months ago';
+    } else {
+      return '${difference.inDays ~/ 365} years ago';
     }
-    return 'NA';
+  }
+
+// is today
+  static bool isToday(DateTime date) {
+    final DateTime currentDate = DateTime.now();
+    return currentDate.year == date.year &&
+        currentDate.month == date.month &&
+        currentDate.day == date.day;
+  }
+
+// is yesterday
+  static bool isYesterday(DateTime date) {
+    final DateTime currentDate = DateTime.now();
+    final DateTime yesterday = currentDate.subtract(Duration(days: 1));
+    return yesterday.year == date.year &&
+        yesterday.month == date.month &&
+        yesterday.day == date.day;
   }
 }

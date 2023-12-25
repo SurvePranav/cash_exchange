@@ -71,13 +71,14 @@ class MessagingProvider with ChangeNotifier {
           fromId: connection.uid, toId: UserModel.instance.uid);
 
       // sending push notification to receiver user
-      NotificationServics.sendChatPushNotification(
+      NotificationServics.sendPushNotification(
         connection,
         type == MsgType.text
             ? msg
             : type == MsgType.image
                 ? '📷 Photo'
                 : 'Accepted Your Request',
+        type,
       );
     });
   }

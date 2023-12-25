@@ -8,6 +8,7 @@ import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/provider/messaging_provider.dart';
 import 'package:cashxchange/provider/utility_provider.dart';
 import 'package:cashxchange/screens/chat_module_screens/view_profile_screen.dart';
+import 'package:cashxchange/utils/util.dart';
 import 'package:cashxchange/widgets/message_card.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -48,10 +49,12 @@ class _MessageScreenState extends State<MessageScreen> {
           stream: Provider.of<AuthProvider>(context, listen: false)
               .getUserById(widget.connection.uid),
           builder: (context, snapshot) {
-            final data = snapshot.data?.docs;
-
-            final list =
-                data?.map((e) => Connection.fromJson(e.data())).toList() ?? [];
+            final Connection user;
+            if (snapshot.hasData && snapshot.data != null) {
+              user = Connection.fromJson(snapshot.data!.data()!);
+            } else {
+              user = widget.connection;
+            }
 
             return SafeArea(
               child: InkWell(
@@ -80,11 +83,8 @@ class _MessageScreenState extends State<MessageScreen> {
                         width: 2,
                       ),
                       CircleAvatar(
-                        backgroundImage: CachedNetworkImageProvider(
-                          list.isNotEmpty
-                              ? list.first.profilePic
-                              : widget.connection.profilePic,
-                        ),
+                        backgroundImage:
+                            CachedNetworkImageProvider(user.profilePic),
                         maxRadius: 20,
                       ),
                       const SizedBox(
@@ -96,9 +96,7 @@ class _MessageScreenState extends State<MessageScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Text(
-                              list.isNotEmpty
-                                  ? list.first.name
-                                  : widget.connection.name,
+                              user.name,
                               style: const TextStyle(
                                   fontSize: 16, fontWeight: FontWeight.w600),
                             ),
@@ -106,12 +104,8 @@ class _MessageScreenState extends State<MessageScreen> {
                               height: 6,
                             ),
                             Text(
-                              list.isNotEmpty
-                                  ? list.first.isOnline
-                                      ? 'Online'
-                                      : 'Offline'
-                                  : 'Not Specified',
-                              style: list.isNotEmpty && list.first.isOnline
+                              user.isOnline ? 'Online' : 'Offline',
+                              style: user.isOnline
                                   ? TextStyle(
                                       color: Colors.green.shade600,
                                       fontSize: 13)
@@ -127,7 +121,10 @@ class _MessageScreenState extends State<MessageScreen> {
                           Icons.phone,
                           color: Colors.black54,
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          MyAppServices.launchAnyUrl(
+                              'tel:${widget.connection.phoneNumber}');
+                        },
                       ),
                     ],
                   ),

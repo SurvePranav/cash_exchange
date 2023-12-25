@@ -1,4 +1,8 @@
 import 'package:cashxchange/constants/constant_values.dart';
+import 'package:cashxchange/model/notification_model.dart';
+import 'package:cashxchange/model/user_model.dart';
+import 'package:cashxchange/utils/date_util.dart';
+import 'package:cashxchange/utils/notification_services.dart';
 import 'package:flutter/material.dart';
 
 class NotificationScreen extends StatelessWidget {
@@ -44,20 +48,59 @@ class NotificationScreen extends StatelessWidget {
             const Text("Notifications", style: TextStyle(color: Colors.white)),
         backgroundColor: AppColors.deepGreen,
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(23),
-            bottomRight: Radius.circular(23),
-          ), // Adjust the value for roundness
-        ),
-        child: ListView.builder(
-          itemCount: notifications.length,
-          itemBuilder: (context, index) {
-            return notifications[index];
-          },
-        ),
+      body: StreamBuilder(
+        stream: NotificationServics.getMyInAppNotifications(),
+        builder: (context, snapshot) {
+          // for (var i = 0; i < 10; i++) {
+          //   MyNotification notification = MyNotification(
+          //       id: i.toString(),
+          //       uid: UserModel.instance.uid,
+          //       title: 'title',
+          //       body: 'body',
+          //       timeStamp: DateTime.now().millisecondsSinceEpoch);
+          //   NotificationServics.sendInAppNotification(notification);
+          // }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(
+                child: Text('You don\'t have any notifications.'));
+          } else {
+            // Display the list of notifications
+            return ListView.builder(
+              itemCount: snapshot.data!.docs.length,
+              itemBuilder: (context, index) {
+                MyNotification notification =
+                    MyNotification.fromJson(snapshot.data!.docs[index].data());
+                return Dismissible(
+                  key: Key(notification.id),
+                  onDismissed: (direction) {
+                    // Delete the document when swiped
+                    NotificationServics.deleteInAppNotification(
+                        notification.id);
+                  },
+                  background: Container(
+                    color: Colors.transparent,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20),
+                    child: Icon(
+                      Icons.delete,
+                      color: AppColors.deepGreen,
+                    ),
+                  ),
+                  child: ListTile(
+                    title: Text(notification.title),
+                    subtitle: Text(notification.body),
+                    trailing:
+                        Text(MyDateUtil.formatTimeAgo(notification.timeStamp)),
+                  ),
+                );
+              },
+            );
+          }
+        },
       ),
     );
   }

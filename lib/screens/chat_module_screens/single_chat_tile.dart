@@ -35,9 +35,9 @@ class _ChatTileState extends State<ChatTile> {
             return const SizedBox();
           case ConnectionState.active:
           case ConnectionState.done:
-            final mydata = snapshot.data?.docs;
+            final mydata = snapshot.data;
             if (mydata != null) {
-              _connection = Connection.fromJson(mydata.first.data());
+              _connection = Connection.fromJson(mydata.data()!);
             }
             return StreamBuilder(
               stream: Provider.of<MessagingProvider>(context, listen: false)
@@ -96,30 +96,63 @@ class _ChatTileState extends State<ChatTile> {
                                       const SizedBox(
                                         height: 6,
                                       ),
-                                      Text(
-                                        _message != null
-                                            ? _message!.type == MsgType.text
-                                                ? _message!.fromId ==
-                                                        UserModel.instance.uid
-                                                    ? "You: ${_message!.msg}"
-                                                    : _message!.msg
-                                                : _message!.type ==
-                                                        MsgType.image
+                                      Row(
+                                        children: [
+                                          if (_message != null &&
+                                              _message!.fromId ==
+                                                  UserModel.instance.uid)
+                                            _message!.read.isNotEmpty
+                                                ? const Padding(
+                                                    padding: EdgeInsets.only(
+                                                        right: 5),
+                                                    child: Icon(
+                                                      Icons.done_all_rounded,
+                                                      color: Colors.blue,
+                                                      size: 20,
+                                                    ),
+                                                  )
+                                                : const Padding(
+                                                    padding: EdgeInsets.only(
+                                                        right: 5),
+                                                    child: Icon(
+                                                      Icons.done,
+                                                      color: Colors.grey,
+                                                      size: 20,
+                                                    ),
+                                                  ),
+                                          Text(
+                                            _message != null
+                                                ? _message!.type == MsgType.text
                                                     ? _message!.fromId ==
                                                             UserModel
                                                                 .instance.uid
-                                                        ? "You: 📷 Photo"
-                                                        : "📷 Photo"
-                                                    : "Request"
-                                            : "✍️ ${_connection.bio}",
-                                        maxLines: 1,
-                                        softWrap: true,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color: Colors.grey.shade600,
-                                          fontWeight: FontWeight.normal,
-                                        ),
+                                                        ? "You: ${_message!.msg}"
+                                                        : _message!.msg
+                                                    : _message!.type ==
+                                                            MsgType.image
+                                                        ? _message!.fromId ==
+                                                                UserModel
+                                                                    .instance
+                                                                    .uid
+                                                            ? "You: 📷 Photo"
+                                                            : "📷 Photo"
+                                                        : _message!.fromId ==
+                                                                UserModel
+                                                                    .instance
+                                                                    .uid
+                                                            ? "You: Accepted Request"
+                                                            : "Accepted Request"
+                                                : "✍️ ${_connection.bio}",
+                                            maxLines: 1,
+                                            softWrap: true,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              color: Colors.grey.shade600,
+                                              fontWeight: FontWeight.normal,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
@@ -130,23 +163,33 @@ class _ChatTileState extends State<ChatTile> {
                         ),
                         _message == null
                             ? const SizedBox()
-                            : _message!.fromId != UserModel.instance.uid &&
-                                    _message!.read.isEmpty
-                                ? Container(
-                                    height: 12,
-                                    width: 12,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(6),
-                                      color: Colors.green,
-                                    ),
-                                  )
-                                : Text(
+                            : Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
                                     MyDateUtil.getLastMessageTime(
                                         context: context, time: _message!.sent),
                                     style: const TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold),
                                   ),
+                                  SizedBox(
+                                    height: _message!.read.isEmpty ? 11 : 25,
+                                  ),
+                                  if (_message!.fromId !=
+                                          UserModel.instance.uid &&
+                                      _message!.read.isEmpty)
+                                    Container(
+                                      height: 14,
+                                      width: 14,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(7),
+                                        color: Colors.green,
+                                      ),
+                                    ),
+                                ],
+                              )
                       ],
                     ),
                   ),

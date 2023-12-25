@@ -1,11 +1,15 @@
+import 'dart:developer';
+
 import 'package:cashxchange/constants/constant_values.dart';
+import 'package:cashxchange/model/message_model.dart';
 import 'package:cashxchange/model/request_model.dart';
 import 'package:cashxchange/model/user_model.dart';
+import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/provider/connectivity_provider.dart';
 import 'package:cashxchange/provider/request_provider.dart';
-import 'package:cashxchange/screens/request_module_screens/active_requests_screen.dart';
 import 'package:cashxchange/screens/request_module_screens/request_success_screen.dart';
 import 'package:cashxchange/utils/location_services.dart';
+import 'package:cashxchange/utils/notification_services.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:cashxchange/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
@@ -295,14 +299,18 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
   }
 
   Future<void> raiseRequest() async {
+    // check internet connection
     if (Provider.of<ConnectivityProvider>(context, listen: false).isConnected) {
+      // check if the fields are not empty
       if (amountController.text.isNotEmpty && infoController.text.isNotEmpty) {
+        // check if the amount is less than rs.2000
         if (int.parse(amountController.text) <= 2000) {
           final requestProvider =
               Provider.of<RequestProvider>(context, listen: false);
           requestProvider.setLoading(true);
           isPressed = true;
           if (widget.editRequest) {
+            // edit old request
             await requestProvider
                 .updateRequestById(
                     reqId: widget.request!.reqId,
@@ -312,34 +320,52 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                 .then((success) {
               requestProvider.setLoading(false);
               Navigator.of(context).pop();
-              Navigator.of(context).pop();
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => const RequestStatusScreen(),
-                ),
-              );
             });
           } else {
+            // new request
+
+            // getting current location
             await LocationServices.getCurrentLocation().then((coordinates) {
+              var createdAt = DateTime.now().millisecondsSinceEpoch;
               final request = RequestModel(
-                reqId: DateTime.now().millisecondsSinceEpoch.toString(),
+                reqId: createdAt.toString(),
                 uid: UserModel.instance.uid,
-                createdAt: DateTime.now(),
+                createdAt: createdAt,
                 amount: amountController.text.trim(),
                 type: _requestType,
                 info: infoController.text.trim(),
                 locationLat: coordinates[0],
                 locationLon: coordinates[1],
-                views: 0,
-                isAccepted: false,
+                acceptedBy: [],
+                confirmedTo: '',
               );
+              // upload request to database
               requestProvider
                   .uploadRequestToDatabase(
                 context: context,
                 request: request,
               )
-                  .then((success) {
+                  .then((success) async {
                 if (success) {
+                  // sending notifications to the nearby users
+                  await Provider.of<AuthProvider>(context, listen: false)
+                      .getNearbyUsers(coordinates[0], coordinates[1])
+                      .then((nearbyUsers) async {
+                    for (int i = 0; i < nearbyUsers.length; i++) {
+                      await NotificationServics.sendPushNotification(
+                          nearbyUsers[i],
+                          '${nearbyUsers[i].name} want Rs.${request.amount} ${request.type} near your home',
+                          MsgType.custom,
+                          title: 'New ${request.type} request');
+                      NotificationServics.sendInAppNotification(
+                        uid: nearbyUsers[i].uid,
+                        title: 'New ${request.type} request',
+                        body:
+                            '${nearbyUsers[i].name} want Rs.${request.amount} ${request.type} near your home',
+                      );
+                    }
+                  });
+
                   amountController.text = '';
                   infoController.text = '';
                   _requestType = 'Cash';
@@ -354,23 +380,23 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                     ),
                   );
                 } else {
-                  MyAppServices.showSlackBar(
+                  MyAppServices.showSnackBar(
                       context, "something went wrong on server");
                 }
               });
             });
           }
         } else {
-          MyAppServices.showSlackBar(
+          MyAppServices.showSnackBar(
             context,
             "Amount Should be less than Rs.2000",
           );
         }
       } else {
-        MyAppServices.showSlackBar(context, "fill all the details");
+        MyAppServices.showSnackBar(context, "fill all the details");
       }
     } else {
-      MyAppServices.showSlackBar(context, "No internet Connection");
+      MyAppServices.showSnackBar(context, "No internet Connection");
     }
   }
 }

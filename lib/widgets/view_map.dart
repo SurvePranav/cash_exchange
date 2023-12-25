@@ -72,8 +72,8 @@ class _ViewMapWidgetState extends State<ViewMapWidget> {
                         child: CircleAvatar(
                           radius: 16,
                           backgroundColor: Colors.black,
-                          backgroundImage:
-                              NetworkImage(UserModel.instance.profilePic),
+                          backgroundImage: CachedNetworkImageProvider(
+                              UserModel.instance.profilePic),
                         ),
                       ),
                     ],

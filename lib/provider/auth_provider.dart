@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cashxchange/model/connection_model.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/screens/auth_module_screens/otp_screen.dart';
+import 'package:cashxchange/utils/location_services.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -80,11 +81,11 @@ class AuthProvider extends ChangeNotifier {
     } on FirebaseAuthException catch (e) {
       // hide progresss dialog
       Navigator.of(context).pop();
-      MyAppServices.showSlackBar(context, e.message.toString());
+      MyAppServices.showSnackBar(context, e.message.toString());
     } catch (e) {
       // hide progress dialog
       Navigator.of(context).pop();
-      MyAppServices.showSlackBar(context, e.toString());
+      MyAppServices.showSnackBar(context, e.toString());
     }
   }
 
@@ -120,7 +121,7 @@ class AuthProvider extends ChangeNotifier {
           _uid = user.uid;
           await onSuccess();
         } else {
-          MyAppServices.showSlackBar(context, 'something went wrong');
+          MyAppServices.showSnackBar(context, 'something went wrong');
           throw Exception("something went wrong");
         }
       });
@@ -266,6 +267,8 @@ class AuthProvider extends ChangeNotifier {
       'pushToken': removePushToken ? "" : UserModel.instance.pushToken,
     });
   }
+
+  ////////////////////////////////////*********** Chatting and Connections Operations */
 
   // add new connection to my connections
   Future<void> addToMyConnection({
@@ -446,6 +449,37 @@ class AuthProvider extends ChangeNotifier {
     return querySnapshot.docs.isNotEmpty;
   }
 
+  // get nearby users
+  Future<List<Connection>> getNearbyUsers(double lat, double lng) async {
+    try {
+      QuerySnapshot querySnapshot;
+      querySnapshot = await _firebaseFirestore
+          .collection('users')
+          .where('uid', isNotEqualTo: UserModel.instance.uid)
+          .get();
+
+      final List<Connection> documents = [];
+      List<Connection> allUsers = querySnapshot.docs
+          .map((doc) => Connection.fromJson(doc.data() as Map<String, dynamic>))
+          .toList();
+      for (int i = 0; i < allUsers.length; i++) {
+        double distance = LocationServices.findDistanceBetweenCoordinates(
+            double.parse(allUsers[i].locationLat),
+            double.parse(allUsers[i].locationLon),
+            lat,
+            lng);
+        log('distance from me: $distance');
+        if (distance < 2000) {
+          documents.add(allUsers[i]);
+        }
+      }
+      return documents;
+    } catch (e) {
+      log('error while getting my requests: $e');
+      return [];
+    }
+  }
+
   // get all users stream accept me
   Stream<QuerySnapshot<Map<String, dynamic>>> getAllUsers() {
     return FirebaseFirestore.instance
@@ -455,11 +489,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// get single user stream by id
-  Stream<QuerySnapshot<Map<String, dynamic>>> getUserById(String uid) {
-    return _firebaseFirestore
-        .collection('users')
-        .where('uid', isEqualTo: uid)
-        .limit(1)
-        .snapshots();
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getUserById(String uid) {
+    return _firebaseFirestore.collection('users').doc(uid).snapshots();
   }
 }

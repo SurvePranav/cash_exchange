@@ -1,16 +1,14 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class RequestModel {
   late String reqId;
   late String uid;
-  late DateTime createdAt;
+  late int createdAt;
   late String amount;
   late String type;
   late String info;
   late double locationLat;
   late double locationLon;
-  late int views;
-  late bool isAccepted;
+  late List<String> acceptedBy;
+  late String confirmedTo;
 
   // Initialization constructor
   RequestModel({
@@ -22,22 +20,26 @@ class RequestModel {
     required this.info,
     required this.locationLat,
     required this.locationLon,
-    required this.views,
-    required this.isAccepted,
+    required this.acceptedBy,
+    required this.confirmedTo,
   });
 
   // from json
   RequestModel.fromJson(Map<String, dynamic> map) {
     reqId = map['reqId'] ?? '';
     uid = map['uid'] ?? '';
-    createdAt = (map['createdAt'] as Timestamp).toDate();
+    createdAt = map['createdAt'];
     amount = map['amount'] ?? '';
     type = map['type'] ?? '';
     info = map['info'] ?? '';
     locationLat = map['locationLat'] ?? '';
     locationLon = map['locationLon'] ?? '';
-    views = map['views'] ?? '';
-    isAccepted = map['isAccepted'] ?? '';
+    acceptedBy = map['acceptedBy'] == null
+        ? []
+        : (map['acceptedBy'] as List<dynamic>)
+            .map((e) => e.toString())
+            .toList();
+    confirmedTo = map['confirmedTo'] ?? '';
   }
 
   // to json
@@ -45,15 +47,14 @@ class RequestModel {
     return {
       "reqId": reqId,
       "uid": uid,
-      // Convert Dart DateTime to Firebase Timestamp
       "createdAt": createdAt,
       "amount": amount,
       "type": type,
       "info": info,
       "locationLat": locationLat,
       "locationLon": locationLon,
-      "views": views,
-      "isAccepted": isAccepted,
+      "acceptedBy": acceptedBy,
+      "confirmedTo": confirmedTo,
     };
   }
 }
