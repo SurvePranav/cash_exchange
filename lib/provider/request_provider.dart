@@ -162,23 +162,16 @@ class RequestProvider extends ChangeNotifier {
   }
 
   // get active requests from firestore
-  Future<List<RequestModel>> getActiveRequests({onlyMyRequests = false}) async {
+  Future<List<RequestModel>> getActiveRequests() async {
     try {
       int exp = DateTime.now().millisecondsSinceEpoch;
-      int sevenDaysAgo = exp - (7 * 24 * 60 * 60 * 1000);
-      QuerySnapshot querySnapshot;
-      if (onlyMyRequests) {
-        querySnapshot = await _firebaseFirestore
-            .collection('request')
-            .where('uid', isEqualTo: UserModel.instance.uid)
-            .where('createdAt', isGreaterThan: sevenDaysAgo)
-            .get();
-      } else {
-        querySnapshot = await _firebaseFirestore
-            .collection('request')
-            .where('createdAt', isGreaterThan: sevenDaysAgo)
-            .get();
-      }
+      int oneDayAgo = exp - (24 * 60 * 60 * 1000);
+
+      QuerySnapshot querySnapshot = await _firebaseFirestore
+          .collection('request')
+          .where('createdAt', isGreaterThan: oneDayAgo)
+          .get();
+
       log('snapshot requests: ${querySnapshot.docs.length}');
       final List<RequestModel> documents = querySnapshot.docs
           .map((doc) =>
@@ -195,17 +188,17 @@ class RequestProvider extends ChangeNotifier {
       {onlyMyRequests = false}) {
     try {
       int exp = DateTime.now().millisecondsSinceEpoch;
-      int sevenDaysAgo = exp - (7 * 24 * 60 * 60 * 1000);
+      int oneDayAgo = exp - (24 * 60 * 60 * 1000);
       if (onlyMyRequests) {
         return _firebaseFirestore
             .collection('request')
             .where('uid', isEqualTo: UserModel.instance.uid)
-            .where('createdAt', isGreaterThan: sevenDaysAgo)
+            .where('createdAt', isGreaterThan: oneDayAgo)
             .snapshots();
       } else {
         return _firebaseFirestore
             .collection('request')
-            .where('createdAt', isGreaterThan: sevenDaysAgo)
+            .where('createdAt', isGreaterThan: oneDayAgo)
             .where('confirmedTo', isEqualTo: '')
             .snapshots();
       }

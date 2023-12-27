@@ -1,9 +1,9 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/provider/utility_provider.dart';
-import 'package:cashxchange/screens/main_body.dart';
 import 'package:cashxchange/utils/location_services.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:cashxchange/widgets/custom_button.dart';
@@ -64,67 +64,35 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
           ? Center(
               child: CircularProgressIndicator(color: AppColors.deepGreen),
             )
-          : SafeArea(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 30, horizontal: 18),
-                child: SingleChildScrollView(
-                  child: Center(
-                    child: Column(
-                      children: [
-                        InkWell(
-                          onTap: () async {
-                            selectImage();
-                          },
-                          child: !widget.editProfile
-                              ? CircleAvatar(
-                                  backgroundColor: AppColors.deepGreen,
-                                  backgroundImage:
-                                      image != null ? FileImage(image!) : null,
-                                  radius: 70,
-                                  child: Stack(
-                                    children: [
-                                      image != null
-                                          ? const SizedBox()
-                                          : const Align(
-                                              alignment: Alignment.center,
-                                              child: Icon(
-                                                Icons.account_circle,
-                                                color: Colors.white,
-                                                size: 90,
-                                              ),
-                                            ),
-                                      Align(
-                                        alignment: Alignment.bottomRight,
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          child: Container(
-                                            height: 35,
-                                            width: 35,
-                                            color: AppColors.deepGreen,
-                                            child: const Icon(
-                                              Icons.camera_alt,
+          : Padding(
+              padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 18),
+              child: SingleChildScrollView(
+                child: Center(
+                  child: Column(
+                    children: [
+                      InkWell(
+                        onTap: () async {
+                          selectImage();
+                        },
+                        child: !widget.editProfile
+                            ? CircleAvatar(
+                                backgroundColor: AppColors.deepGreen,
+                                backgroundImage:
+                                    image != null ? FileImage(image!) : null,
+                                radius: 70,
+                                child: Stack(
+                                  children: [
+                                    image != null
+                                        ? const SizedBox()
+                                        : const Align(
+                                            alignment: Alignment.center,
+                                            child: Icon(
+                                              Icons.account_circle,
                                               color: Colors.white,
-                                              size: 28,
+                                              size: 90,
                                             ),
                                           ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              : Hero(
-                                  tag: "hero_image",
-                                  child: CircleAvatar(
-                                    backgroundColor: Colors.black,
-                                    backgroundImage: image != null
-                                        ? FileImage(image!)
-                                        : NetworkImage(
-                                                UserModel.instance.profilePic)
-                                            as ImageProvider<Object>?,
-                                    radius: 70,
-                                    child: Align(
+                                    Align(
                                       alignment: Alignment.bottomRight,
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(10),
@@ -140,108 +108,120 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                                         ),
                                       ),
                                     ),
+                                  ],
+                                ),
+                              )
+                            : Hero(
+                                tag: "hero_image",
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.black,
+                                  backgroundImage: image != null
+                                      ? FileImage(image!)
+                                      : CachedNetworkImageProvider(
+                                              UserModel.instance.profilePic)
+                                          as ImageProvider,
+                                  radius: 70,
+                                  child: Align(
+                                    alignment: Alignment.bottomRight,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: Container(
+                                        height: 35,
+                                        width: 35,
+                                        color: AppColors.deepGreen,
+                                        child: const Icon(
+                                          Icons.camera_alt,
+                                          color: Colors.white,
+                                          size: 28,
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
-                        ),
-                        Container(
-                          width: MediaQuery.of(context).size.width,
-                          // padding:
-                          //     const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-                          margin: const EdgeInsets.only(top: 30),
-                          child: Column(
-                            children: [
-                              // name field
-                              textFeld(
-                                hintText: "John Smith",
-                                icon: Icons.account_circle,
-                                inputType: TextInputType.name,
-                                maxLines: 1,
-                                controller: nameController,
                               ),
+                      ),
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        // padding:
+                        //     const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                        margin: const EdgeInsets.only(top: 30),
+                        child: Column(
+                          children: [
+                            // name field
+                            textFeld(
+                              hintText: "John Smith",
+                              icon: Icons.account_circle,
+                              inputType: TextInputType.name,
+                              maxLines: 1,
+                              controller: nameController,
+                            ),
 
-                              // email
-                              textFeld(
-                                hintText: "abc@example.com",
-                                icon: Icons.email,
-                                inputType: TextInputType.emailAddress,
-                                maxLines: 1,
-                                controller: emailController,
-                              ),
+                            // email
+                            textFeld(
+                              hintText: "abc@example.com",
+                              icon: Icons.email,
+                              inputType: TextInputType.emailAddress,
+                              maxLines: 1,
+                              controller: emailController,
+                            ),
 
-                              //location
-                              Consumer<UtilityProvider>(
-                                builder: (context, value, child) {
-                                  return textFeld(
-                                      hintText: "Enter your address",
-                                      icon: Icons.location_pin,
-                                      inputType: TextInputType.name,
-                                      maxLines: 2,
-                                      controller: locationController,
-                                      locationButton: true,
-                                      locationButtonIcon: value.isLoading
-                                          ? Icons.location_searching
-                                          : Icons.location_pin,
-                                      // locationButtonIcon: Icons.location_pin,
-                                      onLocationPressed: () async {
-                                        value.setLoading(true);
-                                        await LocationServices
-                                                .getCurrentLocation()
-                                            .then((val) async {
-                                          lat = '${val[0]}';
-                                          lon = '${val[1]}';
-                                          locationController.text =
-                                              await LocationServices
-                                                  .getAddressFromCoordinates(
-                                                      val[0], val[1]);
-                                          value.setLoading(false);
-                                        });
+                            //location
+                            Consumer<UtilityProvider>(
+                              builder: (context, value, child) {
+                                return textFeld(
+                                    hintText: "Press The Button On Side",
+                                    icon: Icons.location_pin,
+                                    inputType: TextInputType.name,
+                                    maxLines: 2,
+                                    controller: locationController,
+                                    locationButton: true,
+                                    locationButtonIcon: value.isLoading
+                                        ? Icons.location_searching
+                                        : Icons.location_pin,
+                                    // locationButtonIcon: Icons.location_pin,
+                                    onLocationPressed: () async {
+                                      value.setLoading(true);
+                                      await LocationServices
+                                              .getCurrentLocation()
+                                          .then((val) async {
+                                        lat = '${val[0]}';
+                                        lon = '${val[1]}';
+                                        locationController.text =
+                                            await LocationServices
+                                                .getAddressFromCoordinates(
+                                                    val[0], val[1]);
+                                        value.setLoading(false);
                                       });
-                                },
-                              ),
+                                    });
+                              },
+                            ),
 
-                              // bio
-                              textFeld(
-                                hintText: "Enter your bio here...",
-                                icon: Icons.edit,
-                                inputType: TextInputType.name,
-                                maxLines: 2,
-                                controller: bioController,
-                              ),
-                            ],
-                          ),
+                            // bio
+                            textFeld(
+                              hintText: "Enter your bio here...",
+                              icon: Icons.edit,
+                              inputType: TextInputType.name,
+                              maxLines: 2,
+                              controller: bioController,
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 30),
-                        SizedBox(
-                          height: 50,
-                          width: MediaQuery.of(context).size.width * 0.85,
-                          child: CustomButton(
-                            text: widget.editProfile
-                                ? "Update Profile"
-                                : "Continue",
-                            onPressed: () async {
-                              // getting latitude and longitude from address
-                              await LocationServices
-                                      .getCoordinatesFromAddressString(
-                                          locationController.text.trim())
-                                  .then((coordinates) async {
-                                if (coordinates.isNotEmpty) {
-                                  lat = coordinates[0].toString();
-                                  lon = coordinates[1].toString();
-                                } else {
-                                  List co = await LocationServices
-                                      .getCurrentLocation();
-                                  lat = co[0].toString();
-                                  lon = co[1].toString();
-                                }
-
-                                //calling store data function
-                                await storeData();
-                              });
-                            },
-                          ),
-                        )
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 30),
+                      SizedBox(
+                        height: 50,
+                        width: MediaQuery.of(context).size.width * 0.85,
+                        child: CustomButton(
+                          text: widget.editProfile
+                              ? "Update Profile"
+                              : "Continue",
+                          onPressed: () async {
+                            //calling store data function
+                            await storeData();
+                          },
+                        ),
+                      )
+                    ],
                   ),
                 ),
               ),
@@ -249,19 +229,20 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
     );
   }
 
-  Widget textFeld({
-    required String hintText,
-    required IconData icon,
-    required TextInputType inputType,
-    required int maxLines,
-    required TextEditingController controller,
-    Function? onLocationPressed,
-    locationButton = false,
-    IconData locationButtonIcon = Icons.location_searching,
-  }) {
+  Widget textFeld(
+      {required String hintText,
+      required IconData icon,
+      required TextInputType inputType,
+      required int maxLines,
+      required TextEditingController controller,
+      Function? onLocationPressed,
+      locationButton = false,
+      IconData locationButtonIcon = Icons.location_searching,
+      s}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: TextFormField(
+        readOnly: locationButton,
         cursorColor: AppColors.deepGreen,
         controller: controller,
         keyboardType: inputType,
@@ -367,7 +348,6 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
             await ap.saveDataToSP().then((value) {
               Navigator.of(context).pop();
               Navigator.of(context).pop();
-              Navigator.of(context).pushReplacementNamed('home_screen');
             });
           },
         );

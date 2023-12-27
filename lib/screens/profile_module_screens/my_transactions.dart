@@ -1,6 +1,5 @@
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/request_model.dart';
-import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/request_provider.dart';
 import 'package:cashxchange/screens/profile_module_screens/transactions_list.dart';
 import 'package:cashxchange/screens/request_module_screens/request_fullscreen.dart';
@@ -41,9 +40,6 @@ class _MyTransactionsScreenState extends State<MyTransactionsScreen> {
                 return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasData) {
                 List<RequestModel> documents = snapshot.data ?? [];
-                // removing own accepted requests
-                documents.removeWhere(
-                    (item) => item.confirmedTo == UserModel.instance.uid);
 
                 // sorting list according to the
                 documents.sort((a, b) => b.createdAt.compareTo(a.createdAt));

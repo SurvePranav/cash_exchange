@@ -1,39 +1,24 @@
+import 'dart:developer';
+
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/notification_model.dart';
-import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/utils/date_util.dart';
 import 'package:cashxchange/utils/notification_services.dart';
 import 'package:flutter/material.dart';
 
-class NotificationScreen extends StatelessWidget {
-  final List<NotificationTile> notifications = [
-    const NotificationTile(
-      title: 'New Message',
-      message: 'You have a new message from John Doe.',
-      time: '10:30 AM',
-    ),
-    const NotificationTile(
-      title: 'Accepted Request',
-      message: 'John Doe is ready to accept cash.',
-      time: '11:50 PM',
-    ),
-    const NotificationTile(
-      title: 'Cash request in your area',
-      message: 'Aman Want 50 RS cash',
-      time: '2 days ago',
-    ),
-    const NotificationTile(
-      title: 'Cash request in your area',
-      message: 'Sangita Want 1000 RS cash',
-      time: '10:30 PM',
-    ),
-    // Add more notification tiles here
-  ];
-
-  NotificationScreen({super.key});
+class NotificationScreen extends StatefulWidget {
+  const NotificationScreen({super.key});
 
   @override
+  State<NotificationScreen> createState() => _NotificationScreenState();
+}
+
+class _NotificationScreenState extends State<NotificationScreen> {
+  bool markedAll = false;
+  @override
   Widget build(BuildContext context) {
+    List<String> notificationIds = [];
+    List<String> allNotifications = [];
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -44,22 +29,33 @@ class NotificationScreen extends StatelessWidget {
               Icons.arrow_back_ios,
               color: Colors.white,
             )),
-        title:
-            const Text("Notifications", style: TextStyle(color: Colors.white)),
+        title: Row(
+          children: [
+            const Text(
+              "Notifications",
+              style: TextStyle(color: Colors.white),
+            ),
+            const Expanded(
+              child: SizedBox(),
+            ),
+            TextButton(
+                onPressed: () async {
+                  log('total notifications ${allNotifications.length}');
+                  for (String uid in allNotifications) {
+                    NotificationServics.deleteInAppNotification(uid);
+                  }
+                },
+                child: const Text(
+                  'Clear All',
+                  style: TextStyle(color: Colors.white),
+                ))
+          ],
+        ),
         backgroundColor: AppColors.deepGreen,
       ),
       body: StreamBuilder(
         stream: NotificationServics.getMyInAppNotifications(),
         builder: (context, snapshot) {
-          // for (var i = 0; i < 10; i++) {
-          //   MyNotification notification = MyNotification(
-          //       id: i.toString(),
-          //       uid: UserModel.instance.uid,
-          //       title: 'title',
-          //       body: 'body',
-          //       timeStamp: DateTime.now().millisecondsSinceEpoch);
-          //   NotificationServics.sendInAppNotification(notification);
-          // }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
@@ -69,38 +65,115 @@ class NotificationScreen extends StatelessWidget {
                 child: Text('You don\'t have any notifications.'));
           } else {
             // Display the list of notifications
-            return ListView.builder(
-              itemCount: snapshot.data!.docs.length,
-              itemBuilder: (context, index) {
-                MyNotification notification =
-                    MyNotification.fromJson(snapshot.data!.docs[index].data());
-                return Dismissible(
-                  key: Key(notification.id),
-                  onDismissed: (direction) {
-                    // Delete the document when swiped
-                    NotificationServics.deleteInAppNotification(
-                        notification.id);
-                  },
-                  background: Container(
-                    color: Colors.transparent,
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.only(right: 20),
-                    child: Icon(
-                      Icons.delete,
-                      color: AppColors.deepGreen,
+            List<MyNotification> notifications = snapshot.data!.docs
+                .map((e) => MyNotification.fromJson(e.data()))
+                .toList();
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 20.0),
+              child: ListView.separated(
+                itemCount: notifications.length,
+                itemBuilder: (context, index) {
+                  MyNotification notification = notifications[index];
+                  if (!notification.isSeen) {
+                    notificationIds.add(notification.id);
+                  }
+                  allNotifications.add(notification.id);
+                  return Dismissible(
+                    key: Key(notification.id),
+                    onDismissed: (direction) {
+                      // Delete the document when swiped
+                      NotificationServics.deleteInAppNotification(
+                          notification.id);
+                    },
+                    background: Container(
+                      color: Colors.transparent,
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.only(right: 20),
+                      child: Icon(
+                        Icons.delete,
+                        color: AppColors.deepGreen,
+                      ),
                     ),
-                  ),
-                  child: ListTile(
-                    title: Text(notification.title),
-                    subtitle: Text(notification.body),
-                    trailing:
-                        Text(MyDateUtil.formatTimeAgo(notification.timeStamp)),
-                  ),
-                );
-              },
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(16),
+                      title: Text(
+                        notification.title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
+                      ),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          notification.body,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      ),
+                      trailing: Column(
+                        children: [
+                          !notification.isSeen
+                              ? Container(
+                                  height: 16,
+                                  width: 16,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.green,
+                                  ),
+                                )
+                              : const SizedBox(
+                                  height: 16,
+                                  width: 16,
+                                ),
+                          Text(
+                            MyDateUtil.formatTimeAgo(notification.timeStamp),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                separatorBuilder: (context, index) {
+                  return const Divider();
+                },
+              ),
             );
           }
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.deepGreen,
+        onPressed: () async {
+          for (String id in notificationIds) {
+            NotificationServics.updateNotificationSeenStatus(id);
+          }
+        },
+        child: const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.check,
+              color: Colors.white,
+            ),
+            Text(
+              'read all',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 9,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -111,11 +184,12 @@ class NotificationTile extends StatelessWidget {
   final String message;
   final String time;
 
-  const NotificationTile(
-      {super.key,
-      required this.title,
-      required this.message,
-      required this.time});
+  const NotificationTile({
+    super.key,
+    required this.title,
+    required this.message,
+    required this.time,
+  });
 
   @override
   Widget build(BuildContext context) {

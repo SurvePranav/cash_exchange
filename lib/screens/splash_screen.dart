@@ -1,6 +1,5 @@
 import 'package:cashxchange/main.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
-import 'package:cashxchange/screens/auth_module_screens/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

@@ -52,11 +52,11 @@ class RequestDetailsScreen extends StatelessWidget {
               children: [
                 buildInfoRow(
                     'Creation Date',
-                    MyDateUtil.getMessageTime(
+                    MyDateUtil.getTimeStamp(
                         context: context, time: request.createdAt.toString())),
                 buildInfoRow(
                     'Expiration Date',
-                    MyDateUtil.getMessageTime(
+                    MyDateUtil.getTimeStamp(
                         context: context, time: expirationDate.toString())),
                 buildInfoRow('Amount', request.amount),
                 buildInfoRow('Request Type', request.type),
@@ -67,7 +67,7 @@ class RequestDetailsScreen extends StatelessWidget {
                 // if request is not confirmed and accepted by is empty
                 if (request.confirmedTo.isEmpty &&
                     request.acceptedBy.isEmpty &&
-                    request.createdAt < expirationDate)
+                    expirationDate > DateTime.now().millisecondsSinceEpoch)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -132,16 +132,27 @@ class RequestDetailsScreen extends StatelessWidget {
                     ],
                   ),
 
+                if (request.confirmedTo.isEmpty &&
+                    expirationDate < DateTime.now().millisecondsSinceEpoch)
+                  const Text(
+                    'Request Expired Without Confirmation',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 20,
+                    ),
+                  ),
+
                 // confirm by yourself if you want to notify others that request is confirmed.
                 if (request.confirmedTo.isEmpty &&
                     request.acceptedBy.isNotEmpty &&
-                    request.createdAt < expirationDate)
+                    // show only when request is not expired
+                    !(DateTime.now().millisecondsSinceEpoch > expirationDate))
                   Center(
                     child: ElevatedButton(
                       onPressed: () {
                         MyAppServices.showConfirmationDialog(
                                 context: context,
-                                title: 'Confirm By Yourself',
+                                title: 'Confirm To Yourself',
                                 body: 'request will be marked as confirm')
                             .then((value) {
                           if (value) {
@@ -151,7 +162,7 @@ class RequestDetailsScreen extends StatelessWidget {
                           }
                         });
                       },
-                      child: const Text('Confirm By Yourself'),
+                      child: const Text('Confirm To Yourself'),
                     ),
                   ),
                 if (request.confirmedTo.contains(UserModel.instance.uid))

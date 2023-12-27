@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/message_model.dart';
 import 'package:cashxchange/model/request_model.dart';
@@ -347,38 +345,66 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
               )
                   .then((success) async {
                 if (success) {
-                  // sending notifications to the nearby users
+                  // sending notifications to the nearby users but not in connections
                   await Provider.of<AuthProvider>(context, listen: false)
                       .getNearbyUsers(coordinates[0], coordinates[1])
                       .then((nearbyUsers) async {
                     for (int i = 0; i < nearbyUsers.length; i++) {
-                      await NotificationServics.sendPushNotification(
+                      NotificationServics.sendPushNotification(
                           nearbyUsers[i],
-                          '${nearbyUsers[i].name} want Rs.${request.amount} ${request.type} near your home',
+                          '${UserModel.instance.name} want Rs.${request.amount} ${request.type} near your area',
                           MsgType.custom,
                           title: 'New ${request.type} request');
+
+                      // sending in app notification
                       NotificationServics.sendInAppNotification(
                         uid: nearbyUsers[i].uid,
                         title: 'New ${request.type} request',
                         body:
-                            '${nearbyUsers[i].name} want Rs.${request.amount} ${request.type} near your home',
+                            '${UserModel.instance.name} want Rs.${request.amount} ${request.type} near your area',
                       );
                     }
-                  });
 
-                  amountController.text = '';
-                  infoController.text = '';
-                  _requestType = 'Cash';
-                  activeButton = 0;
-                  isPressed = false;
-                  requestProvider.setLoading(false);
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => RequestSuccessScreen(
-                        request: request,
+                    // sending notifications to the connections
+                    // for (int i = 0;
+                    //     i < UserModel.instance.connections.length;
+                    //     i++) {
+                    //   await Provider.of<AuthProvider>(context)
+                    //       .getUserDataById(
+                    //           uid: UserModel.instance.connections[i])
+                    //       .then((value) {
+                    //     // in app notifications
+                    //     Connection c = Connection.fromJson(value);
+                    //     NotificationServics.sendPushNotification(
+                    //         c,
+                    //         '${UserModel.instance.name} want Rs.${request.amount} ${request.type} from your connections',
+                    //         MsgType.custom,
+                    //         title: 'New ${request.type} request');
+
+                    //     // sending in app notification
+                    //     NotificationServics.sendInAppNotification(
+                    //       uid: c.uid,
+                    //       title: 'New ${request.type} request',
+                    //       body:
+                    //           '${UserModel.instance.name} want Rs.${request.amount} ${request.type} from your connections',
+                    //     );
+                    //   });
+                    // }
+
+                    amountController.text = '';
+                    infoController.text = '';
+                    _requestType = 'Cash';
+                    activeButton = 0;
+                    isPressed = false;
+
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => RequestSuccessScreen(
+                          request: request,
+                        ),
                       ),
-                    ),
-                  );
+                    );
+                  });
                 } else {
                   MyAppServices.showSnackBar(
                       context, "something went wrong on server");

@@ -1,7 +1,6 @@
-import 'dart:developer';
-
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/request_model.dart';
+import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/request_provider.dart';
 import 'package:cashxchange/screens/request_module_screens/request_fullscreen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -53,6 +52,8 @@ class _RequestStatusScreenState extends State<RequestStatusScreen> {
                   data?.map((e) => RequestModel.fromJson(e.data())).toList() ??
                       [];
               requests.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+              requests.removeWhere((request) =>
+                  request.confirmedTo.contains(UserModel.instance.uid));
               return ActiveRequestsList(
                 requests: requests,
                 onTap: (RequestModel request) {

@@ -12,6 +12,8 @@ import 'package:cashxchange/utils/date_util.dart';
 import 'package:cashxchange/utils/location_services.dart';
 import 'package:cashxchange/utils/notification_services.dart';
 import 'package:cashxchange/utils/util.dart';
+import 'package:cashxchange/widgets/request_meat_data.dart';
+import 'package:cashxchange/widgets/walking_distance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -51,9 +53,16 @@ class _MessageCardState extends State<MessageCard> {
   // sender/ another user message
   Widget _blueMessage() {
     //update last read message if sender and receiver are different
+    String walkingDistance = "";
     if (widget.message.read.isEmpty) {
       Provider.of<MessagingProvider>(context, listen: false)
           .updateMessageReadStatus(widget.message);
+      // updating the message as readed to remove the badge on chats
+      Provider.of<AuthProvider>(context, listen: false).updateHasUnreadMessage(
+        uid: widget.message.fromId,
+        updateInMyConnections: true,
+        hasUnreadMessage: false,
+      );
     }
 
     return Row(
@@ -128,7 +137,16 @@ class _MessageCardState extends State<MessageCard> {
                               switch (snapshot.connectionState) {
                                 case ConnectionState.none:
                                 case ConnectionState.waiting:
-                                  return const CircularProgressIndicator();
+                                  return Container(
+                                    padding: const EdgeInsets.all(20),
+                                    margin: const EdgeInsets.only(top: 10),
+                                    width: mq.width * 0.6,
+                                    height: mq.height * 0.24,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      color: Colors.white,
+                                    ),
+                                  );
                                 case ConnectionState.active:
                                 case ConnectionState.done:
                                   if (snapshot.hasData &&
@@ -186,70 +204,9 @@ class _MessageCardState extends State<MessageCard> {
                                           const Divider(
                                             color: Colors.blue,
                                           ),
-                                          FutureBuilder(
-                                            future:
-                                                Provider.of<RequestProvider>(
-                                                        context,
-                                                        listen: false)
-                                                    .getRequestMetaData(
-                                                        reqId: request.reqId,
-                                                        uid: widget
-                                                            .message.fromId),
-                                            builder: (context, snapshot) {
-                                              if (snapshot.connectionState ==
-                                                      ConnectionState.done &&
-                                                  snapshot.hasData) {
-                                                final data =
-                                                    snapshot.data?.data() ?? {};
-                                                String msg =
-                                                    'I accept your request';
-                                                if (data['msg']
-                                                    .toString()
-                                                    .isNotEmpty) {
-                                                  msg = data['msg'];
-                                                }
-                                                return Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                        'At: ${MyDateUtil.getTimeStamp(
-                                                      context: context,
-                                                      time: data['date']
-                                                          .toString(),
-                                                    )}'),
-                                                    Text(msg),
-                                                    FutureBuilder(
-                                                      future: LocationServices
-                                                          .calculateWalkingDistance(
-                                                              originLat: request
-                                                                  .locationLat,
-                                                              originLng: request
-                                                                  .locationLon,
-                                                              destinationLat:
-                                                                  data['lat'],
-                                                              destinationLng:
-                                                                  data['lng']),
-                                                      builder:
-                                                          (context, snapshot) {
-                                                        if (snapshot.connectionState ==
-                                                                ConnectionState
-                                                                    .done &&
-                                                            snapshot.hasData) {
-                                                          return Text(
-                                                              'Walking Distance: ${(snapshot.data!['distance_value'] / 1000).toStringAsFixed(2)} KM');
-                                                        } else {
-                                                          return const Text(
-                                                              'WalkingDistance: --');
-                                                        }
-                                                      },
-                                                    ),
-                                                  ],
-                                                );
-                                              } else {
-                                                return const Text('');
-                                              }
-                                            },
+                                          RequestMetaData(
+                                            request: request,
+                                            showDistance: true,
                                           ),
                                           Visibility(
                                             visible:
@@ -318,6 +275,7 @@ class _MessageCardState extends State<MessageCard> {
                                                                       .custom,
                                                                   title:
                                                                       'Request Confirmed');
+
                                                               NotificationServics
                                                                   .sendInAppNotification(
                                                                 uid: widget
@@ -518,6 +476,7 @@ class _MessageCardState extends State<MessageCard> {
                           )
                         :
                         // show request
+
                         StreamBuilder(
                             // custom msg type that is request send widget
                             stream: Provider.of<RequestProvider>(context,
@@ -527,7 +486,16 @@ class _MessageCardState extends State<MessageCard> {
                               switch (snapshot.connectionState) {
                                 case ConnectionState.none:
                                 case ConnectionState.waiting:
-                                  return const CircularProgressIndicator();
+                                  return Container(
+                                    padding: const EdgeInsets.all(20),
+                                    margin: const EdgeInsets.only(top: 10),
+                                    width: mq.width * 0.6,
+                                    height: mq.height * 0.24,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      color: Colors.white,
+                                    ),
+                                  );
                                 case ConnectionState.active:
                                 case ConnectionState.done:
                                   if (snapshot.hasData &&
@@ -585,48 +553,8 @@ class _MessageCardState extends State<MessageCard> {
                                           const Divider(
                                             color: Colors.blue,
                                           ),
-                                          FutureBuilder(
-                                            future:
-                                                Provider.of<RequestProvider>(
-                                                        context,
-                                                        listen: false)
-                                                    .getRequestMetaData(
-                                                        reqId: request.reqId,
-                                                        uid: UserModel
-                                                            .instance.uid),
-                                            builder: (context, snapshot) {
-                                              if (snapshot.connectionState ==
-                                                      ConnectionState.done &&
-                                                  snapshot.hasData) {
-                                                final data =
-                                                    snapshot.data?.data() ?? {};
-                                                String msg =
-                                                    'I accept your request';
-                                                if (data['msg']
-                                                    .toString()
-                                                    .isNotEmpty) {
-                                                  msg = data['msg'];
-                                                }
-                                                return Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                        MyDateUtil.getTimeStamp(
-                                                      context: context,
-                                                      time: data['date']
-                                                          .toString(),
-                                                    )),
-                                                    const SizedBox(
-                                                      height: 3,
-                                                    ),
-                                                    Text(msg),
-                                                  ],
-                                                );
-                                              } else {
-                                                return const Text('');
-                                              }
-                                            },
+                                          RequestMetaData(
+                                            request: request,
                                           ),
                                           Visibility(
                                             visible: request.confirmedTo

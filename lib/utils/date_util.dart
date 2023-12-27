@@ -101,7 +101,7 @@ class MyDateUtil {
 // is yesterday
   static bool isYesterday(DateTime date) {
     final DateTime currentDate = DateTime.now();
-    final DateTime yesterday = currentDate.subtract(Duration(days: 1));
+    final DateTime yesterday = currentDate.subtract(const Duration(days: 1));
     return yesterday.year == date.year &&
         yesterday.month == date.month &&
         yesterday.day == date.day;

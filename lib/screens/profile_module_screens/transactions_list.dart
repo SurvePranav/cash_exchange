@@ -1,5 +1,6 @@
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/request_model.dart';
+import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/utils/date_util.dart';
 import 'package:flutter/material.dart';
 
@@ -59,10 +60,19 @@ class TransactionsList extends StatelessWidget {
         itemCount: requests.length,
         itemBuilder: (context, index) {
           final request = requests.elementAt(index);
+          // getting the expiration date of the request
+          int expirationDate =
+              DateTime.fromMillisecondsSinceEpoch(request.createdAt)
+                  .add(const Duration(hours: 24))
+                  .millisecondsSinceEpoch;
           return Card(
             color: request.confirmedTo.isNotEmpty
-                ? Colors.green
-                : AppColors.blue_8,
+                ? request.confirmedTo.contains(UserModel.instance.uid)
+                    ? Colors.grey.shade500
+                    : Colors.green
+                : expirationDate < DateTime.now().millisecondsSinceEpoch
+                    ? Colors.grey.shade500
+                    : AppColors.blue_8,
             elevation: 5,
             margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
             shape: RoundedRectangleBorder(

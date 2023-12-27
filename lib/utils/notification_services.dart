@@ -75,15 +75,28 @@ class NotificationServics {
   }) {
     int timeStamp = DateTime.now().millisecondsSinceEpoch;
     MyNotification notification = MyNotification(
-        id: timeStamp.toString(),
-        uid: uid,
-        title: title,
-        body: body,
-        timeStamp: timeStamp);
+      id: timeStamp.toString(),
+      uid: uid,
+      title: title,
+      body: body,
+      timeStamp: timeStamp,
+      isSeen: false,
+    );
     _firebaseFirestore
         .collection('notifications')
         .doc(notification.id)
         .set(notification.toJson());
+  }
+
+  static void updateNotificationSeenStatus(String id) async {
+    try {
+      _firebaseFirestore
+          .collection('notifications')
+          .doc(id)
+          .update({'isSeen': true});
+    } catch (error) {
+      log('Error updating notifications: $error');
+    }
   }
 
   // read user's inApp notifications
@@ -91,7 +104,18 @@ class NotificationServics {
     return _firebaseFirestore
         .collection('notifications')
         .where('uid', isEqualTo: UserModel.instance.uid)
+        .orderBy('timeStamp', descending: true)
         .snapshots();
+  }
+
+  // UnreadNotification Count
+  static Stream<int> getUnreadNotificationCount() {
+    return FirebaseFirestore.instance
+        .collection('notifications') // Replace with your collection name
+        .where('uid', isEqualTo: UserModel.instance.uid)
+        .where('isSeen', isEqualTo: false)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.length);
   }
 
   // delete a notification by id

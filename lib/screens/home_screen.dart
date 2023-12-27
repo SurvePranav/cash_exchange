@@ -1,5 +1,6 @@
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/provider/connectivity_provider.dart';
+import 'package:cashxchange/provider/utility_provider.dart';
 import 'package:cashxchange/widgets/home_screen_top.dart';
 import 'package:cashxchange/widgets/my_dropdown_button.dart';
 import 'package:cashxchange/widgets/nearby_atms.dart';
@@ -21,6 +22,10 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _loadMap = false;
   @override
   void initState() {
+    // start listening to the notification stream
+    final provider = Provider.of<UtilityProvider>(context, listen: false);
+    provider.listenToUnreadedNotificationsStream();
+    provider.listenToUnreadedChatsStream();
     super.initState();
   }
 
@@ -72,6 +77,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     ? const NearbyAtmsWidget()
                     : RequestsWidget(
                         nearby: _selectedItem == 'Nearby Requests',
+                        onNoRequests: () {
+                          _selectedItem = 'Nearby ATM\'s';
+                          _loadMap = false;
+                          setState(() {});
+                        },
                       ),
                 const SliverList(
                     delegate: SliverChildListDelegate.fixed([

@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/main.dart';
 import 'package:cashxchange/model/connection_model.dart';
-import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/utils/date_util.dart';
 import 'package:cashxchange/utils/util.dart';
@@ -114,12 +113,17 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                           return const SizedBox();
                         case ConnectionState.active:
                         case ConnectionState.done:
+                          if (snapshot.hasError) {
+                            return const Center(
+                              child: Text('User Not found'),
+                            );
+                          }
                           if (snapshot.hasData && snapshot.data != null) {
-                            Map<String, dynamic>? doc = {};
+                            Map<String, dynamic> doc = {};
                             bool isPrimary = false;
-                            var snap = snapshot.data?.docs;
-                            if (snap != null && snap.isNotEmpty) {
-                              doc = snap.first.data();
+                            var snap = snapshot.data;
+                            if (snap != null) {
+                              doc = snap.data()!;
                               isPrimary = doc['primary'];
                             }
 
@@ -159,14 +163,11 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                                 Expanded(
                                   child: OutlinedButton(
                                     onPressed: () {
-                                      if (doc != null) {
-                                        Provider.of<AuthProvider>(context,
-                                                listen: false)
-                                            .updateConnectionPriority(
-                                                senderUid:
-                                                    widget.connection.uid,
-                                                primary: !doc['primary']);
-                                      }
+                                      Provider.of<AuthProvider>(context,
+                                              listen: false)
+                                          .updateConnectionPriority(
+                                              senderUid: widget.connection.uid,
+                                              primary: !doc['primary']);
                                     },
                                     child: Text(
                                       isPrimary

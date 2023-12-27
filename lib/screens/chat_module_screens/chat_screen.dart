@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
-import 'package:cashxchange/provider/messaging_provider.dart';
 import 'package:cashxchange/screens/chat_module_screens/message_screen.dart';
 import 'package:cashxchange/screens/chat_module_screens/single_chat_tile.dart';
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
@@ -54,11 +53,6 @@ class _ChatScreenState extends State<ChatScreen> {
         _searchList.addAll(_userIds);
       });
     }
-  }
-
-  void onNewMessageReceived() {
-    log('show red dot');
-    Provider.of<MessagingProvider>(context, listen: false).setNewMessage(true);
   }
 
   @override
@@ -213,21 +207,20 @@ class _ChatScreenState extends State<ChatScreen> {
                     stream: Provider.of<AuthProvider>(context, listen: false)
                         .getMyConnections(primary: primary),
                     builder: (context, snapshot) {
-                      final data = snapshot.data?.docs;
-                      if (data != null) {
-                        _userIds = data.map((e) {
-                          return e.data()['uid'] as String;
-                        }).toList();
+                      final data = snapshot.data?.docs ?? [];
+                      _userIds = data.map((e) {
+                        return e.data()['uid'] as String;
+                      }).toList();
 
-                        // adding names to connection names
-                        _connectionNames = data.map(
-                          (e) {
-                            return e.data()['name'] as String;
-                          },
-                        ).toList();
-                        log('fetetched userIds: $_userIds');
-                        log('fetetched userNames: $_connectionNames');
-                      }
+                      // adding names to connection names
+                      _connectionNames = data.map(
+                        (e) {
+                          return e.data()['name'] as String;
+                        },
+                      ).toList();
+                      log('fetetched userIds: $_userIds');
+                      log('fetetched userNames: $_connectionNames');
+
                       switch (snapshot.connectionState) {
                         case ConnectionState.none:
                         case ConnectionState.waiting:
@@ -249,6 +242,15 @@ class _ChatScreenState extends State<ChatScreen> {
                                 return ChatTile(
                                   uid: _userIds[index],
                                   onTap: (connection) {
+                                    log('marking as read.....');
+                                    //updating the message as readed to remove the badge on chats
+                                    Provider.of<AuthProvider>(context,
+                                            listen: false)
+                                        .updateHasUnreadMessage(
+                                      uid: connection.uid,
+                                      updateInMyConnections: true,
+                                      hasUnreadMessage: false,
+                                    );
                                     Navigator.of(context).push(
                                       CupertinoPageRoute(
                                         builder: (context) => MessageScreen(

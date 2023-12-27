@@ -1,10 +1,14 @@
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/main.dart';
 import 'package:cashxchange/model/user_model.dart';
+import 'package:cashxchange/provider/utility_provider.dart';
 import 'package:cashxchange/screens/request_module_screens/active_requests_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreenTopSection extends StatelessWidget {
   const HomeScreenTopSection({super.key});
@@ -64,16 +68,50 @@ class HomeScreenTopSection extends StatelessWidget {
                         ),
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.notifications,
-                      ),
-                      iconSize: 35,
-                      onPressed: () {
-                        Navigator.of(context).pushNamed(
-                          'notification_screen',
-                        );
-                      },
+                    Stack(
+                      children: [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.notifications,
+                          ),
+                          iconSize: 40,
+                          onPressed: () {
+                            Navigator.of(context).pushNamed(
+                              'notification_screen',
+                            );
+                          },
+                        ),
+                        Positioned(
+                          top: 4,
+                          right: 10,
+                          child: Consumer<UtilityProvider>(
+                            builder: (BuildContext context, provider,
+                                Widget? child) {
+                              return Visibility(
+                                visible: !(provider.notificationCounter == 0),
+                                child: Container(
+                                  height: 18,
+                                  width: 18,
+                                  decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.red),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    provider.notificationCounter < 10
+                                        ? provider.notificationCounter
+                                            .toString()
+                                        : '9+',
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        )
+                      ],
                     )
                   ],
                 ),
@@ -172,6 +210,34 @@ class HomeScreenTopSection extends StatelessWidget {
                 ),
               ),
             ),
+            Positioned(
+              top: 8,
+              right: 46,
+              child: Consumer<UtilityProvider>(
+                builder: (BuildContext context, provider, Widget? child) {
+                  log('current chat counter...${provider.chatCounter}');
+                  return Visibility(
+                    visible: provider.chatCounter > 0,
+                    child: Container(
+                      height: 22,
+                      width: 22,
+                      decoration: const BoxDecoration(
+                          shape: BoxShape.circle, color: Colors.red),
+                      alignment: Alignment.center,
+                      child: Text(
+                        provider.chatCounter < 10
+                            ? provider.chatCounter.toString()
+                            : '9+',
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            )
           ],
         ),
       ],

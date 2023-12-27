@@ -41,12 +41,16 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  ////////////////////////////////////***************** Authentication Module Database operations  ****************///////////////////////////////// */
+
+// check if user is signed in or not
   Future<void> checkSignIn() async {
     final SharedPreferences s = await SharedPreferences.getInstance();
     _isSignedIn = s.getBool("is_signedin") ?? false;
     notifyListeners();
   }
 
+// set user as signed in
   Future<void> setSignedIn() async {
     final SharedPreferences s = await SharedPreferences.getInstance();
     s.setBool("is_signedin", true);
@@ -54,7 +58,7 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // sign in
+  // sign in using phone number
   void signInWithPhone(BuildContext context, String phoneNumber) async {
     try {
       _firebaseAuth.verifyPhoneNumber(
@@ -131,9 +135,7 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  ////////////////////////////////////***************** Authentication Functions End Here   ****************///////////////////////////////// */
-
-  // database operations
+  // //////////////////////////                  database operations on user data for profile module  ///////////////******************** */
 
   Future<bool> checkIfUserExists() async {
     DocumentSnapshot snapshot =
@@ -268,7 +270,7 @@ class AuthProvider extends ChangeNotifier {
     });
   }
 
-  ////////////////////////////////////*********** Chatting and Connections Operations */
+  ////////////////////////////////////*********** Chatting Module and Connections Operations */ *******/////////////////
 
   // add new connection to my connections
   Future<void> addToMyConnection({
@@ -284,7 +286,8 @@ class AuthProvider extends ChangeNotifier {
       'canMessage': true,
       'primary': true,
       'lastMessage': DateTime.now().millisecondsSinceEpoch.toString(),
-      'name': user.name
+      'name': user.name,
+      'hasUnreadMessage': false,
     });
     if (!UserModel.instance.connections.contains(user.uid)) {
       UserModel.instance.connections.add(user.uid);
@@ -310,6 +313,7 @@ class AuthProvider extends ChangeNotifier {
       'primary': false,
       'lastMessage': DateTime.now().millisecondsSinceEpoch.toString(),
       'name': UserModel.instance.name,
+      'hasUnreadMessage': true,
     });
   }
 
@@ -323,6 +327,32 @@ class AuthProvider extends ChangeNotifier {
         .update({
       'lastMessage': DateTime.now().millisecondsSinceEpoch.toString(),
     });
+  }
+
+// update connections has message status
+  void updateHasUnreadMessage(
+      {required String uid,
+      required bool hasUnreadMessage,
+      required bool updateInMyConnections}) {
+    _firebaseFirestore
+        .collection('users')
+        .doc(updateInMyConnections ? UserModel.instance.uid : uid)
+        .collection('my_connections')
+        .doc(updateInMyConnections ? uid : UserModel.instance.uid)
+        .update({
+      'hasUnreadMessage': hasUnreadMessage,
+    });
+  }
+
+  // get unread chats count to display badge on chat icon
+  static Stream<int> getUnreadChatsCount() {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(UserModel.instance.uid)
+        .collection('my_connections')
+        .where('hasUnreadMessage', isEqualTo: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.length);
   }
 
   // update connection to priority primary or secondary
@@ -413,14 +443,13 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // get my connections info by id as stream
-  Stream<QuerySnapshot<Map<String, dynamic>>> getConnectionInfo(
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getConnectionInfo(
       {required String userId}) {
     return _firebaseFirestore
         .collection('users')
         .doc(UserModel.instance.uid)
         .collection('my_connections')
-        .where('uid', isEqualTo: userId)
-        .limit(1)
+        .doc(userId)
         .snapshots();
   }
 
@@ -449,6 +478,7 @@ class AuthProvider extends ChangeNotifier {
     return querySnapshot.docs.isNotEmpty;
   }
 
+  ////////////////////////////////////  ***********    retriving other users information **********    ///////////////
   // get nearby users
   Future<List<Connection>> getNearbyUsers(double lat, double lng) async {
     try {

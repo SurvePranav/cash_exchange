@@ -1,15 +1,12 @@
-import 'dart:developer';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cashxchange/constants/constant_values.dart';
-import 'package:cashxchange/main.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
+import 'package:cashxchange/provider/utility_provider.dart';
 import 'package:cashxchange/screens/profile_module_screens/I_accepted.dart';
 import 'package:cashxchange/screens/profile_module_screens/my_transactions.dart';
 import 'package:cashxchange/screens/profile_module_screens/profile_pic_screen.dart';
 import 'package:cashxchange/screens/profile_module_screens/user_info_fill.dart';
-import 'package:cashxchange/screens/auth_module_screens/welcome_screen.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -72,14 +69,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 body: 'do you want to logout?')
                             .then((value) {
                           if (value) {
+                            // unsubscribing to the streams
+                            Provider.of<UtilityProvider>(context, listen: false)
+                                .unsubscribeToStreams();
+
+                            // making user offiline and removing it's pushToken
                             ap
                                 .updateUserActiveStatus(false,
                                     removePushToken: true)
                                 .then(
                               (value) async {
-                                final data = await ap.getUserDataById(
-                                    uid: UserModel.instance.uid);
-                                log("isOnline: ${data['isOnline']}");
                                 ap.userSignOut().then((value) {
                                   Navigator.pushNamedAndRemoveUntil(
                                     context,

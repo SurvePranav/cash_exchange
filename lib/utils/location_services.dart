@@ -1,44 +1,31 @@
 import 'dart:convert';
 import 'package:cashxchange/constants/constant_values.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
 class LocationServices {
   // get the address from location coordinates
   static Future<String> getAddressFromCoordinates(
-    double latitude,
-    double longitude,
-  ) async {
-    try {
-      List<Placemark> placemarks =
-          await placemarkFromCoordinates(latitude, longitude);
-      if (placemarks.isNotEmpty) {
-        Placemark first = placemarks.first;
-        return "${first.street}, ${first.subLocality}, ${first.locality}, ${first.administrativeArea} ${first.postalCode}, ${first.country}";
-      } else {
-        return "";
-      }
-    } catch (e) {
-      return "";
-    }
-  }
+      double latitude, double longitude) async {
+    final apiUrl =
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=$latitude,$longitude&key=${ApiKey.getMapsApiKey()}';
 
-  // find latutude, longitude from string
-  static Future<List<double?>> getCoordinatesFromAddressString(
-      String address) async {
     try {
-      List<Location> locations = await locationFromAddress(address);
-      if (locations.isNotEmpty) {
-        return [
-          locations.first.latitude,
-          locations.first.longitude,
-        ];
+      final response = await http.get(Uri.parse(apiUrl));
+      if (response.statusCode == 200) {
+        final decodedData = json.decode(response.body);
+        final results = decodedData['results'] as List<dynamic>;
+        if (results.isNotEmpty) {
+          final formattedAddress = results[0]['formatted_address'] as String;
+          return formattedAddress;
+        } else {
+          return "Address not found";
+        }
       } else {
-        return [];
+        return "Error: ${response.statusCode}";
       }
     } catch (e) {
-      return [];
+      return "Error: $e";
     }
   }
 
@@ -109,7 +96,8 @@ class LocationServices {
   }
 
   // get the place images
-  static Future<String?> getPhotoUrl(String photoReference) async {
+  static Future<String?> getCurrentLocationPhotoUrl(
+      String photoReference) async {
     final photoUrl =
         'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoReference&key=${ApiKey.getMapsApiKey()}';
 

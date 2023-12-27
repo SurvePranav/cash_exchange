@@ -71,7 +71,7 @@ class _MyAppState extends State<MyApp> {
         ),
         routes: {
           'home_screen': (context) => const MainBody(),
-          'notification_screen': (context) => NotificationScreen(),
+          'notification_screen': (context) => const NotificationScreen(),
           'profile_screen': (context) => const ProfileScreen(),
           'welcome_screen': (context) => const WelcomeScreen(),
           'user_info_screen': (context) => const UserInfoScreen(),

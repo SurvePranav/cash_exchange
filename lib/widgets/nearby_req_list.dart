@@ -17,6 +17,7 @@ class NearbyRequestList extends StatelessWidget {
   final List<RequestModel> requests;
   final MyCallBack onTap;
   final MyCallBack2 onAccept;
+  final VoidCallback onNoRequests;
   final double myLat;
   final double myLng;
   const NearbyRequestList({
@@ -26,6 +27,7 @@ class NearbyRequestList extends StatelessWidget {
     required this.onAccept,
     required this.myLat,
     required this.myLng,
+    required this.onNoRequests,
   });
 
   @override
@@ -35,9 +37,15 @@ class NearbyRequestList extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text("No nearby requests"),
             const SizedBox(
-              height: 100,
+              height: 20,
+            ),
+            const Text(
+              "No nearby requests",
+              style: TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(
+              height: 50,
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -48,13 +56,7 @@ class NearbyRequestList extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                       shape: const CircleBorder(),
                       backgroundColor: AppColors.deepGreen),
-                  onPressed: () {
-                    // Navigator.of(context).push(MaterialPageRoute(
-                    //   builder: (context) => const MainBody(
-                    //     currentIndex: 2,
-                    //   ),
-                    // ));
-                  },
+                  onPressed: onNoRequests,
                   child: const Icon(
                     Icons.atm,
                     size: 40,

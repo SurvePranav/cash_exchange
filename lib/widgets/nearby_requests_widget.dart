@@ -15,9 +15,11 @@ import 'package:provider/provider.dart';
 
 class RequestsWidget extends StatefulWidget {
   final bool nearby;
+  final VoidCallback onNoRequests;
   const RequestsWidget({
     super.key,
     this.nearby = true,
+    required this.onNoRequests,
   });
 
   @override
@@ -76,7 +78,6 @@ class _RequestsWidgetState extends State<RequestsWidget> {
                 data?.map((e) => RequestModel.fromJson(e.data())).toList() ??
                     [];
             tempRequests.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-            log('total requests: ${tempRequests.length}');
             for (int i = 0; i < tempRequests.length; i++) {
               //  calculating distance between user and request
               double distance = LocationServices.findDistanceBetweenCoordinates(
@@ -85,11 +86,6 @@ class _RequestsWidgetState extends State<RequestsWidget> {
                 tempRequests[i].locationLat,
                 tempRequests[i].locationLon,
               );
-              log('My lat: $lat');
-              log('My lng: $lng');
-              log('Request lat: ${tempRequests[i].locationLat}');
-              log('Request lng: ${tempRequests[i].locationLon}');
-              log('distance: $distance');
               // removing active requests based on distance
               if (tempRequests[i].uid != UserModel.instance.uid &&
                   distance < 2000) {
@@ -141,12 +137,12 @@ class _RequestsWidgetState extends State<RequestsWidget> {
                     Provider.of<RequestProvider>(context, listen: false)
                         .setLoading(false);
                   }
-                  ;
                 }
               });
             },
             myLat: lat,
             myLng: lng,
+            onNoRequests: widget.onNoRequests,
           );
         } else {
           return const MyConstantWidget();

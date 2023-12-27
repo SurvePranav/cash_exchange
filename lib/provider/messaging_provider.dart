@@ -70,6 +70,12 @@ class MessagingProvider with ChangeNotifier {
       ap.updateLastMessageTime(
           fromId: connection.uid, toId: UserModel.instance.uid);
 
+      //updating the has new message in connections's my_connection collection
+      ap.updateHasUnreadMessage(
+          uid: connection.uid,
+          hasUnreadMessage: true,
+          updateInMyConnections: false);
+
       // sending push notification to receiver user
       NotificationServics.sendPushNotification(
         connection,

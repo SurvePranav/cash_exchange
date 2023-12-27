@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/screens/profile_module_screens/profile_pic_screen.dart';
 import 'package:cashxchange/screens/request_module_screens/atm_info_widget.dart';
@@ -39,8 +40,9 @@ class AtmInfoScreen extends StatelessWidget {
                       minRadius: 78.0,
                       child: atm['photo_reference'] != null
                           ? FutureBuilder(
-                              future: LocationServices.getPhotoUrl(
-                                  atm['photo_reference']),
+                              future:
+                                  LocationServices.getCurrentLocationPhotoUrl(
+                                      atm['photo_reference']),
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
@@ -63,8 +65,8 @@ class AtmInfoScreen extends StatelessWidget {
                                     child: Hero(
                                       tag: 'atm_image',
                                       child: ClipOval(
-                                        child: Image.network(
-                                          snapshot.data!,
+                                        child: CachedNetworkImage(
+                                          imageUrl: snapshot.data!,
                                           width: 150,
                                           height: 150,
                                           fit: BoxFit.cover,

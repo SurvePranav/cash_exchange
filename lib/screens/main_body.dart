@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
 import 'package:cashxchange/screens/home_screen.dart';
-import 'package:cashxchange/screens/request_module_screens/request_screen.dart';
 import 'package:cashxchange/utils/notification_services.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:flutter/material.dart';
@@ -114,15 +113,21 @@ class _MainBodyState extends State<MainBody> with WidgetsBindingObserver {
           child: const HomeScreen(),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).pushNamed('request_screen');
-        },
-        backgroundColor: AppColors.mintGreen,
-        child: Icon(
-          Icons.add_circle_outline,
-          size: 30,
-          color: AppColors.deepGreen,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(right: 5.0),
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.of(context).pushNamed('request_screen');
+          },
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+          ),
+          backgroundColor: AppColors.mintGreen,
+          child: Icon(
+            Icons.add_circle_outline,
+            size: 33,
+            color: AppColors.deepGreen,
+          ),
         ),
       ),
     );
