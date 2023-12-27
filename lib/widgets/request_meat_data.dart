@@ -9,18 +9,19 @@ import 'package:provider/provider.dart';
 class RequestMetaData extends StatelessWidget {
   final RequestModel request;
   final bool showDistance;
+  final String fromId;
   const RequestMetaData({
     super.key,
     required this.request,
     this.showDistance = false,
+    required this.fromId,
   });
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
       future: Provider.of<RequestProvider>(context, listen: false)
-          .getRequestMetaData(
-              reqId: request.reqId, uid: UserModel.instance.uid),
+          .getRequestMetaData(reqId: request.reqId, uid: fromId),
       builder: (context, requestMetaDataSnapshot) {
         if (requestMetaDataSnapshot.connectionState == ConnectionState.done &&
             requestMetaDataSnapshot.hasData) {
