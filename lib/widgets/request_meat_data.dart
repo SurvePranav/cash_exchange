@@ -1,5 +1,4 @@
 import 'package:cashxchange/model/request_model.dart';
-import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/request_provider.dart';
 import 'package:cashxchange/utils/date_util.dart';
 import 'package:cashxchange/widgets/walking_distance.dart';
@@ -51,7 +50,9 @@ class RequestMetaData extends StatelessWidget {
             ],
           );
         } else {
-          return const Text('');
+          return const SizedBox(
+            height: 45,
+          );
         }
       },
     );

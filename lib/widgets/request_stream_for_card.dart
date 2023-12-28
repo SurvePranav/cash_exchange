@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cashxchange/main.dart';
 import 'package:cashxchange/model/request_model.dart';
 import 'package:cashxchange/model/user_model.dart';
@@ -60,7 +62,16 @@ class RequestStreamCard extends StatelessWidget {
                     }
                   }
                 } else {
-                  status = 'Not Confirmed';
+                  int expiration =
+                      (DateTime.fromMillisecondsSinceEpoch(request.createdAt)
+                              .add(const Duration(hours: 24)))
+                          .millisecondsSinceEpoch;
+                  log('expiredAt: ${DateTime.now().millisecondsSinceEpoch}');
+                  if (expiration > DateTime.now().millisecondsSinceEpoch) {
+                    status = 'Not Confirmed';
+                  } else {
+                    status = 'Expired';
+                  }
                 }
               } else {
                 request = RequestModel.fromJson({});

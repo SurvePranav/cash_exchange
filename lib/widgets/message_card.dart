@@ -47,7 +47,6 @@ class _MessageCardState extends State<MessageCard> {
   // sender/ another user message
   Widget _blueMessage() {
     //update last read message if sender and receiver are different
-    String walkingDistance = "";
     if (widget.message.read.isEmpty) {
       Provider.of<MessagingProvider>(context, listen: false)
           .updateMessageReadStatus(widget.message);

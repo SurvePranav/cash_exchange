@@ -36,7 +36,9 @@ class RequestMsgCard extends StatelessWidget {
             ? (request.confirmedTo.contains(fromId))
                 ? Colors.green.withAlpha(100)
                 : Colors.red.withAlpha(100)
-            : Colors.white,
+            : status == 'Expired'
+                ? Colors.grey.shade400
+                : Colors.white,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,7 +63,9 @@ class RequestMsgCard extends StatelessWidget {
             fromId: fromId,
           ),
           Visibility(
-            visible: (request.confirmedTo.isEmpty && !myMessage),
+            visible: (request.confirmedTo.isEmpty &&
+                !myMessage &&
+                status != 'Expired'),
             child: Row(
               children: [
                 Expanded(

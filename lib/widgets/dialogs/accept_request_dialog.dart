@@ -35,7 +35,15 @@ class _AcceptRequestDialogState extends State<AcceptRequestDialog> {
             onChanged: (value) => msg = value,
             decoration: InputDecoration(
                 hintText: 'Message (optional)',
-                prefixIcon: const Icon(Icons.message),
+                prefixIcon: Icon(
+                  Icons.message,
+                  color: AppColors.deepGreen,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7),
+                  borderSide:
+                      BorderSide(color: AppColors.deepGreen, width: 1.5),
+                ),
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15))),
           ),
@@ -140,8 +148,10 @@ class _AcceptRequestDialogState extends State<AcceptRequestDialog> {
                 }
               },
               child: requestProvider.isLoading
-                  ? const CircularProgressIndicator(
-                      strokeWidth: 1,
+                  ? const SizedBox(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                      ),
                     )
                   : Text(
                       'Accept',
