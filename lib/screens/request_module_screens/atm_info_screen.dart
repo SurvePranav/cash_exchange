@@ -23,9 +23,12 @@ class AtmInfoScreen extends StatelessWidget {
             height: 280,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppColors.mintGreen, AppColors.skyBlue],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
+                colors: [
+                  AppColors.skyBlue,
+                  AppColors.mintGreen,
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
             ),
             child: Column(
@@ -191,8 +194,8 @@ class AtmInfoScreen extends StatelessWidget {
                     child: ListTile(
                       onTap: () {
                         MyAppServices.launchAnyUrl(
-                          'https://www.google.com/maps/search/?api=1&query=${atm['lat']},${atm['lng']}',
-                        );
+                            'https://www.google.com/maps/search/?api=1&query=${atm['lat']},${atm['lng']}',
+                            context);
                       },
                       title: const Icon(
                         Icons.location_pin,

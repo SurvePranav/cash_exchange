@@ -16,7 +16,7 @@ class _NearbyAtmsWidgetState extends State<NearbyAtmsWidget> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: _getNearbyAtms(),
+      future: _getNearbyAtms(context),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const MyConstantWidget();
@@ -36,9 +36,9 @@ class _NearbyAtmsWidgetState extends State<NearbyAtmsWidget> {
     );
   }
 
-  Future<void> _getNearbyAtms() async {
+  Future<void> _getNearbyAtms(BuildContext context) async {
     final List<double> coordinates =
-        await LocationServices.getCurrentLocation();
+        await LocationServices.getCurrentLocation(context);
     final List results = await LocationServices.getNearbyPlaces(
         lat: coordinates[0], lng: coordinates[1], place: "atm");
     _nearbyAtms.clear();

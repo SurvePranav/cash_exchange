@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:cashxchange/constants/constant_values.dart';
+import 'package:cashxchange/utils/util.dart';
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
@@ -30,11 +32,13 @@ class LocationServices {
   }
 
   // for getting current location's latutude, longitude
-  static Future<List<double>> getCurrentLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error("Location Permission Dissabled");
-    }
+  static Future<List<double>> getCurrentLocation(BuildContext context) async {
+    await Geolocator.isLocationServiceEnabled().then((serviceEnabled) async {
+      if (!serviceEnabled) {
+        MyAppServices.showSnackBar(context, 'Turn On location');
+        return Future.error("Location Not On");
+      }
+    });
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();

@@ -323,7 +323,8 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
             // new request
 
             // getting current location
-            await LocationServices.getCurrentLocation().then((coordinates) {
+            await LocationServices.getCurrentLocation(context)
+                .then((coordinates) {
               var createdAt = DateTime.now().millisecondsSinceEpoch;
               final request = RequestModel(
                 reqId: createdAt.toString(),

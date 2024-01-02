@@ -178,7 +178,7 @@ class _FullMapScreenState extends State<FullMapScreen> {
     RequestProvider rp = Provider.of<RequestProvider>(context, listen: false);
     CameraPosition cameraPosition = const CameraPosition(target: LatLng(0, 0));
 
-    await LocationServices.getCurrentLocation().then(
+    await LocationServices.getCurrentLocation(context).then(
       (location) async {
         cameraPosition = CameraPosition(
           target: LatLng(location[0], location[1]),

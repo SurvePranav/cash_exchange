@@ -125,13 +125,14 @@ class RequestMsgCard extends StatelessWidget {
             visible: (request.confirmedTo.contains(fromId)),
             child: TextButton(
               onPressed: () async {
-                var data =
-                    await Provider.of<RequestProvider>(context, listen: false)
-                        .getRequestMetaData(reqId: request.reqId, uid: fromId);
-                final snap = data.data();
-                MyAppServices.launchAnyUrl(
-                  'https://www.google.com/maps/search/?api=1&query=${snap!['lat']},${snap['lng']}',
-                );
+                await Provider.of<RequestProvider>(context, listen: false)
+                    .getRequestMetaData(reqId: request.reqId, uid: fromId)
+                    .then((data) {
+                  final snap = data.data();
+                  MyAppServices.launchAnyUrl(
+                      'https://www.google.com/maps/search/?api=1&query=${snap!['lat']},${snap['lng']}',
+                      context);
+                });
               },
               style: ButtonStyle(
                   side: MaterialStateProperty.all<BorderSide>(

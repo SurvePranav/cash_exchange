@@ -31,15 +31,17 @@ class _ViewMapWidgetState extends State<ViewMapWidget> {
             padding: const EdgeInsets.all(9),
             height: MediaQuery.of(context).size.height * 0.23,
             child: FutureBuilder(
-              future: LocationServices.getCurrentLocation(),
+              future: LocationServices.getCurrentLocation(context),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
                   cachedImage = ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: CachedNetworkImage(
                       imageUrl: LocationServices.getStaticMapUrl(
-                        lat: snapshot.data![0],
-                        lon: snapshot.data![1],
+                        lat: snapshot.data?[0] ??
+                            double.parse(UserModel.instance.locationLat),
+                        lon: snapshot.data?[1] ??
+                            double.parse(UserModel.instance.locationLon),
                         zoom: 17,
                         width: 400,
                         height:

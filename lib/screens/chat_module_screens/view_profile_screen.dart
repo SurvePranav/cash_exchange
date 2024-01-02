@@ -7,6 +7,7 @@ import 'package:cashxchange/utils/date_util.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 //view profile screen -- to view profile of user
@@ -98,9 +99,27 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                     ],
                   ),
 
-                  const SizedBox(
-                    height: 40,
-                  ),
+                  Container(
+                      margin: const EdgeInsets.symmetric(vertical: 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            widget.connection.phoneNumber,
+                          ),
+                          IconButton(
+                            onPressed: () async {
+                              await Clipboard.setData(ClipboardData(
+                                      text: widget.connection.phoneNumber))
+                                  .then((value) {
+                                MyAppServices.showSnackBar(
+                                    context, 'Phone Number Copied!');
+                              });
+                            },
+                            icon: const Icon(Icons.copy),
+                          ),
+                        ],
+                      )),
                   // block and move to primary buttons
 
                   StreamBuilder(
@@ -152,8 +171,9 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                                     },
                                     child: Text(
                                       'Remove',
-                                      style:
-                                          TextStyle(color: AppColors.deepGreen),
+                                      style: TextStyle(
+                                          color: AppColors.deepGreen,
+                                          fontSize: 12),
                                     ),
                                   ),
                                 ),
@@ -173,8 +193,9 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                                       isPrimary
                                           ? 'Make Secondary'
                                           : 'Make Primary',
-                                      style:
-                                          TextStyle(color: AppColors.deepGreen),
+                                      style: TextStyle(
+                                          color: AppColors.deepGreen,
+                                          fontSize: 12),
                                     ),
                                   ),
                                 ),

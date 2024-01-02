@@ -37,7 +37,7 @@ class _RequestsWidgetState extends State<RequestsWidget> {
       );
     } else {
       return FutureBuilder(
-        future: LocationServices.getCurrentLocation(),
+        future: LocationServices.getCurrentLocation(context),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.none:

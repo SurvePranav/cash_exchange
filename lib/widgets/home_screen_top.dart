@@ -174,7 +174,7 @@ class HomeScreenTopSection extends StatelessWidget {
                               'Request Status',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 18,
+                                fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

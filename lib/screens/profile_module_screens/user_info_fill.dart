@@ -181,8 +181,8 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                                     // locationButtonIcon: Icons.location_pin,
                                     onLocationPressed: () async {
                                       value.setLoading(true);
-                                      await LocationServices
-                                              .getCurrentLocation()
+                                      await LocationServices.getCurrentLocation(
+                                              context)
                                           .then((val) async {
                                         lat = '${val[0]}';
                                         lon = '${val[1]}';

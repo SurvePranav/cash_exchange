@@ -69,76 +69,82 @@ class _AcceptRequestDialogState extends State<AcceptRequestDialog> {
                         Provider.of<MessagingProvider>(context, listen: false);
 
                     requestProvider.setLoading(true);
-                    final connection = Connection.fromJson(
 
-                        // getting user information (who raised request)
-                        await ap.getUserDataById(uid: widget.request.uid));
-
-                    // check if the distance is minimum (near) between them
-                    await LocationServices.getCurrentLocation()
-                        .then((coordinates) async {
-                      // calculate distance between them
-                      final double distance =
-                          LocationServices.findDistanceBetweenCoordinates(
-                              double.parse(connection.locationLat),
-                              double.parse(connection.locationLon),
-                              coordinates[0],
-                              coordinates[1]);
-                      if (distance < 2000) {
-                        // checking if the users are connected before
-                        await ap
-                            .checkIfUsersConnectedBefore(connection.uid)
-                            .then((connectedBefore) async {
-                          if (!connectedBefore) {
-                            // if not connected connecting each other using my_users collection
-                            log('not connected before');
-                            await ap.addToMyConnection(user: connection);
-                            await ap.addToReceiversConnection(user: connection);
-                          } else if (connectedBefore &&
-                              !UserModel.instance.connections
-                                  .contains(connection.uid)) {
-                            // if users are connected but not in primary then making connection primary
-                            log('connected before but not in primary');
-                            log('making primary');
-                            await ap.updateConnectionPriority(
-                                senderUid: connection.uid, primary: true);
-                          }
-                        }).then(
-                          (value) async {
-                            // adding user information to the request meta data
-                            await requestProvider
-                                .addUserToAcceptedRequest(
-                              reqId: widget.request.reqId,
-                              uid: UserModel.instance.uid,
-                              msg: msg.trim(),
-                              lat: coordinates[0],
-                              lng: coordinates[1],
-                            )
-                                .then((value) {
-                              // sending push notification and request accepted chat message
-                              mp
-                                  .sendMessage(connection, widget.request.reqId,
-                                      MsgType.custom, context)
+                    // getting user information (who raised request)
+                    await ap
+                        .getUserDataById(uid: widget.request.uid)
+                        .then((value) async {
+                      final Connection connection = Connection.fromJson(value);
+                      // check if the distance is minimum (near) between them
+                      await LocationServices.getCurrentLocation(context)
+                          .then((coordinates) async {
+                        // calculate distance between them
+                        final double distance =
+                            LocationServices.findDistanceBetweenCoordinates(
+                                double.parse(connection.locationLat),
+                                double.parse(connection.locationLon),
+                                coordinates[0],
+                                coordinates[1]);
+                        if (distance < 2000) {
+                          // checking if the users are connected before
+                          await ap
+                              .checkIfUsersConnectedBefore(connection.uid)
+                              .then((connectedBefore) async {
+                            if (!connectedBefore) {
+                              // if not connected connecting each other using my_users collection
+                              log('not connected before');
+                              await ap.addToMyConnection(user: connection);
+                              await ap.addToReceiversConnection(
+                                  user: connection);
+                            } else if (connectedBefore &&
+                                !UserModel.instance.connections
+                                    .contains(connection.uid)) {
+                              // if users are connected but not in primary then making connection primary
+                              log('connected before but not in primary');
+                              log('making primary');
+                              await ap.updateConnectionPriority(
+                                  senderUid: connection.uid, primary: true);
+                            }
+                          }).then(
+                            (value) async {
+                              // adding user information to the request meta data
+                              await requestProvider
+                                  .addUserToAcceptedRequest(
+                                reqId: widget.request.reqId,
+                                uid: UserModel.instance.uid,
+                                msg: msg.trim(),
+                                lat: coordinates[0],
+                                lng: coordinates[1],
+                              )
                                   .then((value) {
-                                log('sending true value');
-                                requestProvider.setLoading(false);
+                                // sending push notification and request accepted chat message
+                                mp
+                                    .sendMessage(
+                                        connection,
+                                        widget.request.reqId,
+                                        MsgType.custom,
+                                        context)
+                                    .then((value) {
+                                  log('sending true value');
+                                  requestProvider.setLoading(false);
 
-                                // sending in app notification
-                                NotificationServics.sendInAppNotification(
-                                    uid: connection.uid,
-                                    title: 'Request Accepted',
-                                    body:
-                                        '${UserModel.instance.name} accepted your ${widget.request.type} request of Rs.${widget.request.amount}');
-                                Navigator.of(context).pop(
-                                    true); // Return true on accepted request
+                                  // sending in app notification
+                                  NotificationServics.sendInAppNotification(
+                                      uid: connection.uid,
+                                      title: 'Request Accepted',
+                                      body:
+                                          '${UserModel.instance.name} accepted your ${widget.request.type} request of Rs.${widget.request.amount}');
+                                  Navigator.of(context).pop(
+                                      true); // Return true on accepted request
+                                });
                               });
-                            });
-                          },
-                        );
-                      } else {
-                        requestProvider.setLoading(false);
-                        Navigator.of(context).pop(false);
-                      }
+                            },
+                          );
+                        } else {
+                          requestProvider.setLoading(false);
+                          Navigator.of(context).pop(false);
+                        }
+                      });
                     });
                   } catch (e) {
                     log('could not accept request');

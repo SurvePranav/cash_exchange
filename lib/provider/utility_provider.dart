@@ -15,7 +15,10 @@ class UtilityProvider extends ChangeNotifier {
   int _chatCounterCounter = 0;
   int get chatCounter => _chatCounterCounter;
 
-  late StreamSubscription<int>? _chatsSubscription;
+  int _dMCounter = 0;
+  int get dMCounter => _dMCounter;
+
+  late StreamSubscription<List<int>>? _chatsSubscription;
   late StreamSubscription<int>? _notificationsSubscription;
 
   // for notifications badge
@@ -39,11 +42,18 @@ class UtilityProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // for chats badge
+  void incrementDMCounter(int increment) {
+    _dMCounter = increment;
+    notifyListeners();
+  }
+
   void listenToUnreadedChatsStream() {
-    Stream<int> chatsStream = AuthProvider.getUnreadChatsCount();
+    Stream<List<int>> chatsStream = AuthProvider.getUnreadChatsCount();
     _chatsSubscription = chatsStream.listen((data) {
       log('total unreaded Chats: $data');
-      incrementChatCounter(data);
+      incrementChatCounter(data[0]);
+      incrementDMCounter(data[1]);
     });
   }
 

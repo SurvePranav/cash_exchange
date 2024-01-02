@@ -123,7 +123,10 @@ class _MessageScreenState extends State<MessageScreen> {
                         ),
                         onPressed: () {
                           MyAppServices.launchAnyUrl(
-                              'tel:${widget.connection.phoneNumber}');
+                            widget.connection.phoneNumber,
+                            context,
+                            makeACall: true,
+                          );
                         },
                       ),
                     ],

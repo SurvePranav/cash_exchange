@@ -102,10 +102,22 @@ class MyAppServices {
   }
 
 // launch url from application
-  static void launchAnyUrl(String url) async {
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url));
-    }
+  static void launchAnyUrl(String url, BuildContext context,
+      {bool makeACall = false}) async {
+    final uri = makeACall
+        ? Uri(
+            scheme: 'tel',
+            path: url,
+          )
+        : Uri.parse(url);
+    log('url to launch: ${uri.toString()}');
+    await canLaunchUrl(uri).then((canLaunch) async {
+      if (canLaunch) {
+        await launchUrl(uri);
+      } else {
+        showSnackBar(context, 'could not launch');
+      }
+    });
   }
 
   // show progress dialog

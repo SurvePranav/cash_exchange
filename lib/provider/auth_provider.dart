@@ -345,14 +345,19 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // get unread chats count to display badge on chat icon
-  static Stream<int> getUnreadChatsCount() {
+  static Stream<List<int>> getUnreadChatsCount() {
     return FirebaseFirestore.instance
         .collection('users')
         .doc(UserModel.instance.uid)
         .collection('my_connections')
         .where('hasUnreadMessage', isEqualTo: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs.length);
+        .map((snapshot) {
+      int totalUnread = snapshot.docs.length;
+      int primaryUnread =
+          snapshot.docs.where((doc) => doc.data()['primary'] == false).length;
+      return [totalUnread, primaryUnread];
+    });
   }
 
   // update connection to priority primary or secondary

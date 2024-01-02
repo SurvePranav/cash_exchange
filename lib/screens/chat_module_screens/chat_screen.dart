@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
+import 'package:cashxchange/provider/utility_provider.dart';
 import 'package:cashxchange/screens/chat_module_screens/message_screen.dart';
 import 'package:cashxchange/screens/chat_module_screens/single_chat_tile.dart';
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
@@ -90,7 +91,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       'Chats',
                       style: TextStyle(
                         color: AppColors.deepGreen,
-                        fontSize: 30,
+                        fontSize: 25,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -143,12 +144,48 @@ class _ChatScreenState extends State<ChatScreen> {
           bottom: TabBar(
             indicatorColor: AppColors.deepGreen,
             labelColor: AppColors.deepGreen,
-            tabs: const [
-              Tab(
+            tabs: [
+              const Tab(
                 text: 'Conversations',
               ),
               Tab(
-                text: 'Direct',
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'DM',
+                      style: TextStyle(color: AppColors.deepGreen),
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Consumer<UtilityProvider>(
+                      builder: (BuildContext context, provider, Widget? child) {
+                        return Visibility(
+                          visible: !(provider.dMCounter == 0),
+                          child: Container(
+                            height: 18,
+                            width: 18,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: AppColors.deepGreen,
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              provider.dMCounter < 10
+                                  ? provider.dMCounter.toString()
+                                  : '9+',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
