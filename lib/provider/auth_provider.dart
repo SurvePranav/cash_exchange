@@ -477,6 +477,7 @@ class AuthProvider extends ChangeNotifier {
         .doc(UserModel.instance.uid)
         .collection('my_connections')
         .where('uid', isEqualTo: userId)
+        .limit(1)
         .get();
 
     // Check if there are any documents that match the query

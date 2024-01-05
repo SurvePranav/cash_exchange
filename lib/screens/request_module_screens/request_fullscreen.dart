@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/connection_model.dart';
 import 'package:cashxchange/model/request_model.dart';
 import 'package:cashxchange/model/user_model.dart';
@@ -138,7 +139,7 @@ class RequestDetailsScreen extends StatelessWidget {
                     'Request Expired Without Confirmation',
                     style: TextStyle(
                       color: Colors.red,
-                      fontSize: 20,
+                      fontSize: 16,
                     ),
                   ),
 
@@ -152,8 +153,8 @@ class RequestDetailsScreen extends StatelessWidget {
                       onPressed: () {
                         MyAppServices.showConfirmationDialog(
                                 context: context,
-                                title: 'Confirm To Yourself',
-                                body: 'request will be marked as confirm')
+                                title: 'Cancel Request',
+                                body: 'request will be marked as confirmd')
                             .then((value) {
                           if (value) {
                             Provider.of<RequestProvider>(context, listen: false)
@@ -162,12 +163,15 @@ class RequestDetailsScreen extends StatelessWidget {
                           }
                         });
                       },
-                      child: const Text('Confirm To Yourself'),
+                      child: Text(
+                        'Cancel Request',
+                        style: TextStyle(color: AppColors.deepGreen),
+                      ),
                     ),
                   ),
                 if (request.confirmedTo.contains(UserModel.instance.uid))
                   const Text(
-                    "Confirmed To Yourself",
+                    "Canceled By You",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,

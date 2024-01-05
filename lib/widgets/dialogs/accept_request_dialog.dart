@@ -78,20 +78,22 @@ class _AcceptRequestDialogState extends State<AcceptRequestDialog> {
                       // check if the distance is minimum (near) between them
                       await LocationServices.getCurrentLocation(context)
                           .then((coordinates) async {
-                        // calculate distance between them
+                        // calculate distance between user's current location and request location
                         final double distance =
                             LocationServices.findDistanceBetweenCoordinates(
-                                double.parse(connection.locationLat),
-                                double.parse(connection.locationLon),
-                                coordinates[0],
-                                coordinates[1]);
+                          widget.request.locationLat,
+                          widget.request.locationLon,
+                          coordinates[0],
+                          coordinates[1],
+                        );
+
                         if (distance < 2000) {
                           // checking if the users are connected before
                           await ap
                               .checkIfUsersConnectedBefore(connection.uid)
                               .then((connectedBefore) async {
                             if (!connectedBefore) {
-                              // if not connected connecting each other using my_users collection
+                              // if not connected connecting each other using my_connections collection
                               log('not connected before');
                               await ap.addToMyConnection(user: connection);
                               await ap.addToReceiversConnection(
@@ -103,7 +105,9 @@ class _AcceptRequestDialogState extends State<AcceptRequestDialog> {
                               log('connected before but not in primary');
                               log('making primary');
                               await ap.updateConnectionPriority(
-                                  senderUid: connection.uid, primary: true);
+                                senderUid: connection.uid,
+                                primary: true,
+                              );
                             }
                           }).then(
                             (value) async {
@@ -141,6 +145,7 @@ class _AcceptRequestDialogState extends State<AcceptRequestDialog> {
                             },
                           );
                         } else {
+                          // distance is more so cannot accept request so returning false
                           requestProvider.setLoading(false);
                           Navigator.of(context).pop(false);
                         }
