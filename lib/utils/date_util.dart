@@ -74,10 +74,18 @@ class MyDateUtil {
     final Duration difference = currentDate.difference(providedDate);
 
     if (isToday(providedDate)) {
-      return DateFormat.jm().format(providedDate); // Today's time with AM/PM
+      if (difference.inMinutes < 1) {
+        return 'Just now';
+      } else if (difference.inMinutes < 60) {
+        return '${difference.inMinutes} mins ago';
+      } else if (difference.inHours < 24) {
+        return '${difference.inHours} hours ago';
+      } else {
+        return DateFormat.jm().format(providedDate); // Today's time with AM/PM
+      }
     } else if (isYesterday(providedDate)) {
       return 'Yesterday';
-    } else if (difference.inDays >= 3 && difference.inDays <= 6) {
+    } else if (difference.inDays >= 2 && difference.inDays <= 6) {
       return '${difference.inDays} days ago';
     } else if (difference.inDays == 7) {
       return '1 week ago';

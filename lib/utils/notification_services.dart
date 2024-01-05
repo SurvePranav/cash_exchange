@@ -25,10 +25,8 @@ class NotificationServics {
     // getting notification token
     final msgToken = await _firebaseMessaging.getToken();
     if (msgToken != null) {
-      log("token is not null");
       if (getMyToken) {
         UserModel.instance.pushToken = msgToken;
-        log('push Token: $msgToken');
         return;
       }
     } else {

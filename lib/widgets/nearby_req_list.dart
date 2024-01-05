@@ -4,6 +4,8 @@ import 'package:cashxchange/model/connection_model.dart';
 import 'package:cashxchange/model/request_model.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/auth_provider.dart';
+import 'package:cashxchange/provider/utility_provider.dart';
+import 'package:cashxchange/utils/date_util.dart';
 import 'package:cashxchange/utils/location_services.dart';
 import 'package:cashxchange/widgets/constant_widget.dart';
 import 'package:flutter/material.dart';
@@ -132,6 +134,11 @@ class NearbyRequestList extends StatelessWidget {
                                 ),
                               ],
                             ),
+                            trailing: Text(
+                              MyDateUtil.formatTimeAgo(request.createdAt),
+                              style: const TextStyle(
+                                  color: Colors.grey, fontSize: 10),
+                            ),
                           );
                         case ConnectionState.active:
                         case ConnectionState.done:
@@ -171,6 +178,13 @@ class NearbyRequestList extends StatelessWidget {
                                   user.bio,
                                 ),
                               ],
+                            ),
+                            trailing: Consumer<UtilityProvider>(
+                              builder: (context, value, child) => Text(
+                                MyDateUtil.formatTimeAgo(request.createdAt),
+                                style: const TextStyle(
+                                    color: Colors.grey, fontSize: 10),
+                              ),
                             ),
                             onTap: () {
                               onTap(request, user, distance);

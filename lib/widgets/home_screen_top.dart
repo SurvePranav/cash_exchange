@@ -215,7 +215,6 @@ class HomeScreenTopSection extends StatelessWidget {
               right: 46,
               child: Consumer<UtilityProvider>(
                 builder: (BuildContext context, provider, Widget? child) {
-                  log('current chat counter...${provider.chatCounter}');
                   return Visibility(
                     visible: provider.chatCounter > 0,
                     child: Container(

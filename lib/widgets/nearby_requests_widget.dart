@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:cashxchange/model/connection_model.dart';
 import 'package:cashxchange/model/request_model.dart';
 import 'package:cashxchange/model/user_model.dart';
 import 'package:cashxchange/provider/request_provider.dart';
+import 'package:cashxchange/provider/utility_provider.dart';
 import 'package:cashxchange/utils/location_services.dart';
 import 'package:cashxchange/utils/util.dart';
 import 'package:cashxchange/widgets/constant_widget.dart';
@@ -27,6 +29,16 @@ class RequestsWidget extends StatefulWidget {
 }
 
 class _RequestsWidgetState extends State<RequestsWidget> {
+  @override
+  void initState() {
+    final counterProvider =
+        Provider.of<UtilityProvider>(context, listen: false);
+    Timer.periodic(const Duration(minutes: 1), (timer) {
+      counterProvider.incrementClockCounter();
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!widget.nearby) {
@@ -91,11 +103,11 @@ class _RequestsWidgetState extends State<RequestsWidget> {
 
                 // removing requests whose distance is more than 2KM away from user's current location
                 // Return true if the distance is less than 2000, indicating it should be removed
-                return distance < 2000;
+                return distance > 2000;
               }
               // removing request which are user's own active requests
               // Return false if the uid matches, indicating it should not be removed
-              return false;
+              return true;
             });
 
             // sorting requests on the basis of request createing date

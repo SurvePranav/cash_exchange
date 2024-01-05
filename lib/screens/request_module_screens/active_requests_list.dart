@@ -1,6 +1,9 @@
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/request_model.dart';
+import 'package:cashxchange/provider/utility_provider.dart';
+import 'package:cashxchange/utils/date_util.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 typedef MyCallBack = Function(RequestModel request);
 
@@ -62,19 +65,32 @@ class ActiveRequestsList extends StatelessWidget {
                 ? Colors.green
                 : AppColors.blue_8,
             elevation: 5,
-            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15),
             ),
             child: ListTile(
               contentPadding: const EdgeInsets.all(16),
-              title: Text(
-                "Request for ${request.type}",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                ),
+              title: Row(
+                children: [
+                  Text(
+                    "For ${request.type}",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                  const Spacer(),
+                  Consumer<UtilityProvider>(
+                    builder: (context, value, child) => Text(
+                        MyDateUtil.formatTimeAgo(
+                          request.createdAt,
+                        ),
+                        style: const TextStyle(
+                            color: Colors.white70, fontSize: 13)),
+                  ),
+                ],
               ),
               subtitle: Row(
                 children: [
@@ -87,8 +103,9 @@ class ActiveRequestsList extends StatelessWidget {
                   ),
                   const Expanded(child: SizedBox()),
                   SizedBox(
-                    width: 50,
+                    width: 35,
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         const Icon(Icons.remove_red_eye,
                             size: 18, color: Colors.white70),

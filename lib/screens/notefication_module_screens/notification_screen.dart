@@ -2,9 +2,11 @@ import 'dart:developer';
 
 import 'package:cashxchange/constants/constant_values.dart';
 import 'package:cashxchange/model/notification_model.dart';
+import 'package:cashxchange/provider/utility_provider.dart';
 import 'package:cashxchange/utils/date_util.dart';
 import 'package:cashxchange/utils/notification_services.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -130,11 +132,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                   height: 16,
                                   width: 16,
                                 ),
-                          Text(
-                            MyDateUtil.formatTimeAgo(notification.timeStamp),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
+                          Consumer<UtilityProvider>(
+                            builder: (context, value, child) => Text(
+                              MyDateUtil.formatTimeAgo(notification.timeStamp),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
                             ),
                           ),
                         ],

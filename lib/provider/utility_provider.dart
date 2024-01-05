@@ -18,8 +18,17 @@ class UtilityProvider extends ChangeNotifier {
   int _dMCounter = 0;
   int get dMCounter => _dMCounter;
 
+  int _clockCounter = 0;
+  int get clockCounter => _clockCounter;
+
   late StreamSubscription<List<int>>? _chatsSubscription;
   late StreamSubscription<int>? _notificationsSubscription;
+
+  // for the clock counter
+  void incrementClockCounter() {
+    _clockCounter++;
+    notifyListeners();
+  }
 
   // for notifications badge
   void incrementNotificationCounter(int increment) {
