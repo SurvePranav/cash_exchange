@@ -73,25 +73,33 @@ class _RequestsWidgetState extends State<RequestsWidget> {
           if (snapshot.hasData) {
             final data = snapshot.data?.docs;
 
-            //    fetching all active requests
-            var tempRequests =
+            // fetching all active requests
+            requests =
                 data?.map((e) => RequestModel.fromJson(e.data())).toList() ??
                     [];
-            tempRequests.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-            for (int i = 0; i < tempRequests.length; i++) {
-              //  calculating distance between user and request
-              double distance = LocationServices.findDistanceBetweenCoordinates(
-                lat,
-                lng,
-                tempRequests[i].locationLat,
-                tempRequests[i].locationLon,
-              );
-              // removing active requests based on distance
-              if (tempRequests[i].uid != UserModel.instance.uid &&
-                  distance < 2000) {
-                requests.add(tempRequests[i]);
+
+            // removing requests on basis of some criterias
+            requests.removeWhere((request) {
+              if (request.uid != UserModel.instance.uid) {
+                double distance =
+                    LocationServices.findDistanceBetweenCoordinates(
+                  lat,
+                  lng,
+                  request.locationLat,
+                  request.locationLon,
+                );
+
+                // removing requests whose distance is more than 2KM away from user's current location
+                // Return true if the distance is less than 2000, indicating it should be removed
+                return distance < 2000;
               }
-            }
+              // removing request which are user's own active requests
+              // Return false if the uid matches, indicating it should not be removed
+              return false;
+            });
+
+            // sorting requests on the basis of request createing date
+            requests.sort((a, b) => b.createdAt.compareTo(a.createdAt));
           }
           return NearbyRequestList(
             requests: requests,
@@ -117,7 +125,7 @@ class _RequestsWidgetState extends State<RequestsWidget> {
               ).then((value) {
                 if (value != null) {
                   if (value) {
-                    // on not accepting request
+                    // on accepting request
                     MyAppServices.showSnackBar(
                       context,
                       'Request Accepted Successfully',
