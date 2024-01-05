@@ -73,18 +73,22 @@ class MyDateUtil {
 
     final Duration difference = currentDate.difference(providedDate);
 
-    if (isToday(providedDate)) {
+    if (difference.inHours < 24) {
       if (difference.inMinutes < 1) {
         return 'Just now';
+      } else if (difference.inMinutes < 2) {
+        return '${difference.inMinutes} min ago';
       } else if (difference.inMinutes < 60) {
         return '${difference.inMinutes} mins ago';
+      } else if (difference.inHours < 2) {
+        return '${difference.inHours} hour ago';
       } else if (difference.inHours < 24) {
         return '${difference.inHours} hours ago';
       } else {
         return DateFormat.jm().format(providedDate); // Today's time with AM/PM
       }
-    } else if (isYesterday(providedDate)) {
-      return 'Yesterday';
+    } else if (difference.inDays == 1) {
+      return '1 day ago';
     } else if (difference.inDays >= 2 && difference.inDays <= 6) {
       return '${difference.inDays} days ago';
     } else if (difference.inDays == 7) {
@@ -96,22 +100,5 @@ class MyDateUtil {
     } else {
       return '${difference.inDays ~/ 365} years ago';
     }
-  }
-
-// is today
-  static bool isToday(DateTime date) {
-    final DateTime currentDate = DateTime.now();
-    return currentDate.year == date.year &&
-        currentDate.month == date.month &&
-        currentDate.day == date.day;
-  }
-
-// is yesterday
-  static bool isYesterday(DateTime date) {
-    final DateTime currentDate = DateTime.now();
-    final DateTime yesterday = currentDate.subtract(const Duration(days: 1));
-    return yesterday.year == date.year &&
-        yesterday.month == date.month &&
-        yesterday.day == date.day;
   }
 }
