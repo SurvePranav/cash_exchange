@@ -22,9 +22,9 @@ final class AppColors {
 
 class ApiKey {
   static String getMapsApiKey() {
-    const androidKey = "AIzaSyD1LUJFCbES2C3MRDvq4L0eXSf-hJGlY70";
-    const iosKey = "AIzaSyDS6-9MRY4QZ6AgLCdePhbOto7TaiBihAg";
-    const webKey = "AIzaSyBIWdl-yke7VXhe991b8DKeMQQBmexoYkA";
+    const androidKey = "abc";
+    const iosKey = "abc";
+    const webKey = "abc";
     if (Platform.isAndroid) {
       return androidKey;
     } else if (Platform.isIOS) {
