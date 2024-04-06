@@ -47,7 +47,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBIWdl-yke7VXhe991b8DKeMQQBmexoYkA',
+    apiKey: 'api',
     appId: '1:355328288359:web:63bbc6bd93b1ce554c56c2',
     messagingSenderId: '355328288359',
     projectId: 'cashxchange-a07f7',
@@ -57,7 +57,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyD1LUJFCbES2C3MRDvq4L0eXSf-hJGlY70',
+    apiKey: 'api',
     appId: '1:355328288359:android:56c55a458ef9fd644c56c2',
     messagingSenderId: '355328288359',
     projectId: 'cashxchange-a07f7',
@@ -65,7 +65,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDS6-9MRY4QZ6AgLCdePhbOto7TaiBihAg',
+    apiKey: 'api',
     appId: '1:355328288359:ios:2583d3a14799327f4c56c2',
     messagingSenderId: '355328288359',
     projectId: 'cashxchange-a07f7',
